@@ -1,0 +1,17 @@
+[project]
+name = "ease-2026"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "matplotlib",
+    "networkx",
+    "numpy",
+    "pandas",
+    "pymongo",
+    "rbo",
+    "rpy2",
+    "scikit-learn",
+    "scipy",
+    "seaborn",
+    "upsetplot",
+]
