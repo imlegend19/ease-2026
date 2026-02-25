@@ -73,11 +73,13 @@ Step 1 has been migrated to a modular layout:
 - `pipelines/technical/commit_based.py`: migrated pipeline for commit-based technical heroes.
 - `pipelines/technical/loc_based.py`: migrated pipeline for LOC-based technical heroes.
 - `pipelines/technical/file_based.py`: migrated pipeline for file-based technical heroes.
+- `pipelines/super/intersection_based.py`: super-hero intersections for all six social/technical combinations.
 - `scripts/generate_social_comment_heroes.py`: social pipeline CLI.
 - `scripts/generate_social_issue_heroes.py`: social issue pipeline CLI.
 - `scripts/generate_technical_commit_heroes.py`: technical pipeline CLI.
 - `scripts/generate_technical_loc_heroes.py`: technical LOC pipeline CLI.
 - `scripts/generate_technical_file_heroes.py`: technical file pipeline CLI.
+- `scripts/generate_super_heroes.py`: super-hero intersection pipeline CLI.
 
 Run the migrated pipelines:
 
@@ -88,6 +90,7 @@ cd experiments/ease-2026
 .venv\Scripts\python.exe -m scripts.generate_technical_commit_heroes
 .venv\Scripts\python.exe -m scripts.generate_technical_loc_heroes
 .venv\Scripts\python.exe -m scripts.generate_technical_file_heroes
+.venv\Scripts\python.exe -m scripts.generate_super_heroes
 ```
 
 Artifacts are written under `artifacts/`:
@@ -95,5 +98,6 @@ Artifacts are written under `artifacts/`:
 - `artifacts/cache/identity/` for identity cache.
 - `artifacts/interim/social/comment_based/`, `artifacts/interim/social/issue_based/`,
   and `artifacts/interim/technical/commit_based/`, `artifacts/interim/technical/loc_based/`,
-  `artifacts/interim/technical/file_based/` for intermediate pickles.
-- `artifacts/outputs/csv/social/` and `artifacts/outputs/csv/technical/` for final CSV output.
+  `artifacts/interim/technical/file_based/`, `artifacts/interim/super/` for intermediate pickles.
+- `artifacts/outputs/csv/social/`, `artifacts/outputs/csv/technical/`,
+  `artifacts/outputs/csv/super/` for final CSV output.
