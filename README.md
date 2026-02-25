@@ -109,3 +109,9 @@ Artifacts are written under `artifacts/`:
 - `artifacts/outputs/csv/social/`, `artifacts/outputs/csv/technical/`,
   `artifacts/outputs/csv/super/`, `artifacts/outputs/csv/socio_technical/`,
   `artifacts/outputs/csv/techno_social/` for final CSV output.
+
+## Artifact Versioning Policy
+
+- `artifacts/outputs/csv/**` is committed to git for reproducibility snapshots.
+- `artifacts/cache/**`, `artifacts/interim/**`, and `artifacts/outputs/plots/**` are ignored
+  because they are environment-dependent or large/intermediate byproducts.
