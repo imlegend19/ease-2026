@@ -18,6 +18,7 @@ from core.mongo import get_mongo_collection
 from core.paths import ensure_directory
 from core.settings import settings
 from identity.reverse_identity import ReverseIdentityMap, ReverseIdentityResolver
+from pipelines.common.hero_rules import compute_hero_flags, extract_top_authors
 
 logger = get_logger(__name__)
 
@@ -53,8 +54,8 @@ class SocialIssueHeroPipeline:
         records = get_mongo_collection(COMMENTS_WITH_ISSUE_COLLECTION).find({})
         project_author_issues = self._build_project_author_issues(records, reverse_identity_map)
         project_author_counts = self._build_project_author_counts(project_author_issues)
-        top_authors = self._extract_top_authors(project_author_counts)
-        hero_flags = self._compute_hero_flags(project_author_counts, top_authors)
+        top_authors = extract_top_authors(project_author_counts, self.top_contributor_fraction)
+        hero_flags = compute_hero_flags(project_author_counts, top_authors, self.hero_coverage_fraction)
         hero_rows = self._build_rows(top_authors, hero_flags)
 
         if write_interim:
@@ -102,32 +103,6 @@ class SocialIssueHeroPipeline:
             counts[project_name] = {author_id: count for author_id, count in sorted_counts}
         return counts
 
-    def _extract_top_authors(self, project_author_counts: ProjectAuthorCounts) -> ProjectAuthorCounts:
-        top_authors: ProjectAuthorCounts = {}
-        for project_name, author_counts in project_author_counts.items():
-            author_count = len(author_counts)
-            top_limit = int(self.top_contributor_fraction * author_count)
-            project_top: dict[Any, int] = {}
-            for index, (author_id, contribution_count) in enumerate(author_counts.items()):
-                if index == top_limit:
-                    break
-                project_top[author_id] = contribution_count
-            top_authors[project_name] = project_top
-        return top_authors
-
-    def _compute_hero_flags(
-        self,
-        project_author_counts: ProjectAuthorCounts,
-        top_authors: ProjectAuthorCounts,
-    ) -> ProjectHeroFlags:
-        hero_flags: ProjectHeroFlags = {}
-        for project_name, author_counts in project_author_counts.items():
-            project_total = sum(author_counts.values())
-            top_total = sum(top_authors.get(project_name, {}).values())
-            threshold = int(self.hero_coverage_fraction * project_total)
-            hero_flags[project_name] = threshold <= top_total
-        return hero_flags
-
     @staticmethod
     def _build_rows(top_authors: ProjectAuthorCounts, hero_flags: ProjectHeroFlags) -> list[SocialIssueHeroRow]:
         rows: list[SocialIssueHeroRow] = []
@@ -174,4 +149,3 @@ class SocialIssueHeroPipeline:
             file_path = self.interim_dir / filename
             with file_path.open("wb") as file:
                 pickle.dump(data, file)
-
