@@ -1,13 +1,3 @@
 .env*
 !.env.example
 .venv/
-
-# Artifact policy:
-# - Track reproducibility outputs (CSV snapshots).
-# - Ignore volatile caches/intermediate binaries and plots.
-artifacts/cache/
-artifacts/interim/
-artifacts/outputs/plots/
-!artifacts/outputs/
-!artifacts/outputs/csv/
-!artifacts/outputs/csv/**

@@ -63,7 +63,7 @@ uv pip list --python .venv\Scripts\python.exe
 
 ## Migration Progress
 
-Step 1 has been migrated to a modular layout:
+Step 1 (hero CSV generation) and Step 2+ (analysis artifacts) are migrated to a modular layout:
 
 - `core/`: shared configuration, logging, mongo clients, path helpers.
 - `identity/`: reusable reverse-identity resolver with pickle cache support.
@@ -76,6 +76,14 @@ Step 1 has been migrated to a modular layout:
 - `pipelines/super/intersection_based.py`: super-hero intersections for all six social/technical combinations.
 - `pipelines/socio_technical/median_based.py`: socio-technical heroes (social heroes + technical median filter).
 - `pipelines/techno_social/median_based.py`: techno-social heroes (technical heroes + social median filter).
+- `pipelines/analysis/hero_catalog.py`: canonical `S*`, `T*`, `TS*`, `ST*`, `SH*` metadata and RQ2 order.
+- `pipelines/analysis/hero_membership.py`: project->author membership extraction for all 23 hero types.
+- `pipelines/analysis/issue_data.py`: shared issue/event extraction helpers from Mongo.
+- `pipelines/analysis/issue_metrics.py`: fixed/reopened issue percentages by hero type and severity.
+- `pipelines/analysis/resolution_time.py`: severity-wise assignee averages and hero resolution-time averages.
+- `pipelines/analysis/rq2_jaccard.py`: Jaccard matrices + RQ2 plot generation.
+- `pipelines/analysis/rq3_rankings.py`: severity-wise rankings + Kendall Tau matrices for RQ3.
+- `pipelines/analysis/rq3_sk_esd.py`: Scott-Knott ESD rankings with deterministic fallback when R package is unavailable.
 - `scripts/generate_social_comment_heroes.py`: social pipeline CLI.
 - `scripts/generate_social_issue_heroes.py`: social issue pipeline CLI.
 - `scripts/generate_technical_commit_heroes.py`: technical pipeline CLI.
@@ -84,6 +92,13 @@ Step 1 has been migrated to a modular layout:
 - `scripts/generate_super_heroes.py`: super-hero intersection pipeline CLI.
 - `scripts/generate_socio_technical_heroes.py`: socio-technical hero pipeline CLI.
 - `scripts/generate_techno_social_heroes.py`: techno-social hero pipeline CLI.
+- `scripts/generate_hero_membership_index.py`: hero-membership index CLI.
+- `scripts/generate_issue_outcome_metrics.py`: fixed/reopened issue metrics CLI.
+- `scripts/generate_resolution_time_metrics.py`: average resolution-time metrics CLI.
+- `scripts/generate_rq2_jaccard_analysis.py`: RQ2 Jaccard matrices/plots CLI.
+- `scripts/generate_rq3_rankings.py`: RQ3 ranking and Kendall Tau CLI.
+- `scripts/generate_rq3_sk_esd.py`: RQ3 Scott-Knott ESD CLI.
+- `scripts/generate_analysis_artifacts.py`: run all migrated analysis pipelines.
 
 Run the migrated pipelines:
 
@@ -97,6 +112,7 @@ cd experiments/ease-2026
 .venv\Scripts\python.exe -m scripts.generate_super_heroes
 .venv\Scripts\python.exe -m scripts.generate_socio_technical_heroes
 .venv\Scripts\python.exe -m scripts.generate_techno_social_heroes
+.venv\Scripts\python.exe -m scripts.generate_analysis_artifacts
 ```
 
 Artifacts are written under `artifacts/`:
@@ -105,10 +121,12 @@ Artifacts are written under `artifacts/`:
 - `artifacts/interim/social/comment_based/`, `artifacts/interim/social/issue_based/`,
   and `artifacts/interim/technical/commit_based/`, `artifacts/interim/technical/loc_based/`,
   `artifacts/interim/technical/file_based/`, `artifacts/interim/super/`,
-  `artifacts/interim/socio_technical/`, `artifacts/interim/techno_social/` for intermediate pickles.
+  `artifacts/interim/socio_technical/`, `artifacts/interim/techno_social/`,
+  `artifacts/interim/analysis/` for intermediate pickles.
 - `artifacts/outputs/csv/social/`, `artifacts/outputs/csv/technical/`,
   `artifacts/outputs/csv/super/`, `artifacts/outputs/csv/socio_technical/`,
-  `artifacts/outputs/csv/techno_social/` for final CSV output.
+  `artifacts/outputs/csv/techno_social/`, `artifacts/outputs/csv/analysis/` for final CSV output.
+- `artifacts/outputs/plots/rq2/` for generated RQ2 plot files.
 
 ## Artifact Versioning Policy
 

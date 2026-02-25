@@ -1,0 +1,6 @@
+,minor,major,critical,trivial,blocker
+minor,1.000000,,,,
+major,,1.000000,,,
+critical,,,1.000000,,
+trivial,,,,1.000000,
+blocker,,,,,1.000000
