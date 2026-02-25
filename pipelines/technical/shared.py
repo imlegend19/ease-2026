@@ -1,6 +1,5 @@
 """Shared extractors for technical hero pipelines."""
 
-from __future__ import annotations
 
 from typing import Any
 

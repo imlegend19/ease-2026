@@ -1,6 +1,5 @@
 """CLI entrypoint for generating hero membership index artifacts."""
 
-from __future__ import annotations
 
 import argparse
 

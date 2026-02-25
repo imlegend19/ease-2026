@@ -1,6 +1,5 @@
 """Build project->hero-author membership maps from generated hero CSV files."""
 
-from __future__ import annotations
 
 import csv
 import pickle

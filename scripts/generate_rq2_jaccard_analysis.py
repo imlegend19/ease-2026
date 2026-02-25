@@ -1,6 +1,5 @@
 """CLI entrypoint for RQ2 Jaccard matrices and plots."""
 
-from __future__ import annotations
 
 import argparse
 

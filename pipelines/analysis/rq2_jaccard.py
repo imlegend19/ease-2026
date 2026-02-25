@@ -1,6 +1,5 @@
 """RQ2 analysis: Jaccard similarity matrices and plots across hero categories."""
 
-from __future__ import annotations
 
 import itertools
 from dataclasses import dataclass

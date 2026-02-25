@@ -1,6 +1,5 @@
 """Compute severity-wise resolution-time metrics for hero categories."""
 
-from __future__ import annotations
 
 import csv
 import pickle

@@ -1,6 +1,5 @@
 """Synchronous MongoDB connection helpers."""
 
-from __future__ import annotations
 
 __all__ = ["get_mongo_client", "get_mongo_database", "get_mongo_collection"]
 

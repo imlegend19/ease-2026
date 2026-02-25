@@ -1,6 +1,5 @@
 """Generate technical heroes based on commit count."""
 
-from __future__ import annotations
 
 import csv
 import pickle

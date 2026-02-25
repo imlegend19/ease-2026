@@ -5,7 +5,6 @@ This module configures stdlib logging with structlog and provides
 contextvars helpers for request/run-scoped fields.
 """
 
-from __future__ import annotations
 
 __all__ = [
     "LoggerKlass",

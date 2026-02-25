@@ -1,6 +1,5 @@
 """Generate techno-social heroes via project-level median thresholding."""
 
-from __future__ import annotations
 
 import csv
 import pickle

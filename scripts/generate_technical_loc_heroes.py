@@ -1,6 +1,5 @@
 """CLI entrypoint for technical heroes based on lines changed."""
 
-from __future__ import annotations
 
 import argparse
 

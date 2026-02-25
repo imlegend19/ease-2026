@@ -1,6 +1,5 @@
 """CLI entrypoint for fixed/reopened issue outcome metrics."""
 
-from __future__ import annotations
 
 import argparse
 

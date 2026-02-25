@@ -1,6 +1,5 @@
 """Optional RQ3 Scott-Knott ESD rankings with a deterministic mean-rank fallback."""
 
-from __future__ import annotations
 
 import math
 from dataclasses import dataclass

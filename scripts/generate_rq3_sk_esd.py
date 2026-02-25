@@ -1,6 +1,5 @@
 """CLI entrypoint for optional RQ3 Scott-Knott ESD rankings."""
 
-from __future__ import annotations
 
 import argparse
 

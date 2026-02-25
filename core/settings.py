@@ -1,6 +1,5 @@
 """Settings for EASE 2026 scripts loaded from environment variables."""
 
-from __future__ import annotations
 
 import os
 from dataclasses import dataclass

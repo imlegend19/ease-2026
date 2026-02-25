@@ -1,6 +1,5 @@
 """Build and cache person -> merged-identity mapping."""
 
-from __future__ import annotations
 
 import pickle
 from dataclasses import dataclass

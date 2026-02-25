@@ -1,6 +1,5 @@
 """Generate super heroes by intersecting social and technical hero sets."""
 
-from __future__ import annotations
 
 import csv
 import pickle

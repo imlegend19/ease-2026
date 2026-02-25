@@ -1,6 +1,5 @@
 """Generate technical heroes based on unique files touched."""
 
-from __future__ import annotations
 
 import csv
 import pickle

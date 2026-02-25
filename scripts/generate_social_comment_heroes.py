@@ -1,6 +1,5 @@
 """CLI entrypoint for social heroes based on comments."""
 
-from __future__ import annotations
 
 import argparse
 

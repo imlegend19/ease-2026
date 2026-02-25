@@ -1,6 +1,5 @@
 """Compute fixed/reopened issue percentages for each hero type and severity."""
 
-from __future__ import annotations
 
 import csv
 import pickle

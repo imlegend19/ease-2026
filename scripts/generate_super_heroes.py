@@ -1,6 +1,5 @@
 """CLI entrypoint for super heroes (social/technical intersections)."""
 
-from __future__ import annotations
 
 import argparse
 

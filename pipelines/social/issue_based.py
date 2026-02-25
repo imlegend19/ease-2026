@@ -1,6 +1,5 @@
 """Generate social heroes based on unique issues touched in comments."""
 
-from __future__ import annotations
 
 import csv
 import pickle

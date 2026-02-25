@@ -24,7 +24,7 @@ Copy-Item .env.example .env
 Defaults:
 
 - `SMARTSHARK_MONGO_URI=mongodb://smartshark:smartshark@localhost:27117/?authSource=admin`
-- `SMARTSHARK_MONGO_DB=smartshark`
+- `SMARTSHARK_MONGO_DB=smartshark_2_2`
 
 ## 3. Create local `uv` environment (Python 3.12)
 

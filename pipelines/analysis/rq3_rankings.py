@@ -1,6 +1,5 @@
 """RQ3 analysis: mean-based hero rankings and Kendall Tau stability checks."""
 
-from __future__ import annotations
 
 import csv
 import math

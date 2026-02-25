@@ -1,6 +1,5 @@
 """Asynchronous MongoDB connection helpers."""
 
-from __future__ import annotations
 
 __all__ = [
     "get_async_mongo_client",

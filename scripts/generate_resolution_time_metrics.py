@@ -1,6 +1,5 @@
 """CLI entrypoint for resolution-time analysis artifacts."""
 
-from __future__ import annotations
 
 import argparse
 

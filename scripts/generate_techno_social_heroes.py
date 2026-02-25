@@ -1,6 +1,5 @@
 """CLI entrypoint for techno-social heroes (technical-first median filter)."""
 
-from __future__ import annotations
 
 import argparse
 

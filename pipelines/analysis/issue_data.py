@@ -1,6 +1,5 @@
 """Shared Mongo extractors for issue-based analysis pipelines."""
 
-from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -39,6 +38,7 @@ def build_issue_metadata(
 ) -> dict[str, IssueMetadata]:
     metadata_by_issue: dict[str, IssueMetadata] = {}
     project_name_by_id = _load_project_name_index()
+    project_name_by_issue_system_id = _load_project_name_by_issue_system_index(project_name_by_id)
 
     issue_collection = get_mongo_collection("issue")
     for issue_doc in issue_collection.find({}):
@@ -46,7 +46,11 @@ def build_issue_metadata(
         if issue_id is None:
             continue
 
-        project_name = _extract_project_name(issue_doc, project_name_by_id)
+        project_name = _extract_project_name(
+            issue_doc,
+            project_name_by_id=project_name_by_id,
+            project_name_by_issue_system_id=project_name_by_issue_system_id,
+        )
         priority = _normalize_priority(issue_doc.get("priority"))
         created_at = _normalize_datetime(issue_doc.get("created_at"))
 
@@ -131,7 +135,30 @@ def _load_project_name_index() -> dict[str, str]:
     return project_name_by_id
 
 
-def _extract_project_name(issue_doc: dict[str, Any], project_name_by_id: dict[str, str]) -> str | None:
+def _load_project_name_by_issue_system_index(project_name_by_id: dict[str, str]) -> dict[str, str]:
+    project_name_by_issue_system_id: dict[str, str] = {}
+    issue_system_collection = get_mongo_collection("issue_system")
+
+    for issue_system_doc in issue_system_collection.find({}, {"_id": 1, "project_id": 1}):
+        issue_system_id = _normalize_identifier(issue_system_doc.get("_id"))
+        project_id = _normalize_identifier(issue_system_doc.get("project_id"))
+        if issue_system_id is None or project_id is None:
+            continue
+
+        project_name = project_name_by_id.get(project_id)
+        if not project_name:
+            continue
+
+        project_name_by_issue_system_id[issue_system_id] = project_name
+
+    return project_name_by_issue_system_id
+
+
+def _extract_project_name(
+    issue_doc: dict[str, Any],
+    project_name_by_id: dict[str, str],
+    project_name_by_issue_system_id: dict[str, str],
+) -> str | None:
     if "project_name" in issue_doc and issue_doc["project_name"]:
         return str(issue_doc["project_name"])
 
@@ -148,6 +175,10 @@ def _extract_project_name(issue_doc: dict[str, Any], project_name_by_id: dict[st
     project_id = _normalize_identifier(issue_doc.get("project_id"))
     if project_id is not None:
         return project_name_by_id.get(project_id)
+
+    issue_system_id = _normalize_identifier(issue_doc.get("issue_system_id"))
+    if issue_system_id is not None:
+        return project_name_by_issue_system_id.get(issue_system_id)
 
     return None
 
