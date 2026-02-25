@@ -1,6 +1,5 @@
 """RQ3 analysis: mean-based hero rankings and Kendall Tau stability checks."""
 
-
 import csv
 import math
 from dataclasses import dataclass
@@ -70,10 +69,16 @@ class Rq3RankingPipeline:
         ranking_orders: dict[str, list[str]] = {}
 
         for severity in PRIORITY_SEVERITIES:
-            metric_by_hero = issue_metrics.load_metric_pickle(metric_name=metric_name, severity=severity)
+            metric_by_hero = issue_metrics.load_metric_pickle(
+                metric_name=metric_name, severity=severity
+            )
             mean_by_hero, common_projects = self._compute_project_intersection_means(metric_by_hero)
             ranked_items = sorted(
-                [(hero_code, mean_value) for hero_code, mean_value in mean_by_hero.items() if not math.isnan(mean_value)],
+                [
+                    (hero_code, mean_value)
+                    for hero_code, mean_value in mean_by_hero.items()
+                    if not math.isnan(mean_value)
+                ],
                 key=lambda item: item[1],
                 reverse=sort_descending,
             )
@@ -113,18 +118,22 @@ class Rq3RankingPipeline:
         )
 
     @staticmethod
-    def _compute_project_intersection_means(metric_by_hero: IssueMetricByHero) -> tuple[dict[str, float], set[str]]:
+    def _compute_project_intersection_means(
+        metric_by_hero: IssueMetricByHero,
+    ) -> tuple[dict[str, float], set[str]]:
         filtered_by_hero = {
-            hero_code: {project_name: value for project_name, value in project_map.items() if value != 0.0}
+            hero_code: {
+                project_name: value for project_name, value in project_map.items() if value != 0.0
+            }
             for hero_code, project_map in metric_by_hero.items()
         }
 
         non_empty_project_sets = [
-            set(project_map.keys())
-            for project_map in filtered_by_hero.values()
-            if project_map
+            set(project_map.keys()) for project_map in filtered_by_hero.values() if project_map
         ]
-        common_projects = set.intersection(*non_empty_project_sets) if non_empty_project_sets else set()
+        common_projects = (
+            set.intersection(*non_empty_project_sets) if non_empty_project_sets else set()
+        )
 
         mean_by_hero: dict[str, float] = {}
         for hero_spec in HERO_TYPE_SPECS:
@@ -143,7 +152,9 @@ class Rq3RankingPipeline:
         return mean_by_hero, common_projects
 
     @staticmethod
-    def _write_ranking_csv(output_path: Path, ranking_rows: list[tuple[str, str, int, str, float, int]]) -> None:
+    def _write_ranking_csv(
+        output_path: Path, ranking_rows: list[tuple[str, str, int, str, float, int]]
+    ) -> None:
         with output_path.open("w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
             writer.writerow(
@@ -159,7 +170,9 @@ class Rq3RankingPipeline:
             writer.writerows(ranking_rows)
 
     @staticmethod
-    def _compute_kendall_tables(ranking_orders: dict[str, list[str]]) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    def _compute_kendall_tables(
+        ranking_orders: dict[str, list[str]],
+    ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         severities = list(PRIORITY_SEVERITIES)
         tau_matrix = pd.DataFrame(index=severities, columns=severities, dtype=float)
         p_value_matrix = pd.DataFrame(index=severities, columns=severities, dtype=float)
@@ -186,6 +199,7 @@ class Rq3RankingPipeline:
                 tau_matrix.loc[severity_a, severity_b] = tau_value
                 p_value_matrix.loc[severity_a, severity_b] = p_value
 
-        formatted_df = tau_matrix.round(3).astype(str) + " (" + p_value_matrix.round(3).astype(str) + ")"
+        formatted_df = (
+            tau_matrix.round(3).astype(str) + " (" + p_value_matrix.round(3).astype(str) + ")"
+        )
         return tau_matrix, p_value_matrix, formatted_df
-

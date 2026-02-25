@@ -1,6 +1,5 @@
 """Build and cache person -> merged-identity mapping."""
 
-
 import pickle
 from dataclasses import dataclass
 from pathlib import Path
@@ -63,4 +62,3 @@ class ReverseIdentityResolver:
             cache_path=str(self.cache_path),
             people_count=len(reverse_identity_map),
         )
-

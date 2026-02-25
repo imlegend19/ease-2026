@@ -1,6 +1,5 @@
 """Canonical hero-type metadata used by analysis pipelines."""
 
-
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -172,10 +171,7 @@ HERO_TYPE_SPECS: tuple[HeroTypeSpec, ...] = (
     ),
 )
 
-HERO_TYPE_SPECS_BY_CODE: dict[str, HeroTypeSpec] = {
-    spec.code: spec
-    for spec in HERO_TYPE_SPECS
-}
+HERO_TYPE_SPECS_BY_CODE: dict[str, HeroTypeSpec] = {spec.code: spec for spec in HERO_TYPE_SPECS}
 
 # Keep this order aligned with RQ2 figures and labels in the paper.
 RQ2_HERO_ORDER: tuple[str, ...] = (
@@ -211,4 +207,3 @@ RQ2_CLUSTERS: dict[str, tuple[str, ...]] = {
     "TS": ("TS1", "TS2", "TS3", "TS4", "TS5", "TS6"),
     "SH": ("SH1", "SH2", "SH3", "SH4", "SH5", "SH6"),
 }
-

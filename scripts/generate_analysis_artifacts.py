@@ -1,6 +1,5 @@
 """CLI entrypoint for all migrated post-processing analysis pipelines."""
 
-
 import argparse
 
 from core.logging import setup_logging

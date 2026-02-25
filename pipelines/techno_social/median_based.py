@@ -1,6 +1,5 @@
 """Generate techno-social heroes via project-level median thresholding."""
 
-
 import csv
 import pickle
 from dataclasses import dataclass
@@ -95,7 +94,9 @@ class TechnoSocialMedianPipeline:
         return output_paths
 
     def run_spec(self, spec: TechnoSocialSpec) -> Path:
-        technical_heroes = self._load_hero_author_counts(self.technical_root / spec.technical_dir_name)
+        technical_heroes = self._load_hero_author_counts(
+            self.technical_root / spec.technical_dir_name
+        )
         social_counts = self._load_project_author_counts(self.social_root / spec.social_dir_name)
         rows = self._build_rows(technical_heroes, social_counts)
 
@@ -208,4 +209,3 @@ class TechnoSocialMedianPipeline:
 
         with (target_dir / "techno_social_hero_authors.pkl").open("wb") as file:
             pickle.dump(by_project, file)
-

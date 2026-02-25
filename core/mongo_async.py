@@ -1,6 +1,5 @@
 """Asynchronous MongoDB connection helpers."""
 
-
 __all__ = [
     "get_async_mongo_client",
     "get_async_mongo_database",
@@ -79,5 +78,6 @@ async def get_async_mongo_collection(
     collection_name: str,
     db_name: str | None = None,
 ) -> AsyncCollection:
-    return await MongoAsyncConnectionManager.get_collection(collection_name=collection_name, db_name=db_name)
-
+    return await MongoAsyncConnectionManager.get_collection(
+        collection_name=collection_name, db_name=db_name
+    )

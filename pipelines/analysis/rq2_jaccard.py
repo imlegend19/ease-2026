@@ -1,6 +1,5 @@
 """RQ2 analysis: Jaccard similarity matrices and plots across hero categories."""
 
-
 import itertools
 from dataclasses import dataclass
 from pathlib import Path
@@ -148,12 +147,16 @@ class Rq2JaccardPipeline:
                 else:
                     values = submatrix.values.flatten()
 
-                cluster_matrix.loc[cluster_a, cluster_b] = float(np.mean(values)) if values.size > 0 else 0.0
+                cluster_matrix.loc[cluster_a, cluster_b] = (
+                    float(np.mean(values)) if values.size > 0 else 0.0
+                )
 
         return cluster_matrix.astype(float)
 
     @staticmethod
-    def _plot_cluster_submatrix(matrix_df: pd.DataFrame, cluster_name: str, output_path: Path) -> None:
+    def _plot_cluster_submatrix(
+        matrix_df: pd.DataFrame, cluster_name: str, output_path: Path
+    ) -> None:
         labels = list(RQ2_CLUSTERS[cluster_name])
         submatrix = matrix_df.loc[labels, labels].astype(float)
         mask = np.triu(np.ones_like(submatrix, dtype=bool), k=1)
@@ -187,7 +190,9 @@ class Rq2JaccardPipeline:
         plt.close()
 
     @staticmethod
-    def _plot_cluster_heatmap(cluster_matrix_df: pd.DataFrame, png_path: Path, pdf_path: Path) -> None:
+    def _plot_cluster_heatmap(
+        cluster_matrix_df: pd.DataFrame, png_path: Path, pdf_path: Path
+    ) -> None:
         cluster_matrix = cluster_matrix_df.astype(float)
         mask = np.triu(np.ones_like(cluster_matrix, dtype=bool), k=1)
         vmin = float(cluster_matrix.values.min())
@@ -218,4 +223,3 @@ class Rq2JaccardPipeline:
         plt.savefig(png_path, dpi=300, bbox_inches="tight")
         plt.savefig(pdf_path, dpi=300, bbox_inches="tight")
         plt.close()
-

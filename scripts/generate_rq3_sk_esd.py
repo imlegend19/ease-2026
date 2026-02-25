@@ -1,6 +1,5 @@
 """CLI entrypoint for optional RQ3 Scott-Knott ESD rankings."""
 
-
 import argparse
 
 from core.logging import setup_logging
@@ -49,4 +48,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

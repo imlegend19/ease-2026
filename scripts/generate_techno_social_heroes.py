@@ -1,6 +1,5 @@
 """CLI entrypoint for techno-social heroes (technical-first median filter)."""
 
-
 import argparse
 
 from core.logging import setup_logging
@@ -58,4 +57,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

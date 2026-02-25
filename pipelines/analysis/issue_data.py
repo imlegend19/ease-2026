@@ -1,6 +1,5 @@
 """Shared Mongo extractors for issue-based analysis pipelines."""
 
-
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
@@ -57,7 +56,9 @@ def build_issue_metadata(
         raw_assignee_ids = _extract_assignee_identifiers(issue_doc)
         merged_assignee_ids: set[str] = set()
         for raw_assignee_id in raw_assignee_ids:
-            resolved_person_id = reverse_identity_resolver.resolve_person_id(raw_assignee_id, reverse_identity_map)
+            resolved_person_id = reverse_identity_resolver.resolve_person_id(
+                raw_assignee_id, reverse_identity_map
+            )
             normalized_person_id = _normalize_identifier(resolved_person_id)
             if normalized_person_id is not None:
                 merged_assignee_ids.add(normalized_person_id)
@@ -252,4 +253,6 @@ def _extract_identifier_values(value: Any) -> set[Any]:
 
 
 def _is_relevant_event(status: str, new_value: str) -> bool:
-    return (status == "resolution" and new_value == "fixed") or (status == "status" and new_value == "reopened")
+    return (status == "resolution" and new_value == "fixed") or (
+        status == "status" and new_value == "reopened"
+    )

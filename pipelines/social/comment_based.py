@@ -1,6 +1,5 @@
 """Generate social heroes based on issue comments."""
 
-
 import csv
 import pickle
 from dataclasses import dataclass, field
@@ -37,7 +36,9 @@ class SocialHeroRow:
 class SocialCommentHeroPipeline:
     top_contributor_fraction: float = DEFAULT_TOP_CONTRIBUTOR_FRACTION
     hero_coverage_fraction: float = DEFAULT_HERO_COVERAGE_FRACTION
-    reverse_identity_resolver: ReverseIdentityResolver = field(default_factory=ReverseIdentityResolver)
+    reverse_identity_resolver: ReverseIdentityResolver = field(
+        default_factory=ReverseIdentityResolver
+    )
 
     @property
     def interim_dir(self) -> Path:
@@ -48,17 +49,23 @@ class SocialCommentHeroPipeline:
         return settings.outputs_csv_dir / "social" / "social_heroes_comment_based.csv"
 
     def run(self, refresh_identity_cache: bool = False, write_interim: bool = True) -> Path:
-        reverse_identity_map = self.reverse_identity_resolver.load_or_build(refresh_cache=refresh_identity_cache)
+        reverse_identity_map = self.reverse_identity_resolver.load_or_build(
+            refresh_cache=refresh_identity_cache
+        )
 
         records = get_mongo_collection(COMMENTS_WITH_ISSUE_COLLECTION).find({})
         project_author_comments = self._build_project_author_comments(records, reverse_identity_map)
         project_author_counts = self._build_project_author_counts(project_author_comments)
         top_authors = extract_top_authors(project_author_counts, self.top_contributor_fraction)
-        hero_flags = compute_hero_flags(project_author_counts, top_authors, self.hero_coverage_fraction)
+        hero_flags = compute_hero_flags(
+            project_author_counts, top_authors, self.hero_coverage_fraction
+        )
         hero_rows = self._build_rows(top_authors, hero_flags)
 
         if write_interim:
-            self._write_interim(project_author_comments, project_author_counts, top_authors, hero_flags)
+            self._write_interim(
+                project_author_comments, project_author_counts, top_authors, hero_flags
+            )
 
         self._write_csv(hero_rows)
         logger.info(
@@ -84,18 +91,27 @@ class SocialCommentHeroPipeline:
             except KeyError:
                 continue
 
-            merged_author_id = self.reverse_identity_resolver.resolve_person_id(person_id, reverse_identity_map)
-            author_comments = project_author_comments.setdefault(project_name, {}).setdefault(merged_author_id, set())
+            merged_author_id = self.reverse_identity_resolver.resolve_person_id(
+                person_id, reverse_identity_map
+            )
+            author_comments = project_author_comments.setdefault(project_name, {}).setdefault(
+                merged_author_id, set()
+            )
             author_comments.add(comment_id)
 
         return project_author_comments
 
     @staticmethod
-    def _build_project_author_counts(project_author_comments: ProjectAuthorComments) -> ProjectAuthorCounts:
+    def _build_project_author_counts(
+        project_author_comments: ProjectAuthorComments,
+    ) -> ProjectAuthorCounts:
         counts: ProjectAuthorCounts = {}
         for project_name, author_comments in project_author_comments.items():
             sorted_counts = sorted(
-                ((author_id, len(comment_ids)) for author_id, comment_ids in author_comments.items()),
+                (
+                    (author_id, len(comment_ids))
+                    for author_id, comment_ids in author_comments.items()
+                ),
                 key=lambda item: item[1],
                 reverse=True,
             )
@@ -103,7 +119,9 @@ class SocialCommentHeroPipeline:
         return counts
 
     @staticmethod
-    def _build_rows(top_authors: ProjectAuthorCounts, hero_flags: ProjectHeroFlags) -> list[SocialHeroRow]:
+    def _build_rows(
+        top_authors: ProjectAuthorCounts, hero_flags: ProjectHeroFlags
+    ) -> list[SocialHeroRow]:
         rows: list[SocialHeroRow] = []
         for project_name, author_counts in top_authors.items():
             if not hero_flags.get(project_name, False):
@@ -124,8 +142,7 @@ class SocialCommentHeroPipeline:
             writer = csv.writer(file)
             writer.writerow(["project_name", "author_id", "comment_count"])
             writer.writerows(
-                [row.project_name, str(row.author_id), row.comment_count]
-                for row in hero_rows
+                [row.project_name, str(row.author_id), row.comment_count] for row in hero_rows
             )
 
     def _write_interim(

@@ -1,2 +1,1 @@
 """Socio-technical heroism pipelines."""
-

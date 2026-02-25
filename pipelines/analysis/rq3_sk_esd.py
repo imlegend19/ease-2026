@@ -1,6 +1,5 @@
 """Optional RQ3 Scott-Knott ESD rankings with a deterministic mean-rank fallback."""
 
-
 import math
 from dataclasses import dataclass
 from pathlib import Path
@@ -37,7 +36,9 @@ class Rq3ScottKnottEsdPipeline:
             ranking_paths[metric_name] = {}
             input_paths[metric_name] = {}
             for severity in PRIORITY_SEVERITIES:
-                ranking_path, input_path = self.run_single(metric_name=metric_name, severity=severity)
+                ranking_path, input_path = self.run_single(
+                    metric_name=metric_name, severity=severity
+                )
                 ranking_paths[metric_name][severity] = ranking_path
                 input_paths[metric_name][severity] = input_path
 
@@ -57,7 +58,9 @@ class Rq3ScottKnottEsdPipeline:
         ranking_path = self.output_root / f"sk_esd_ranking_{metric_name}_{severity}.csv"
 
         issue_metrics = IssueOutcomeMetricsPipeline()
-        metric_by_hero = issue_metrics.load_metric_pickle(metric_name=metric_name, severity=severity)
+        metric_by_hero = issue_metrics.load_metric_pickle(
+            metric_name=metric_name, severity=severity
+        )
         input_matrix = self._build_input_matrix(metric_by_hero)
         input_matrix.to_csv(input_matrix_path, index=False)
 
@@ -71,7 +74,11 @@ class Rq3ScottKnottEsdPipeline:
     @staticmethod
     def _build_input_matrix(metric_by_hero: IssueMetricByHero) -> pd.DataFrame:
         filtered_by_hero = {
-            hero_code: {project_name: value for project_name, value in project_values.items() if value != 0.0}
+            hero_code: {
+                project_name: value
+                for project_name, value in project_values.items()
+                if value != 0.0
+            }
             for hero_code, project_values in metric_by_hero.items()
         }
 
@@ -97,7 +104,9 @@ class Rq3ScottKnottEsdPipeline:
 
         return pd.DataFrame(matrix_data)
 
-    def _compute_sk_esd_or_fallback(self, input_matrix: pd.DataFrame, metric_name: str) -> pd.DataFrame:
+    def _compute_sk_esd_or_fallback(
+        self, input_matrix: pd.DataFrame, metric_name: str
+    ) -> pd.DataFrame:
         if input_matrix.empty:
             return pd.DataFrame(columns=["hero_code", "rank", "method"])
 
@@ -149,4 +158,3 @@ class Rq3ScottKnottEsdPipeline:
         except Exception as exc:  # pragma: no cover - depends on R runtime and package shape
             logger.warning("ScottKnottESD execution failed; using fallback ranking", error=str(exc))
             return None
-

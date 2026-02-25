@@ -1,6 +1,5 @@
 """Compute fixed/reopened issue percentages for each hero type and severity."""
 
-
 import csv
 import pickle
 from dataclasses import dataclass
@@ -12,7 +11,12 @@ from core.settings import settings
 from identity.reverse_identity import ReverseIdentityResolver
 from pipelines.analysis.hero_catalog import ALL_SEVERITIES, HERO_TYPE_SPECS
 from pipelines.analysis.hero_membership import HeroMembershipByCode, HeroMembershipPipeline
-from pipelines.analysis.issue_data import IssueEvent, IssueMetadata, build_issue_metadata, build_relevant_issue_events
+from pipelines.analysis.issue_data import (
+    IssueEvent,
+    IssueMetadata,
+    build_issue_metadata,
+    build_relevant_issue_events,
+)
 
 logger = get_logger(__name__)
 
@@ -62,7 +66,9 @@ class IssueOutcomeMetricsPipeline:
     ) -> IssueMetricOutputPaths:
         hero_membership = HeroMembershipPipeline().load_or_build()
         reverse_identity_resolver = ReverseIdentityResolver()
-        reverse_identity_map = reverse_identity_resolver.load_or_build(refresh_cache=refresh_identity_cache)
+        reverse_identity_map = reverse_identity_resolver.load_or_build(
+            refresh_cache=refresh_identity_cache
+        )
 
         issue_metadata = build_issue_metadata(
             reverse_identity_map=reverse_identity_map,
@@ -158,12 +164,10 @@ class IssueOutcomeMetricsPipeline:
         hero_codes = [spec.code for spec in HERO_TYPE_SPECS]
 
         fixed_metrics: IssueMetricBySeverity = {
-            severity: {hero_code: {} for hero_code in hero_codes}
-            for severity in ALL_SEVERITIES
+            severity: {hero_code: {} for hero_code in hero_codes} for severity in ALL_SEVERITIES
         }
         reopened_metrics: IssueMetricBySeverity = {
-            severity: {hero_code: {} for hero_code in hero_codes}
-            for severity in ALL_SEVERITIES
+            severity: {hero_code: {} for hero_code in hero_codes} for severity in ALL_SEVERITIES
         }
 
         for hero_code, project_hero_authors in hero_membership.items():
@@ -187,7 +191,8 @@ class IssueOutcomeMetricsPipeline:
                     severity_issue_ids = [
                         issue_id
                         for issue_id in relevant_issue_ids
-                        if severity == "all" or issue_payload_by_issue[issue_id].priority == severity
+                        if severity == "all"
+                        or issue_payload_by_issue[issue_id].priority == severity
                     ]
                     if not severity_issue_ids:
                         continue
@@ -205,7 +210,11 @@ class IssueOutcomeMetricsPipeline:
                             if event.status == "resolution" and event.new_value == "fixed":
                                 fixed_issue_events += 1
                                 fixed_seen = True
-                            elif fixed_seen and event.status == "status" and event.new_value == "reopened":
+                            elif (
+                                fixed_seen
+                                and event.status == "status"
+                                and event.new_value == "reopened"
+                            ):
                                 reopened_after_fixed = True
                                 break
 
@@ -271,7 +280,9 @@ class IssueOutcomeMetricsPipeline:
         if severity not in ALL_SEVERITIES:
             raise ValueError(f"Unsupported severity '{severity}'")
 
-        metric_root = self.fixed_pickle_root if metric_name == "fixed" else self.reopened_pickle_root
+        metric_root = (
+            self.fixed_pickle_root if metric_name == "fixed" else self.reopened_pickle_root
+        )
         file_path = metric_root / f"{severity}_{metric_name}_percentage_by_hero.pkl"
         if not file_path.exists():
             return {spec.code: {} for spec in HERO_TYPE_SPECS}

@@ -1,6 +1,5 @@
 """Generate super heroes by intersecting social and technical hero sets."""
 
-
 import csv
 import pickle
 from dataclasses import dataclass
@@ -97,7 +96,9 @@ class SuperIntersectionPipeline:
         return output_paths
 
     def run_spec(self, spec: SuperIntersectionSpec) -> Path:
-        technical_counts = self._load_hero_author_counts(self.technical_root / spec.technical_dir_name)
+        technical_counts = self._load_hero_author_counts(
+            self.technical_root / spec.technical_dir_name
+        )
         social_counts = self._load_hero_author_counts(self.social_root / spec.social_dir_name)
         rows = self._build_rows(technical_counts, social_counts)
 
@@ -186,4 +187,3 @@ class SuperIntersectionPipeline:
 
         with (target_dir / "super_hero_authors.pkl").open("wb") as file:
             pickle.dump(by_project, file)
-

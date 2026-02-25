@@ -1,6 +1,5 @@
 """Common hero-selection rules used across pipelines."""
 
-
 from typing import Any
 
 ProjectAuthorCounts = dict[str, dict[Any, int]]
@@ -36,4 +35,3 @@ def compute_hero_flags(
         threshold = int(hero_coverage_fraction * project_total)
         hero_flags[project_name] = threshold <= top_total
     return hero_flags
-

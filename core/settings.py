@@ -1,6 +1,5 @@
 """Settings for EASE 2026 scripts loaded from environment variables."""
 
-
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -33,4 +32,3 @@ class Settings:
 
 
 settings = Settings()
-

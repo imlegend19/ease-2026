@@ -1,6 +1,5 @@
 """Generate technical heroes based on lines changed (added + deleted)."""
 
-
 import csv
 import pickle
 from dataclasses import dataclass, field
@@ -37,7 +36,9 @@ class TechnicalLocHeroRow:
 class TechnicalLocHeroPipeline:
     top_contributor_fraction: float = DEFAULT_TOP_CONTRIBUTOR_FRACTION
     hero_coverage_fraction: float = DEFAULT_HERO_COVERAGE_FRACTION
-    reverse_identity_resolver: ReverseIdentityResolver = field(default_factory=ReverseIdentityResolver)
+    reverse_identity_resolver: ReverseIdentityResolver = field(
+        default_factory=ReverseIdentityResolver
+    )
 
     @property
     def interim_dir(self) -> Path:
@@ -48,7 +49,9 @@ class TechnicalLocHeroPipeline:
         return settings.outputs_csv_dir / "technical" / "technical_heroes_loc_based.csv"
 
     def run(self, refresh_identity_cache: bool = False, write_interim: bool = True) -> Path:
-        reverse_identity_map = self.reverse_identity_resolver.load_or_build(refresh_cache=refresh_identity_cache)
+        reverse_identity_map = self.reverse_identity_resolver.load_or_build(
+            refresh_cache=refresh_identity_cache
+        )
         commit_index = build_commit_project_author_index(
             reverse_identity_map=reverse_identity_map,
             reverse_identity_resolver=self.reverse_identity_resolver,
@@ -60,7 +63,9 @@ class TechnicalLocHeroPipeline:
         )
         project_author_counts = self._build_project_author_loc_counts(file_actions, commit_index)
         top_authors = extract_top_authors(project_author_counts, self.top_contributor_fraction)
-        hero_flags = compute_hero_flags(project_author_counts, top_authors, self.hero_coverage_fraction)
+        hero_flags = compute_hero_flags(
+            project_author_counts, top_authors, self.hero_coverage_fraction
+        )
         hero_rows = self._build_rows(top_authors, hero_flags)
 
         if write_interim:
@@ -107,7 +112,9 @@ class TechnicalLocHeroPipeline:
             return 0
 
     @staticmethod
-    def _build_rows(top_authors: ProjectAuthorCounts, hero_flags: ProjectHeroFlags) -> list[TechnicalLocHeroRow]:
+    def _build_rows(
+        top_authors: ProjectAuthorCounts, hero_flags: ProjectHeroFlags
+    ) -> list[TechnicalLocHeroRow]:
         rows: list[TechnicalLocHeroRow] = []
         for project_name, author_counts in top_authors.items():
             if not hero_flags.get(project_name, False):
@@ -128,8 +135,7 @@ class TechnicalLocHeroPipeline:
             writer = csv.writer(file)
             writer.writerow(["project_name", "author_id", "loc_changed"])
             writer.writerows(
-                [row.project_name, str(row.author_id), row.loc_changed]
-                for row in hero_rows
+                [row.project_name, str(row.author_id), row.loc_changed] for row in hero_rows
             )
 
     def _write_interim(
@@ -152,4 +158,3 @@ class TechnicalLocHeroPipeline:
             file_path = self.interim_dir / filename
             with file_path.open("wb") as file:
                 pickle.dump(data, file)
-

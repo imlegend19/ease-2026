@@ -1,2 +1,1 @@
 """Technical heroism pipelines."""
-

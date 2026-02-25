@@ -56,6 +56,32 @@ uv pip install --python .venv\Scripts\python.exe --upgrade `
 uv pip list --python .venv\Scripts\python.exe
 ```
 
+## 6. Regenerate And Validate Derived Collections
+
+If archived baseline collections are present, keep them as:
+
+- `commit_with_project_info_old`
+- `comments_with_issue_and_project_info_old`
+- `final_identity_old`
+
+Then regenerate current v2.2 derived collections one-by-one:
+
+```powershell
+.venv\Scripts\python.exe -m scripts.generate_derived_commit_with_project_info
+.venv\Scripts\python.exe -m scripts.generate_derived_comments_with_issue_and_project_info
+.venv\Scripts\python.exe -m scripts.generate_derived_final_identity
+```
+
+Validate regenerated collections against `_old` baselines:
+
+```powershell
+.venv\Scripts\python.exe -m scripts.validate_derived_collections_against_old
+```
+
+Validation writes a JSON report to:
+
+- `artifacts/interim/analysis/derived_collection_validation.json`
+
 ## Notes
 
 - Dependency set above was derived from `experiments/saner-2026` scripts and requirements.

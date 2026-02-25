@@ -1,6 +1,5 @@
 """Shared extractors for technical hero pipelines."""
 
-
 from typing import Any
 
 from core.constants import COMMIT_WITH_PROJECT_INFO_COLLECTION
@@ -29,9 +28,10 @@ def build_commit_project_author_index(
         if commit_id is None or author_person_id is None or not project_name:
             continue
 
-        merged_author_id = reverse_identity_resolver.resolve_person_id(author_person_id, reverse_identity_map)
+        merged_author_id = reverse_identity_resolver.resolve_person_id(
+            author_person_id, reverse_identity_map
+        )
         commit_index[commit_id] = (project_name, merged_author_id)
         commit_index[str(commit_id)] = (project_name, merged_author_id)
 
     return commit_index
-

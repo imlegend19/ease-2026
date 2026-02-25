@@ -1,6 +1,5 @@
 """Compute severity-wise resolution-time metrics for hero categories."""
 
-
 import csv
 import pickle
 from dataclasses import dataclass
@@ -13,7 +12,12 @@ from core.settings import settings
 from identity.reverse_identity import ReverseIdentityResolver
 from pipelines.analysis.hero_catalog import HERO_TYPE_SPECS, PRIORITY_SEVERITIES
 from pipelines.analysis.hero_membership import HeroMembershipByCode, HeroMembershipPipeline
-from pipelines.analysis.issue_data import IssueMetadata, build_issue_metadata, build_relevant_issue_events, extract_first_fixed_timestamp
+from pipelines.analysis.issue_data import (
+    IssueMetadata,
+    build_issue_metadata,
+    build_relevant_issue_events,
+    extract_first_fixed_timestamp,
+)
 
 logger = get_logger(__name__)
 
@@ -54,7 +58,9 @@ class ResolutionTimePipeline:
     ) -> ResolutionTimeOutputPaths:
         hero_membership = HeroMembershipPipeline().load_or_build()
         reverse_identity_resolver = ReverseIdentityResolver()
-        reverse_identity_map = reverse_identity_resolver.load_or_build(refresh_cache=refresh_identity_cache)
+        reverse_identity_map = reverse_identity_resolver.load_or_build(
+            refresh_cache=refresh_identity_cache
+        )
 
         issue_metadata = build_issue_metadata(
             reverse_identity_map=reverse_identity_map,
@@ -100,8 +106,7 @@ class ResolutionTimePipeline:
         events_by_issue: dict[str, list],
     ) -> SeverityAssigneeAverages:
         raw_totals: dict[str, dict[str, dict[str, tuple[float, int]]]] = {
-            severity: {}
-            for severity in PRIORITY_SEVERITIES
+            severity: {} for severity in PRIORITY_SEVERITIES
         }
 
         for issue_id, metadata in issue_metadata.items():
@@ -171,11 +176,15 @@ class ResolutionTimePipeline:
                         total_counter += 1
 
                     if total_counter > 0:
-                        hero_avg_hours[severity][hero_code][project_name] = total_hours / total_counter
+                        hero_avg_hours[severity][hero_code][project_name] = (
+                            total_hours / total_counter
+                        )
 
         return hero_avg_hours
 
-    def _write_assignee_pickles(self, assignee_avg_seconds: SeverityAssigneeAverages) -> dict[str, Path]:
+    def _write_assignee_pickles(
+        self, assignee_avg_seconds: SeverityAssigneeAverages
+    ) -> dict[str, Path]:
         ensure_directory(self.assignee_pickle_root)
         output_paths: dict[str, Path] = {}
 
@@ -231,4 +240,3 @@ def _datetime_to_utc_timestamp(value: datetime) -> float | None:
     else:
         normalized_value = value.astimezone(UTC)
     return normalized_value.timestamp()
-

@@ -1,6 +1,5 @@
 """CLI entrypoint for technical heroes based on unique files touched."""
 
-
 import argparse
 
 from core.logging import setup_logging
@@ -45,4 +44,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

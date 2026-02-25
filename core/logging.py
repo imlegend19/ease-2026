@@ -5,7 +5,6 @@ This module configures stdlib logging with structlog and provides
 contextvars helpers for request/run-scoped fields.
 """
 
-
 __all__ = [
     "LoggerKlass",
     "get_logger",
@@ -102,5 +101,7 @@ def cleanup_duplicate_handlers() -> None:
     get_logger("core.logging").debug("Duplicate handlers cleaned up")
 
 
-bind_logger_contextvars: Callable[[Any], Mapping[str, Token]] = structlog.contextvars.bind_contextvars
+bind_logger_contextvars: Callable[[Any], Mapping[str, Token]] = (
+    structlog.contextvars.bind_contextvars
+)
 clear_logger_contextvars: Callable[[], None] = structlog.contextvars.clear_contextvars

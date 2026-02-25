@@ -1,6 +1,5 @@
 """Generate social heroes based on unique issues touched in comments."""
 
-
 import csv
 import pickle
 from dataclasses import dataclass, field
@@ -37,7 +36,9 @@ class SocialIssueHeroRow:
 class SocialIssueHeroPipeline:
     top_contributor_fraction: float = DEFAULT_TOP_CONTRIBUTOR_FRACTION
     hero_coverage_fraction: float = DEFAULT_HERO_COVERAGE_FRACTION
-    reverse_identity_resolver: ReverseIdentityResolver = field(default_factory=ReverseIdentityResolver)
+    reverse_identity_resolver: ReverseIdentityResolver = field(
+        default_factory=ReverseIdentityResolver
+    )
 
     @property
     def interim_dir(self) -> Path:
@@ -48,17 +49,23 @@ class SocialIssueHeroPipeline:
         return settings.outputs_csv_dir / "social" / "social_heroes_issue_based.csv"
 
     def run(self, refresh_identity_cache: bool = False, write_interim: bool = True) -> Path:
-        reverse_identity_map = self.reverse_identity_resolver.load_or_build(refresh_cache=refresh_identity_cache)
+        reverse_identity_map = self.reverse_identity_resolver.load_or_build(
+            refresh_cache=refresh_identity_cache
+        )
 
         records = get_mongo_collection(COMMENTS_WITH_ISSUE_COLLECTION).find({})
         project_author_issues = self._build_project_author_issues(records, reverse_identity_map)
         project_author_counts = self._build_project_author_counts(project_author_issues)
         top_authors = extract_top_authors(project_author_counts, self.top_contributor_fraction)
-        hero_flags = compute_hero_flags(project_author_counts, top_authors, self.hero_coverage_fraction)
+        hero_flags = compute_hero_flags(
+            project_author_counts, top_authors, self.hero_coverage_fraction
+        )
         hero_rows = self._build_rows(top_authors, hero_flags)
 
         if write_interim:
-            self._write_interim(project_author_issues, project_author_counts, top_authors, hero_flags)
+            self._write_interim(
+                project_author_issues, project_author_counts, top_authors, hero_flags
+            )
 
         self._write_csv(hero_rows)
         logger.info(
@@ -84,14 +91,20 @@ class SocialIssueHeroPipeline:
             except KeyError:
                 continue
 
-            merged_author_id = self.reverse_identity_resolver.resolve_person_id(person_id, reverse_identity_map)
-            author_issues = project_author_issues.setdefault(project_name, {}).setdefault(merged_author_id, set())
+            merged_author_id = self.reverse_identity_resolver.resolve_person_id(
+                person_id, reverse_identity_map
+            )
+            author_issues = project_author_issues.setdefault(project_name, {}).setdefault(
+                merged_author_id, set()
+            )
             author_issues.add(issue_id)
 
         return project_author_issues
 
     @staticmethod
-    def _build_project_author_counts(project_author_issues: ProjectAuthorIssues) -> ProjectAuthorCounts:
+    def _build_project_author_counts(
+        project_author_issues: ProjectAuthorIssues,
+    ) -> ProjectAuthorCounts:
         counts: ProjectAuthorCounts = {}
         for project_name, author_issues in project_author_issues.items():
             sorted_counts = sorted(
@@ -103,7 +116,9 @@ class SocialIssueHeroPipeline:
         return counts
 
     @staticmethod
-    def _build_rows(top_authors: ProjectAuthorCounts, hero_flags: ProjectHeroFlags) -> list[SocialIssueHeroRow]:
+    def _build_rows(
+        top_authors: ProjectAuthorCounts, hero_flags: ProjectHeroFlags
+    ) -> list[SocialIssueHeroRow]:
         rows: list[SocialIssueHeroRow] = []
         for project_name, author_counts in top_authors.items():
             if not hero_flags.get(project_name, False):
@@ -124,8 +139,7 @@ class SocialIssueHeroPipeline:
             writer = csv.writer(file)
             writer.writerow(["project_name", "author_id", "issue_count"])
             writer.writerows(
-                [row.project_name, str(row.author_id), row.issue_count]
-                for row in hero_rows
+                [row.project_name, str(row.author_id), row.issue_count] for row in hero_rows
             )
 
     def _write_interim(

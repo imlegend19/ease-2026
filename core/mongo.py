@@ -1,6 +1,5 @@
 """Synchronous MongoDB connection helpers."""
 
-
 __all__ = ["get_mongo_client", "get_mongo_database", "get_mongo_collection"]
 
 import threading
@@ -60,4 +59,3 @@ def get_mongo_database(db_name: str | None = None) -> Database:
 
 def get_mongo_collection(collection_name: str, db_name: str | None = None) -> Collection:
     return MongoConnectionManager.get_collection(collection_name=collection_name, db_name=db_name)
-

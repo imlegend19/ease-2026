@@ -1,6 +1,5 @@
 """CLI entrypoint for social heroes based on comments."""
 
-
 import argparse
 
 from core.logging import setup_logging
@@ -45,4 +44,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

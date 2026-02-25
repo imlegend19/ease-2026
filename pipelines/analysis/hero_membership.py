@@ -1,6 +1,5 @@
 """Build project->hero-author membership maps from generated hero CSV files."""
 
-
 import csv
 import pickle
 from pathlib import Path
@@ -86,4 +85,3 @@ class HeroMembershipPipeline:
             output_path = self.interim_dir / f"{hero_code.lower()}_project_author_set.pkl"
             with output_path.open("wb") as file:
                 pickle.dump(project_map, file)
-

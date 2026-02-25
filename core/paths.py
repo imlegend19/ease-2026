@@ -1,6 +1,5 @@
 """Path helpers for generated artifacts."""
 
-
 from pathlib import Path
 
 from core.settings import settings
