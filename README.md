@@ -68,8 +68,10 @@ Step 1 has been migrated to a modular layout:
 - `core/`: shared configuration, logging, mongo clients, path helpers.
 - `identity/`: reusable reverse-identity resolver with pickle cache support.
 - `pipelines/social/comment_based.py`: migrated pipeline for comment-based social heroes.
+- `pipelines/social/issue_based.py`: migrated pipeline for issue-based social heroes.
 - `pipelines/technical/commit_based.py`: migrated pipeline for commit-based technical heroes.
 - `scripts/generate_social_comment_heroes.py`: social pipeline CLI.
+- `scripts/generate_social_issue_heroes.py`: social issue pipeline CLI.
 - `scripts/generate_technical_commit_heroes.py`: technical pipeline CLI.
 
 Run the migrated pipelines:
@@ -77,11 +79,13 @@ Run the migrated pipelines:
 ```powershell
 cd experiments/ease-2026
 .venv\Scripts\python.exe -m scripts.generate_social_comment_heroes
+.venv\Scripts\python.exe -m scripts.generate_social_issue_heroes
 .venv\Scripts\python.exe -m scripts.generate_technical_commit_heroes
 ```
 
 Artifacts are written under `artifacts/`:
 
 - `artifacts/cache/identity/` for identity cache.
-- `artifacts/interim/social/comment_based/` and `artifacts/interim/technical/commit_based/` for intermediate pickles.
+- `artifacts/interim/social/comment_based/`, `artifacts/interim/social/issue_based/`,
+  and `artifacts/interim/technical/commit_based/` for intermediate pickles.
 - `artifacts/outputs/csv/social/` and `artifacts/outputs/csv/technical/` for final CSV output.
