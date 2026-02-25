@@ -45,6 +45,7 @@ From `experiments/ease-2026`:
 ```powershell
 uv pip install --python .venv\Scripts\python.exe --upgrade `
   pandas numpy scipy matplotlib seaborn pymongo rbo rpy2 `
+  python-dotenv structlog `
   networkx upsetplot scikit-learn
 ```
 
@@ -59,3 +60,28 @@ uv pip list --python .venv\Scripts\python.exe
 
 - Dependency set above was derived from `experiments/saner-2026` scripts and requirements.
 - `experiments/saner-2026/rq3_scott-knot.py` imports `from sk import Rx`; this helper module is not present in `saner-2026` as a pip dependency.
+
+## Migration Progress
+
+Step 1 has been migrated to a modular layout:
+
+- `core/`: shared configuration, logging, mongo clients, path helpers.
+- `identity/`: reusable reverse-identity resolver with pickle cache support.
+- `pipelines/social/comment_based.py`: migrated pipeline for comment-based social heroes.
+- `pipelines/technical/commit_based.py`: migrated pipeline for commit-based technical heroes.
+- `scripts/generate_social_comment_heroes.py`: social pipeline CLI.
+- `scripts/generate_technical_commit_heroes.py`: technical pipeline CLI.
+
+Run the migrated pipelines:
+
+```powershell
+cd experiments/ease-2026
+.venv\Scripts\python.exe -m scripts.generate_social_comment_heroes
+.venv\Scripts\python.exe -m scripts.generate_technical_commit_heroes
+```
+
+Artifacts are written under `artifacts/`:
+
+- `artifacts/cache/identity/` for identity cache.
+- `artifacts/interim/social/comment_based/` and `artifacts/interim/technical/commit_based/` for intermediate pickles.
+- `artifacts/outputs/csv/social/` and `artifacts/outputs/csv/technical/` for final CSV output.

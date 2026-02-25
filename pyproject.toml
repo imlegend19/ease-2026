@@ -7,11 +7,13 @@ dependencies = [
     "networkx",
     "numpy",
     "pandas",
+    "python-dotenv",
     "pymongo",
     "rbo",
     "rpy2",
     "scikit-learn",
     "scipy",
     "seaborn",
+    "structlog",
     "upsetplot",
 ]
