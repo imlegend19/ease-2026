@@ -7,6 +7,7 @@ from core.paths import ensure_artifact_directories
 from pipelines.analysis.hero_membership import HeroMembershipPipeline
 from pipelines.analysis.issue_metrics import IssueOutcomeMetricsPipeline
 from pipelines.analysis.resolution_time import ResolutionTimePipeline
+from pipelines.analysis.rq1_prevalence import Rq1PrevalencePipeline
 from pipelines.analysis.rq2_jaccard import Rq2JaccardPipeline
 from pipelines.analysis.rq3_rankings import Rq3RankingPipeline
 from pipelines.analysis.rq3_sk_esd import Rq3ScottKnottEsdPipeline
@@ -41,6 +42,7 @@ def main() -> None:
         write_interim=True,
         write_csv=True,
     )
+    Rq1PrevalencePipeline().run()
     Rq2JaccardPipeline().run()
     Rq3RankingPipeline().run_all()
     Rq3ScottKnottEsdPipeline().run_all()
