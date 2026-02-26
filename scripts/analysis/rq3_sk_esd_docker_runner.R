@@ -29,6 +29,52 @@ if (length(input_files) == 0) {
   stop(sprintf("No SK-ESD input files found in: %s", input_dir), call. = FALSE)
 }
 
+build_empty_df <- function(metric, severity) {
+  data.frame(
+    metric = character(),
+    severity = character(),
+    hero_code = character(),
+    rank = integer(),
+    method = character()
+  )
+}
+
+build_mean_fallback <- function(raw_df, metric, severity) {
+  if (ncol(raw_df) == 0) {
+    return(build_empty_df(metric, severity))
+  }
+
+  numeric_df <- suppressWarnings(data.frame(lapply(raw_df, as.numeric), check.names = FALSE))
+  if (ncol(numeric_df) == 0) {
+    return(build_empty_df(metric, severity))
+  }
+
+  non_empty_cols <- colSums(!is.na(numeric_df)) > 0
+  numeric_df <- numeric_df[, non_empty_cols, drop = FALSE]
+  if (ncol(numeric_df) == 0) {
+    return(build_empty_df(metric, severity))
+  }
+
+  means <- colMeans(numeric_df, na.rm = TRUE)
+  means <- means[is.finite(means)]
+  if (length(means) == 0) {
+    return(build_empty_df(metric, severity))
+  }
+
+  # Fixed: higher is better. Reopened: lower is better.
+  decreasing <- identical(metric, "fixed")
+  ordered <- sort(means, decreasing = decreasing)
+  hero_codes <- names(ordered)
+
+  data.frame(
+    metric = rep(metric, length(hero_codes)),
+    severity = rep(severity, length(hero_codes)),
+    hero_code = hero_codes,
+    rank = seq_along(hero_codes),
+    method = rep("mean_fallback_docker", length(hero_codes))
+  )
+}
+
 for (input_path in input_files) {
   file_name <- basename(input_path)
   matches <- regexec(pattern, file_name)
@@ -40,44 +86,64 @@ for (input_path in input_files) {
 
   input_df <- read.csv(input_path, check.names = FALSE)
   if (nrow(input_df) == 0 || ncol(input_df) == 0) {
-    empty_df <- data.frame(
-      metric = character(),
-      severity = character(),
-      hero_code = character(),
-      rank = integer(),
-      method = character()
-    )
+    empty_df <- build_empty_df(metric, severity)
     write.csv(empty_df, output_path, row.names = FALSE, quote = FALSE)
     next
   }
 
-  sk_result <- sk_esd(input_df)
+  numeric_df <- suppressWarnings(data.frame(lapply(input_df, as.numeric), check.names = FALSE))
+  non_empty_cols <- colSums(!is.na(numeric_df)) > 0
+  numeric_df <- numeric_df[, non_empty_cols, drop = FALSE]
+  complete_df <- numeric_df[stats::complete.cases(numeric_df), , drop = FALSE]
 
-  # Legacy mapping used in the Python pipeline:
-  # result[[2]] -> rank values, result[[4]] -> column order (1-based).
-  rank_values <- as.integer(unlist(sk_result[[2]]))
-  column_order <- as.integer(unlist(sk_result[[4]]))
-  hero_codes <- colnames(input_df)[column_order]
+  ranking_df <- NULL
+  if (ncol(complete_df) >= 2 && nrow(complete_df) >= 2) {
+    ranking_df <- tryCatch(
+      {
+        sk_result <- sk_esd(complete_df)
 
-  if (length(rank_values) != length(hero_codes)) {
-    stop(
-      sprintf(
-        "ScottKnottESD output mismatch for %s: %d ranks vs %d hero codes",
-        file_name,
-        length(rank_values),
-        length(hero_codes)
-      ),
-      call. = FALSE
+        # Legacy mapping used in the Python pipeline:
+        # result[[2]] -> rank values, result[[4]] -> column order (1-based).
+        rank_values <- as.integer(unlist(sk_result[[2]]))
+        column_order <- as.integer(unlist(sk_result[[4]]))
+        hero_codes <- colnames(complete_df)[column_order]
+
+        if (length(rank_values) != length(hero_codes)) {
+          stop(
+            sprintf(
+              "ScottKnottESD output mismatch for %s: %d ranks vs %d hero codes",
+              file_name,
+              length(rank_values),
+              length(hero_codes)
+            )
+          )
+        }
+
+        data.frame(
+          metric = rep(metric, length(hero_codes)),
+          severity = rep(severity, length(hero_codes)),
+          hero_code = hero_codes,
+          rank = rank_values,
+          method = rep("sk_esd_docker", length(hero_codes))
+        )
+      },
+      error = function(e) {
+        message(
+          sprintf(
+            "SK-ESD failed for %s (%s). Using mean fallback ranking.",
+            file_name,
+            conditionMessage(e)
+          )
+        )
+        NULL
+      }
     )
   }
 
-  ranking_df <- data.frame(
-    metric = rep(metric, length(hero_codes)),
-    severity = rep(severity, length(hero_codes)),
-    hero_code = hero_codes,
-    rank = rank_values,
-    method = rep("sk_esd_docker", length(hero_codes))
-  )
+  if (is.null(ranking_df)) {
+    ranking_df <- build_mean_fallback(input_df, metric, severity)
+  }
+
   write.csv(ranking_df, output_path, row.names = FALSE, quote = FALSE)
 }
 

@@ -7,6 +7,7 @@ from core.paths import ensure_artifact_directories
 from pipelines.analysis.hero_membership import HeroMembershipPipeline
 from pipelines.analysis.issue_metrics import IssueOutcomeMetricsPipeline
 from pipelines.analysis.resolution_time import ResolutionTimePipeline
+from pipelines.analysis.rq3_legacy_exports import Rq3LegacyExportPipeline
 from pipelines.analysis.rq1_prevalence import Rq1PrevalencePipeline
 from pipelines.analysis.rq2_jaccard import Rq2JaccardPipeline
 from pipelines.analysis.rq3_rankings import Rq3RankingPipeline
@@ -46,6 +47,7 @@ def main() -> None:
     Rq2JaccardPipeline().run()
     Rq3RankingPipeline().run_all()
     Rq3ScottKnottEsdPipeline().run_all()
+    Rq3LegacyExportPipeline().run_all(regenerate_dependencies=False)
 
     print("Generated all analysis artifacts.")
 

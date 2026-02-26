@@ -69,6 +69,7 @@ experiments/ease-2026/
 |       |-- resolution_time.py        # resolution-time metrics
 |       |-- rq2_jaccard.py            # RQ2 similarity matrices/plots
 |       |-- rq3_rankings.py           # RQ3 rankings + Kendall Tau
+|       |-- rq3_legacy_exports.py     # SANER-style RQ3 compatibility outputs
 |       `-- rq3_sk_esd.py             # optional Scott-Knott ESD ranking
 |
 |-- scripts/                     # runnable CLI entry points (grouped)
@@ -204,7 +205,16 @@ Analysis:
 - `scripts.analysis.generate_rq2_jaccard_analysis`
 - `scripts.analysis.generate_rq3_rankings`
 - `scripts.analysis.generate_rq3_sk_esd`
+- `scripts.analysis.generate_rq3_legacy_outputs` (all SANER-style RQ3 exports)
+- `scripts.analysis.generate_rq3_fixed_issues` (SANER-style fixed issue pickles)
+- `scripts.analysis.generate_rq3_reopened_issues` (SANER-style reopened issue pickles)
+- `scripts.analysis.generate_rq3_scott_knot` (SANER-style Scott-Knott mean rankings)
+- `scripts.analysis.generate_rq3_scott_knot_esd_legacy` (SANER-style SK-ESD rankings)
+- `scripts.analysis.generate_rq3_kendall_tau` (SANER-style Kendall Tau file names)
 - `scripts.analysis.generate_analysis_artifacts` (all analysis steps in one run)
+- Backward-compatible SANER file-name wrappers also exist at project root:
+  `fixed_issues.py`, `reopened_issues.py`, `rq3_scott-knot.py`,
+  `rq3_scott_knot_esd.py`, `rq3_kendall-tau.py`
 
 ## Outputs
 
@@ -215,6 +225,7 @@ Main output locations:
 - `artifacts/outputs/csv/socio_technical/`
 - `artifacts/outputs/csv/techno_social/`
 - `artifacts/outputs/csv/analysis/`
+- `artifacts/outputs/csv/analysis/rq3/legacy/` (SANER-compatible RQ3 outputs)
 - `artifacts/outputs/plots/rq2/`
 
 Intermediates and cache:
@@ -225,3 +236,4 @@ Intermediates and cache:
 
 - `generate_analysis_artifacts` assumes hero CSVs exist; it does not generate them.
 - RQ3 SK-ESD uses `rpy2` when available and falls back to deterministic mean-based behavior if the R package is unavailable.
+- `generate_analysis_artifacts` now also writes SANER-style RQ3 compatibility files under `analysis/rq3/legacy`.
