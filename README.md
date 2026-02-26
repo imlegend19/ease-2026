@@ -1,161 +1,227 @@
-# EASE 2026 Experiment Workspace
+# EASE 2026 Developer Guide
 
-This experiment uses the shared SmartSHARK MongoDB service in
-`datasets/smartshark`. Mongo access in Python is through `pymongo`.
+This project analyzes SmartSHARK data to identify different kinds of "hero developers"
+and compare their bug-fixing performance.
 
-## 1. Start shared SmartSHARK MongoDB
+In simple terms, the code does three big things:
 
-From workspace root:
+1. Finds hero developers from technical and social contribution metrics.
+2. Builds combined hero categories (socio-technical, techno-social, super).
+3. Runs analysis for prevalence (RQ1), overlap (RQ2), and bug-fixing performance (RQ3).
+
+The definitions and goals follow the paper in `papers/ease-2026/main.tex`.
+
+## What The Pipeline Produces
+
+- Social hero CSVs (2 types): `S1`, `S2`
+- Technical hero CSVs (3 types): `T1`, `T2`, `T3`
+- Combined hero CSVs (18 types): `ST1..ST6`, `TS1..TS6`, `SH1..SH6`
+- Analysis outputs for:
+  - RQ2 Jaccard overlap matrices and plots
+  - RQ3 fixed/reopened bug metrics, rankings, and Kendall Tau correlations
+
+Total hero categories: `23`.
+
+## Project Structure (Complete Map)
+
+```text
+experiments/ease-2026/
+|-- .env.example                 # Mongo connection template
+|-- pyproject.toml               # Python project + dependencies
+|-- uv.lock                      # locked dependency versions
+|-- README.md                    # this file
+|
+|-- core/                        # shared infrastructure
+|   |-- settings.py              # env loading (.env), paths, db name
+|   |-- mongo.py                 # synced MongoDB client helpers
+|   |-- mongo_async.py           # async Mongo client helpers
+|   |-- constants.py             # collection names and thresholds
+|   |-- logging.py               # structlog setup
+|   `-- paths.py                 # artifact directory helpers
+|
+|-- identity/
+|   `-- reverse_identity.py      # maps person -> merged identity (cached pickle)
+|
+|-- pipelines/
+|   |-- preprocessing/
+|   |   `-- derived_collections.py    # builds derived Mongo collections
+|   |-- common/
+|   |   `-- hero_rules.py             # top-20% + 80%-coverage hero logic
+|   |-- social/
+|   |   |-- comment_based.py          # S1
+|   |   `-- issue_based.py            # S2
+|   |-- technical/
+|   |   |-- commit_based.py           # T1
+|   |   |-- file_based.py             # T2
+|   |   |-- loc_based.py              # T3
+|   |   `-- shared.py                 # shared commit->(project,author) index
+|   |-- super/
+|   |   `-- intersection_based.py     # SH1..SH6 (strict intersections)
+|   |-- socio_technical/
+|   |   `-- median_based.py           # ST1..ST6 (social hero + tech median)
+|   |-- techno_social/
+|   |   `-- median_based.py           # TS1..TS6 (technical hero + social median)
+|   `-- analysis/
+|       |-- hero_catalog.py           # canonical hero-code metadata/order
+|       |-- hero_membership.py        # project->hero-author index
+|       |-- issue_data.py             # issue/event extraction from Mongo
+|       |-- issue_metrics.py          # fixed/reopened percentages
+|       |-- resolution_time.py        # resolution-time metrics
+|       |-- rq2_jaccard.py            # RQ2 similarity matrices/plots
+|       |-- rq3_rankings.py           # RQ3 rankings + Kendall Tau
+|       `-- rq3_sk_esd.py             # optional Scott-Knott ESD ranking
+|
+|-- scripts/                     # runnable CLI entry points (grouped)
+|   |-- preprocessing/           # derived collection materialization scripts
+|   |-- heroes/                  # social/technical/super hero generation scripts
+|   `-- analysis/                # RQ2/RQ3 and metrics scripts
+|
+`-- artifacts/                   # generated runtime outputs
+    |-- cache/                   # identity cache pickle
+    |-- interim/                 # intermediate pickles used by later steps
+    `-- outputs/
+        |-- csv/                 # final CSV outputs
+        `-- plots/               # generated figures (RQ2)
+```
+
+## Data Requirements (MongoDB)
+
+The code expects SmartSHARK data in one DB (your case: `smartshark_2_1`).
+
+Base collections used:
+- `project`, `vcs_system`, `commit`, `file_action`
+- `issue_system`, `issue`, `issue_comment`, `event`
+- `people` (for identity grouping when available)
+
+Derived collections expected:
+- `commit_with_project_info`
+- `comments_with_issue_and_project_info`
+- `final_identity`
+
+If those three derived collections are already restored, you can skip regeneration.
+
+## Setup
+
+From workspace root, ensure Mongo is running:
 
 ```powershell
 cd datasets/smartshark
 docker compose up -d mongo
-docker compose --profile restore run --rm mongo-restore
 ```
 
-## 2. Configure this experiment
-
-From `experiments/ease-2026`:
+From `experiments/ease-2026`, set environment:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Defaults:
+Then edit `.env` and set:
 
-- `SMARTSHARK_MONGO_URI=mongodb://smartshark:smartshark@localhost:27117/?authSource=admin`
-- `SMARTSHARK_MONGO_DB=smartshark_2_2`
+```env
+SMARTSHARK_MONGO_URI=mongodb://smartshark:smartshark@localhost:27117/?authSource=admin
+SMARTSHARK_MONGO_DB=smartshark_2_1
+```
 
-## 3. Create local `uv` environment (Python 3.12)
-
-From `experiments/ease-2026`:
+Create environment and install dependencies:
 
 ```powershell
-# Install uv (one-time) if needed
-irm https://astral.sh/uv/install.ps1 | iex
-
-# Create local virtual environment with Python 3.12
 uv venv --python 3.12 .venv
+uv sync
 ```
 
-## 4. Install experiment dependencies (latest)
+## Recommended Execution Order
 
-From `experiments/ease-2026`:
+Run from `experiments/ease-2026`.
+
+Option A (recommended): one command to run all hero generation once.
 
 ```powershell
-uv pip install --python .venv\Scripts\python.exe --upgrade `
-  pandas numpy scipy matplotlib seaborn pymongo rbo rpy2 `
-  python-dotenv structlog `
-  networkx upsetplot scikit-learn
+python -m scripts.heroes.generate_all_heroes --refresh-identity-cache
+python -m scripts.analysis.generate_analysis_artifacts
 ```
 
-## 5. Verify the environment
+Option B: run each hero script separately.
 
 ```powershell
-.venv\Scripts\python.exe --version
-uv pip list --python .venv\Scripts\python.exe
+python -m scripts.heroes.generate_social_comment_heroes --refresh-identity-cache
+python -m scripts.heroes.generate_social_issue_heroes
+python -m scripts.heroes.generate_technical_commit_heroes
+python -m scripts.heroes.generate_technical_loc_heroes
+python -m scripts.heroes.generate_technical_file_heroes
+python -m scripts.heroes.generate_super_heroes
+python -m scripts.heroes.generate_socio_technical_heroes
+python -m scripts.heroes.generate_techno_social_heroes
+python -m scripts.analysis.generate_analysis_artifacts
 ```
 
-## 6. Regenerate And Validate Derived Collections
+Note:
+- `generate_super_heroes`, `generate_socio_technical_heroes`, and `generate_techno_social_heroes`
+  now use existing prerequisite artifacts by default.
+- They first check that prerequisite artifact files exist; if not, they stop and print
+  the exact prerequisite script commands you should run.
+- If you want those scripts to re-run prerequisites inside the same command, pass
+  `--include-prerequisites`.
 
-If archived baseline collections are present, keep them as:
+## If Derived Collections Are Missing
 
-- `commit_with_project_info_old`
-- `comments_with_issue_and_project_info_old`
-- `final_identity_old`
-
-Then regenerate current v2.2 derived collections one-by-one:
+Build all derived collections in one command:
 
 ```powershell
-.venv\Scripts\python.exe -m scripts.generate_derived_commit_with_project_info
-.venv\Scripts\python.exe -m scripts.generate_derived_comments_with_issue_and_project_info
-.venv\Scripts\python.exe -m scripts.generate_derived_final_identity
+python -m scripts.preprocessing.materialize_derived_collections
 ```
 
-Validate regenerated collections against `_old` baselines:
+Or run them one by one:
 
 ```powershell
-.venv\Scripts\python.exe -m scripts.validate_derived_collections_against_old
+python -m scripts.preprocessing.generate_derived_commit_with_project_info
+python -m scripts.preprocessing.generate_derived_comments_with_issue_and_project_info
+python -m scripts.preprocessing.generate_derived_final_identity
 ```
 
-Validation writes a JSON report to:
+## Script Cheat Sheet
 
-- `artifacts/interim/analysis/derived_collection_validation.json`
+Data preparation:
+- `scripts.preprocessing.materialize_derived_collections`
+- `scripts.preprocessing.generate_derived_commit_with_project_info`
+- `scripts.preprocessing.generate_derived_comments_with_issue_and_project_info`
+- `scripts.preprocessing.generate_derived_final_identity`
+
+Hero generation:
+- `scripts.heroes.generate_all_heroes` (all hero categories end-to-end)
+- `scripts.heroes.generate_social_comment_heroes` (`S1`)
+- `scripts.heroes.generate_social_issue_heroes` (`S2`)
+- `scripts.heroes.generate_technical_commit_heroes` (`T1`)
+- `scripts.heroes.generate_technical_file_heroes` (`T2`)
+- `scripts.heroes.generate_technical_loc_heroes` (`T3`)
+- `scripts.heroes.generate_super_heroes` (`SH1..SH6`)
+- `scripts.heroes.generate_socio_technical_heroes` (`ST1..ST6`)
+- `scripts.heroes.generate_techno_social_heroes` (`TS1..TS6`)
+
+Analysis:
+- `scripts.analysis.generate_hero_membership_index`
+- `scripts.analysis.generate_issue_outcome_metrics`
+- `scripts.analysis.generate_resolution_time_metrics`
+- `scripts.analysis.generate_rq2_jaccard_analysis`
+- `scripts.analysis.generate_rq3_rankings`
+- `scripts.analysis.generate_rq3_sk_esd`
+- `scripts.analysis.generate_analysis_artifacts` (all analysis steps in one run)
+
+## Outputs
+
+Main output locations:
+- `artifacts/outputs/csv/social/`
+- `artifacts/outputs/csv/technical/`
+- `artifacts/outputs/csv/super/`
+- `artifacts/outputs/csv/socio_technical/`
+- `artifacts/outputs/csv/techno_social/`
+- `artifacts/outputs/csv/analysis/`
+- `artifacts/outputs/plots/rq2/`
+
+Intermediates and cache:
+- `artifacts/interim/**`
+- `artifacts/cache/identity/reverse_identity.pkl`
 
 ## Notes
 
-- Dependency set above was derived from `experiments/saner-2026` scripts and requirements.
-- `experiments/saner-2026/rq3_scott-knot.py` imports `from sk import Rx`; this helper module is not present in `saner-2026` as a pip dependency.
-
-## Migration Progress
-
-Step 1 (hero CSV generation) and Step 2+ (analysis artifacts) are migrated to a modular layout:
-
-- `core/`: shared configuration, logging, mongo clients, path helpers.
-- `identity/`: reusable reverse-identity resolver with pickle cache support.
-- `pipelines/common/hero_rules.py`: shared top-20% and 80%-coverage hero rules.
-- `pipelines/social/comment_based.py`: migrated pipeline for comment-based social heroes.
-- `pipelines/social/issue_based.py`: migrated pipeline for issue-based social heroes.
-- `pipelines/technical/commit_based.py`: migrated pipeline for commit-based technical heroes.
-- `pipelines/technical/loc_based.py`: migrated pipeline for LOC-based technical heroes.
-- `pipelines/technical/file_based.py`: migrated pipeline for file-based technical heroes.
-- `pipelines/super/intersection_based.py`: super-hero intersections for all six social/technical combinations.
-- `pipelines/socio_technical/median_based.py`: socio-technical heroes (social heroes + technical median filter).
-- `pipelines/techno_social/median_based.py`: techno-social heroes (technical heroes + social median filter).
-- `pipelines/analysis/hero_catalog.py`: canonical `S*`, `T*`, `TS*`, `ST*`, `SH*` metadata and RQ2 order.
-- `pipelines/analysis/hero_membership.py`: project->author membership extraction for all 23 hero types.
-- `pipelines/analysis/issue_data.py`: shared issue/event extraction helpers from Mongo.
-- `pipelines/analysis/issue_metrics.py`: fixed/reopened issue percentages by hero type and severity.
-- `pipelines/analysis/resolution_time.py`: severity-wise assignee averages and hero resolution-time averages.
-- `pipelines/analysis/rq2_jaccard.py`: Jaccard matrices + RQ2 plot generation.
-- `pipelines/analysis/rq3_rankings.py`: severity-wise rankings + Kendall Tau matrices for RQ3.
-- `pipelines/analysis/rq3_sk_esd.py`: Scott-Knott ESD rankings with deterministic fallback when R package is unavailable.
-- `scripts/generate_social_comment_heroes.py`: social pipeline CLI.
-- `scripts/generate_social_issue_heroes.py`: social issue pipeline CLI.
-- `scripts/generate_technical_commit_heroes.py`: technical pipeline CLI.
-- `scripts/generate_technical_loc_heroes.py`: technical LOC pipeline CLI.
-- `scripts/generate_technical_file_heroes.py`: technical file pipeline CLI.
-- `scripts/generate_super_heroes.py`: super-hero intersection pipeline CLI.
-- `scripts/generate_socio_technical_heroes.py`: socio-technical hero pipeline CLI.
-- `scripts/generate_techno_social_heroes.py`: techno-social hero pipeline CLI.
-- `scripts/generate_hero_membership_index.py`: hero-membership index CLI.
-- `scripts/generate_issue_outcome_metrics.py`: fixed/reopened issue metrics CLI.
-- `scripts/generate_resolution_time_metrics.py`: average resolution-time metrics CLI.
-- `scripts/generate_rq2_jaccard_analysis.py`: RQ2 Jaccard matrices/plots CLI.
-- `scripts/generate_rq3_rankings.py`: RQ3 ranking and Kendall Tau CLI.
-- `scripts/generate_rq3_sk_esd.py`: RQ3 Scott-Knott ESD CLI.
-- `scripts/generate_analysis_artifacts.py`: run all migrated analysis pipelines.
-
-Run the migrated pipelines:
-
-```powershell
-cd experiments/ease-2026
-.venv\Scripts\python.exe -m scripts.generate_social_comment_heroes
-.venv\Scripts\python.exe -m scripts.generate_social_issue_heroes
-.venv\Scripts\python.exe -m scripts.generate_technical_commit_heroes
-.venv\Scripts\python.exe -m scripts.generate_technical_loc_heroes
-.venv\Scripts\python.exe -m scripts.generate_technical_file_heroes
-.venv\Scripts\python.exe -m scripts.generate_super_heroes
-.venv\Scripts\python.exe -m scripts.generate_socio_technical_heroes
-.venv\Scripts\python.exe -m scripts.generate_techno_social_heroes
-.venv\Scripts\python.exe -m scripts.generate_analysis_artifacts
-```
-
-Artifacts are written under `artifacts/`:
-
-- `artifacts/cache/identity/` for identity cache.
-- `artifacts/interim/social/comment_based/`, `artifacts/interim/social/issue_based/`,
-  and `artifacts/interim/technical/commit_based/`, `artifacts/interim/technical/loc_based/`,
-  `artifacts/interim/technical/file_based/`, `artifacts/interim/super/`,
-  `artifacts/interim/socio_technical/`, `artifacts/interim/techno_social/`,
-  `artifacts/interim/analysis/` for intermediate pickles.
-- `artifacts/outputs/csv/social/`, `artifacts/outputs/csv/technical/`,
-  `artifacts/outputs/csv/super/`, `artifacts/outputs/csv/socio_technical/`,
-  `artifacts/outputs/csv/techno_social/`, `artifacts/outputs/csv/analysis/` for final CSV output.
-- `artifacts/outputs/plots/rq2/` for generated RQ2 plot files.
-
-## Artifact Versioning Policy
-
-- `artifacts/outputs/csv/**` is committed to git for reproducibility snapshots.
-- `artifacts/cache/**`, `artifacts/interim/**`, and `artifacts/outputs/plots/**` are ignored
-  because they are environment-dependent or large/intermediate byproducts.
+- `generate_analysis_artifacts` assumes hero CSVs exist; it does not generate them.
+- RQ3 SK-ESD uses `rpy2` when available and falls back to deterministic mean-based behavior if the R package is unavailable.

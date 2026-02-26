@@ -10,6 +10,22 @@ from pipelines.super.intersection_based import SuperIntersectionPipeline
 from pipelines.technical.commit_based import TechnicalCommitHeroPipeline
 from pipelines.technical.file_based import TechnicalFileHeroPipeline
 from pipelines.technical.loc_based import TechnicalLocHeroPipeline
+from scripts.heroes.prerequisites import (
+    SOCIAL_COMMENT,
+    SOCIAL_ISSUE,
+    TECHNICAL_COMMIT,
+    TECHNICAL_FILE,
+    TECHNICAL_LOC,
+    ensure_prerequisites,
+)
+
+SUPER_PREREQUISITES = (
+    SOCIAL_COMMENT,
+    SOCIAL_ISSUE,
+    TECHNICAL_COMMIT,
+    TECHNICAL_FILE,
+    TECHNICAL_LOC,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -22,9 +38,12 @@ def parse_args() -> argparse.Namespace:
         help="Rebuild identity cache from MongoDB before running.",
     )
     parser.add_argument(
-        "--skip-prerequisites",
+        "--include-prerequisites",
         action="store_true",
-        help="Skip social/technical prerequisite pipelines and use existing interim artifacts.",
+        help=(
+            "Also run social/technical prerequisite pipelines before super heroes. "
+            "By default this script only computes super heroes from existing artifacts."
+        ),
     )
     parser.add_argument(
         "--debug",
@@ -39,7 +58,7 @@ def main() -> None:
     setup_logging(debug=args.debug)
     ensure_artifact_directories()
 
-    if not args.skip_prerequisites:
+    if args.include_prerequisites:
         SocialCommentHeroPipeline().run(
             refresh_identity_cache=args.refresh_identity_cache,
             write_interim=True,
@@ -48,6 +67,11 @@ def main() -> None:
         TechnicalCommitHeroPipeline().run(write_interim=True)
         TechnicalLocHeroPipeline().run(write_interim=True)
         TechnicalFileHeroPipeline().run(write_interim=True)
+    else:
+        ensure_prerequisites(
+            SUPER_PREREQUISITES,
+            pipeline_name="super heroes",
+        )
 
     output_paths = SuperIntersectionPipeline().run_all()
     print("Generated CSV files:")
