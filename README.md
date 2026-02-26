@@ -86,7 +86,7 @@ experiments/ease-2026/
 
 ## Data Requirements (MongoDB)
 
-The code expects SmartSHARK data in one DB (your case: `smartshark_2_1`).
+The code expects SmartSHARK data in one DB (your case: `smartshark_2_2`).
 
 Base collections used:
 - `project`, `vcs_system`, `commit`, `file_action`
@@ -119,7 +119,7 @@ Then edit `.env` and set:
 
 ```env
 SMARTSHARK_MONGO_URI=mongodb://smartshark:smartshark@localhost:27117/?authSource=admin
-SMARTSHARK_MONGO_DB=smartshark_2_1
+SMARTSHARK_MONGO_DB=smartshark_2_2
 ```
 
 Create environment and install dependencies:
