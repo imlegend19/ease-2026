@@ -1,1 +1,0 @@
-"""Social heroism pipelines."""

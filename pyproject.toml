@@ -3,24 +3,14 @@ name = "ease-2026"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "matplotlib",
-    "networkx",
-    "numpy",
-    "pandas",
-    "python-dotenv",
-    "pymongo",
-    "rbo",
-    "rpy2",
-    "scikit-learn",
-    "scipy",
-    "seaborn",
-    "structlog",
-    "upsetplot",
+  "pymongo>=4.10.0",
+  "python-dotenv>=1.0.1",
+  "structlog>=25.4.0",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.14.0",
+  "ruff>=0.14.0",
 ]
 
 [tool.ruff]

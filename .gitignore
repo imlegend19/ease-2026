@@ -1,4 +1,4 @@
-.env*
-!.env.example
 .venv/
-artifacts/
+__pycache__/
+*.pyc
+.env
