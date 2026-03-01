@@ -9,6 +9,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.patches import Patch
 
 from ease2026.analysis.rq1 import HERO_TYPE_ORDER
 from ease2026.core.logging import get_logger
@@ -157,6 +158,10 @@ class FinalFigureGenerator:
         outputs: dict[str, Path] = {}
 
         outputs["figure_1_prevalence"] = self._plot_figure_1_prevalence(dpi=dpi, save_svg=save_svg)
+        if self.robustness_csv_path.exists():
+            outputs["figure_1_prevalence_thresholds"] = self._plot_figure_1_prevalence_thresholds(
+                dpi=dpi, save_svg=save_svg
+            )
         outputs["figure_2_overlap"] = self._plot_figure_2_overlap(dpi=dpi, save_svg=save_svg)
         outputs["figure_3_bug_performance"] = self._plot_figure_3_bug_performance(
             fixer=fixer_for_rq3,
@@ -182,6 +187,49 @@ class FinalFigureGenerator:
             fixer_for_rq3=fixer_for_rq3,
         )
         return outputs
+
+    def _load_threshold_prevalence_rows(self) -> list[dict[str, float | str]]:
+        rows = self._read_csv(self.robustness_csv_path)
+        prevalence_rows: list[dict[str, float | str]] = []
+
+        for row in rows:
+            if row.get("status", "").strip() != "success":
+                continue
+
+            run_dir = Path(str(row["run_dir"]))
+            prevalence_path = (
+                run_dir
+                / "outputs"
+                / "csv"
+                / "analysis"
+                / "final_tables"
+                / "rq1_hero_type_prevalence.csv"
+            )
+            if not prevalence_path.exists():
+                logger.warning(
+                    "Missing run prevalence CSV for threshold figure",
+                    run_id=row.get("run_id", ""),
+                    path=str(prevalence_path),
+                )
+                continue
+
+            with prevalence_path.open("r", newline="", encoding="utf-8") as file:
+                prevalence_table = list(csv.DictReader(file))
+                for prevalence_row in prevalence_table:
+                    prevalence_rows.append(
+                        {
+                            "run_id": str(row["run_id"]),
+                            "top_fraction": float(row["top_fraction"]),
+                            "coverage_fraction": float(row["coverage_fraction"]),
+                            "hybrid_quantile": float(row["hybrid_quantile"]),
+                            "hero_type": str(prevalence_row["hero_type"]),
+                            "project_prevalence_pct": float(
+                                prevalence_row["project_prevalence_pct"]
+                            ),
+                        }
+                    )
+
+        return prevalence_rows
 
     def _read_csv(self, csv_path: Path) -> list[dict[str, str]]:
         if not csv_path.exists():
@@ -263,6 +311,126 @@ class FinalFigureGenerator:
         )
 
         return self._save_figure(figure, "figure_1_prevalence_by_hero_type", dpi, save_svg)
+
+    def _plot_figure_1_prevalence_thresholds(self, dpi: int, save_svg: bool) -> Path:
+        threshold_rows = self._load_threshold_prevalence_rows()
+        if not threshold_rows:
+            raise ValueError("No successful threshold prevalence rows found.")
+
+        top_values = sorted({float(row["top_fraction"]) for row in threshold_rows})
+        coverage_values = sorted({float(row["coverage_fraction"]) for row in threshold_rows})
+        quantile_values = sorted({float(row["hybrid_quantile"]) for row in threshold_rows})
+        combos = [
+            (coverage, quantile) for coverage in coverage_values for quantile in quantile_values
+        ]
+
+        prevalence_lookup: dict[tuple[float, float, float, str], float] = {}
+        for row in threshold_rows:
+            key = (
+                float(row["top_fraction"]),
+                float(row["coverage_fraction"]),
+                float(row["hybrid_quantile"]),
+                str(row["hero_type"]),
+            )
+            prevalence_lookup[key] = float(row["project_prevalence_pct"])
+
+        color_by_coverage = {
+            coverage: color
+            for coverage, color in zip(
+                coverage_values,
+                ("#1F77B4", "#2CA02C", "#FF7F0E"),
+                strict=False,
+            )
+        }
+        hatch_by_quantile = {
+            quantile: hatch for quantile, hatch in zip(quantile_values, ("", "//"), strict=False)
+        }
+
+        columns = min(2, len(top_values))
+        rows = math.ceil(len(top_values) / columns)
+        figure, axes = plt.subplots(
+            nrows=rows,
+            ncols=columns,
+            figsize=(7.2 * columns, 4.8 * rows),
+            constrained_layout=True,
+        )
+        axes_array = np.atleast_1d(axes).flatten()
+
+        x_positions = np.arange(len(HERO_TYPE_ORDER))
+        bar_width = 0.12 if len(combos) >= 6 else 0.18
+        combo_offsets = [
+            (index - (len(combos) - 1) / 2.0) * bar_width for index, _ in enumerate(combos)
+        ]
+
+        for axis, top_fraction in zip(axes_array, top_values, strict=False):
+            for (coverage, quantile), offset in zip(combos, combo_offsets, strict=True):
+                y_values = [
+                    prevalence_lookup.get((top_fraction, coverage, quantile, hero_type), math.nan)
+                    for hero_type in HERO_TYPE_ORDER
+                ]
+                axis.bar(
+                    x_positions + offset,
+                    y_values,
+                    width=bar_width * 0.95,
+                    color=color_by_coverage[coverage],
+                    hatch=hatch_by_quantile[quantile],
+                    edgecolor="#1A202C",
+                    linewidth=0.4,
+                    alpha=0.9,
+                )
+
+            axis.set_title(f"top_fraction = {top_fraction:.2f}", fontsize=11.5, fontweight="bold")
+            axis.set_xticks(x_positions)
+            axis.set_xticklabels(
+                [HERO_TYPE_LABELS[hero_type] for hero_type in HERO_TYPE_ORDER],
+                rotation=20,
+                ha="right",
+            )
+            axis.set_ylim(0, 100)
+            axis.grid(axis="y", alpha=0.2)
+            axis.set_axisbelow(True)
+            axis.set_ylabel("Prevalence (%)")
+
+        for axis in axes_array[len(top_values) :]:
+            axis.axis("off")
+
+        coverage_handles = [
+            Patch(
+                facecolor=color_by_coverage[coverage],
+                edgecolor="#1A202C",
+                label=f"coverage={coverage:.2f}",
+            )
+            for coverage in coverage_values
+        ]
+        quantile_handles = [
+            Patch(
+                facecolor="#FFFFFF",
+                edgecolor="#1A202C",
+                hatch=hatch_by_quantile[quantile],
+                label=f"q={quantile:.2f}",
+            )
+            for quantile in quantile_values
+        ]
+        axes_array[0].legend(
+            handles=coverage_handles + quantile_handles,
+            loc="upper right",
+            fontsize=8.5,
+            frameon=True,
+        )
+
+        figure.suptitle(
+            "Figure 1b. Prevalence by Hero Type Across Threshold Ratios",
+            fontsize=13,
+            fontweight="bold",
+            x=0.01,
+            ha="left",
+        )
+        return self._save_figure(
+            figure,
+            "figure_1_prevalence_threshold_panels",
+            dpi,
+            save_svg,
+        )
 
     def _plot_figure_2_overlap(self, dpi: int, save_svg: bool) -> Path:
         rows = self._read_csv(self.final_tables_dir / "rq2_overlap_type_groups.csv")
