@@ -3,7 +3,11 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from ease2026.analysis.figures import build_rq3_effect_grids, build_type_overlap_matrix
+from ease2026.analysis.figures import (
+    build_rq3_effect_grids,
+    build_type_overlap_matrix,
+    summarize_rq1_conditional_prevalence,
+)
 
 
 def test_build_type_overlap_matrix_populates_symmetric_values() -> None:
@@ -62,3 +66,23 @@ def test_build_rq3_effect_grids_deltas_are_vs_technical() -> None:
     assert "IQR 7.0" in fix_annotations[social_index][major_index]
     assert "n=12" in reopen_annotations[social_index][major_index]
     assert np.isnan(fix_delta[social_index, 0])
+
+
+def test_summarize_rq1_conditional_prevalence_counts_non_zero_projects() -> None:
+    rows = [
+        {"condition_id": "st_over_s", "percentage": 0.0},
+        {"condition_id": "st_over_s", "percentage": 20.0},
+        {"condition_id": "ts_over_t", "percentage": 5.0},
+        {"condition_id": "ts_over_t", "percentage": 0.0},
+        {"condition_id": "sh_over_s_union_t", "percentage": 0.0},
+    ]
+
+    summary = summarize_rq1_conditional_prevalence(rows)
+
+    assert summary["st_over_s"].n_projects == 2
+    assert summary["st_over_s"].non_zero_projects == 1
+    assert summary["st_over_s"].median == pytest.approx(10.0)
+    assert summary["ts_over_t"].n_projects == 2
+    assert summary["ts_over_t"].non_zero_projects == 1
+    assert summary["sh_over_s_union_t"].n_projects == 1
+    assert summary["sh_over_s_union_t"].non_zero_projects == 0

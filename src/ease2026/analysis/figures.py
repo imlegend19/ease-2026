@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import math
+from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -46,6 +47,32 @@ RQ1_DIMENSION_COLORS: dict[str, str] = {
     "technical": "#4C78A8",
     "social": "#E15759",
 }
+RQ1_SOCIAL_CODES: tuple[str, ...] = ("S1", "S2")
+RQ1_TECHNICAL_CODES: tuple[str, ...] = ("T1", "T2", "T3")
+RQ1_ST_CODES: tuple[str, ...] = ("ST1", "ST2", "ST3", "ST4", "ST5", "ST6")
+RQ1_TS_CODES: tuple[str, ...] = ("TS1", "TS2", "TS3", "TS4", "TS5", "TS6")
+RQ1_SH_CODES: tuple[str, ...] = ("SH1", "SH2", "SH3", "SH4", "SH5", "SH6")
+
+RQ1_CONDITIONAL_ORDER: tuple[str, ...] = (
+    "st_over_s",
+    "ts_over_t",
+    "sh_over_s_union_t",
+)
+RQ1_CONDITIONAL_LABELS: dict[str, str] = {
+    "st_over_s": "ST*/S*",
+    "ts_over_t": "TS*/T*",
+    "sh_over_s_union_t": "SH*/(S∪T)",
+}
+RQ1_CONDITIONAL_DESCRIPTION: dict[str, str] = {
+    "st_over_s": "% of social heroes that are sociotechnical",
+    "ts_over_t": "% of technical heroes that are technosocial",
+    "sh_over_s_union_t": "% of heroes (social/technical union) that are superheroes",
+}
+RQ1_CONDITIONAL_COLORS: dict[str, str] = {
+    "st_over_s": "#DD6B20",
+    "ts_over_t": "#33658A",
+    "sh_over_s_union_t": "#6B46C1",
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,6 +88,17 @@ class Rq1MetricSummary:
     q1: float
     median: float
     q3: float
+    maximum: float
+
+
+@dataclass(frozen=True, slots=True)
+class Rq1ConditionalSummary:
+    n_projects: int
+    non_zero_projects: int
+    median: float
+    q1: float
+    q3: float
+    mean: float
     maximum: float
 
 
@@ -95,6 +133,47 @@ def summarize_rq1_threshold_prevalence(
             q1=float(np.quantile(values, 0.25)),
             median=float(np.quantile(values, 0.5)),
             q3=float(np.quantile(values, 0.75)),
+            maximum=float(values[-1]),
+        )
+
+    return summary
+
+
+def summarize_rq1_conditional_prevalence(
+    rows: list[dict[str, float | str]],
+    condition_order: tuple[str, ...] = RQ1_CONDITIONAL_ORDER,
+) -> dict[str, Rq1ConditionalSummary]:
+    """Summarize project-level conditional percentages used in multifaceted RQ1."""
+    values_by_condition: dict[str, list[float]] = {condition: [] for condition in condition_order}
+    for row in rows:
+        condition_id = str(row["condition_id"])
+        if condition_id not in values_by_condition:
+            continue
+        values_by_condition[condition_id].append(float(row["percentage"]))
+
+    summary: dict[str, Rq1ConditionalSummary] = {}
+    for condition_id in condition_order:
+        values = sorted(values_by_condition[condition_id])
+        if not values:
+            nan = float("nan")
+            summary[condition_id] = Rq1ConditionalSummary(
+                n_projects=0,
+                non_zero_projects=0,
+                median=nan,
+                q1=nan,
+                q3=nan,
+                mean=nan,
+                maximum=nan,
+            )
+            continue
+
+        summary[condition_id] = Rq1ConditionalSummary(
+            n_projects=len(values),
+            non_zero_projects=sum(value > 0.0 for value in values),
+            median=float(np.quantile(values, 0.5)),
+            q1=float(np.quantile(values, 0.25)),
+            q3=float(np.quantile(values, 0.75)),
+            mean=float(np.mean(values)),
             maximum=float(values[-1]),
         )
 
@@ -216,6 +295,14 @@ class FinalFigureGenerator:
             dpi=dpi,
             save_svg=save_svg,
         )
+        (
+            multifaceted_figure_path,
+            multifaceted_project_csv_path,
+            multifaceted_summary_csv_path,
+        ) = self._plot_rq1_multifaceted_conditional_prevalence(dpi=dpi, save_svg=save_svg)
+        outputs["figure_1_multifaceted_conditional"] = multifaceted_figure_path
+        outputs["rq1_tikz_multifaceted_conditional_project_csv"] = multifaceted_project_csv_path
+        outputs["rq1_tikz_multifaceted_conditional_summary_csv"] = multifaceted_summary_csv_path
         outputs["figure_1_hero_type_appendix"] = self._plot_figure_1_prevalence(
             dpi=dpi,
             save_svg=save_svg,
@@ -227,7 +314,7 @@ class FinalFigureGenerator:
                 threshold_long_csv_path,
                 threshold_summary_csv_path,
             ) = self._plot_rq1_technical_social_threshold_ranges(dpi=dpi, save_svg=save_svg)
-            outputs["figure_1_technical_social_threshold_ranges"] = threshold_figure_path
+            outputs["figure_1_technical_social_threshold_ranges_appendix"] = threshold_figure_path
             outputs["rq1_tikz_baseline_csv"] = baseline_csv_path
             outputs["rq1_tikz_threshold_long_csv"] = threshold_long_csv_path
             outputs["rq1_tikz_threshold_summary_csv"] = threshold_summary_csv_path
@@ -301,6 +388,128 @@ class FinalFigureGenerator:
                     }
                 )
         return metric_rows
+
+    def _read_hero_member_sets(self, csv_path: Path) -> dict[str, set[str]]:
+        project_members: dict[str, set[str]] = defaultdict(set)
+        if not csv_path.exists():
+            logger.warning(
+                "Missing hero CSV while generating multifaceted RQ1 figure", path=str(csv_path)
+            )
+            return project_members
+
+        with csv_path.open("r", newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                project_name = row.get("project_name", "").strip()
+                author_id = row.get("author_id", "").strip()
+                if not project_name or not author_id:
+                    continue
+                project_members[project_name].add(author_id)
+        return project_members
+
+    def _merge_project_member_sets(
+        self,
+        maps: list[dict[str, set[str]]],
+    ) -> dict[str, set[str]]:
+        merged: dict[str, set[str]] = defaultdict(set)
+        for member_map in maps:
+            for project_name, author_ids in member_map.items():
+                merged[project_name].update(author_ids)
+        return merged
+
+    def _load_rq1_conditional_rows(self) -> list[dict[str, float | str]]:
+        heroes_dir = settings.outputs_csv_dir / "heroes"
+
+        social_map = self._merge_project_member_sets(
+            [
+                self._read_hero_member_sets(heroes_dir / code / "heroes.csv")
+                for code in RQ1_SOCIAL_CODES
+            ]
+        )
+        technical_map = self._merge_project_member_sets(
+            [
+                self._read_hero_member_sets(heroes_dir / code / "heroes.csv")
+                for code in RQ1_TECHNICAL_CODES
+            ]
+        )
+        sociotechnical_map = self._merge_project_member_sets(
+            [
+                self._read_hero_member_sets(
+                    heroes_dir / "hybrid" / "sociotechnical" / f"{code}.csv"
+                )
+                for code in RQ1_ST_CODES
+            ]
+        )
+        technosocial_map = self._merge_project_member_sets(
+            [
+                self._read_hero_member_sets(heroes_dir / "hybrid" / "technosocial" / f"{code}.csv")
+                for code in RQ1_TS_CODES
+            ]
+        )
+        superhero_map = self._merge_project_member_sets(
+            [
+                self._read_hero_member_sets(heroes_dir / "hybrid" / "super" / f"{code}.csv")
+                for code in RQ1_SH_CODES
+            ]
+        )
+
+        all_projects: set[str] = set()
+        for member_map in (
+            social_map,
+            technical_map,
+            sociotechnical_map,
+            technosocial_map,
+            superhero_map,
+        ):
+            all_projects.update(member_map.keys())
+
+        conditional_rows: list[dict[str, float | str]] = []
+        for project_name in sorted(all_projects):
+            social_members = social_map.get(project_name, set())
+            technical_members = technical_map.get(project_name, set())
+            sociotechnical_members = sociotechnical_map.get(project_name, set())
+            technosocial_members = technosocial_map.get(project_name, set())
+            superhero_members = superhero_map.get(project_name, set())
+
+            if social_members:
+                conditional_rows.append(
+                    {
+                        "condition_id": "st_over_s",
+                        "condition_label": RQ1_CONDITIONAL_LABELS["st_over_s"],
+                        "project_name": project_name,
+                        "numerator_count": len(sociotechnical_members),
+                        "denominator_count": len(social_members),
+                        "percentage": (len(sociotechnical_members) / len(social_members)) * 100.0,
+                    }
+                )
+
+            if technical_members:
+                conditional_rows.append(
+                    {
+                        "condition_id": "ts_over_t",
+                        "condition_label": RQ1_CONDITIONAL_LABELS["ts_over_t"],
+                        "project_name": project_name,
+                        "numerator_count": len(technosocial_members),
+                        "denominator_count": len(technical_members),
+                        "percentage": (len(technosocial_members) / len(technical_members)) * 100.0,
+                    }
+                )
+
+            social_or_technical_members = social_members.union(technical_members)
+            if social_or_technical_members:
+                conditional_rows.append(
+                    {
+                        "condition_id": "sh_over_s_union_t",
+                        "condition_label": RQ1_CONDITIONAL_LABELS["sh_over_s_union_t"],
+                        "project_name": project_name,
+                        "numerator_count": len(superhero_members),
+                        "denominator_count": len(social_or_technical_members),
+                        "percentage": (len(superhero_members) / len(social_or_technical_members))
+                        * 100.0,
+                    }
+                )
+
+        return conditional_rows
 
     def _plot_data_dir(self) -> Path:
         directory = self.final_tables_dir / "plot_data"
@@ -384,6 +593,204 @@ class FinalFigureGenerator:
         ]
         axis.legend(handles=legend_handles, loc="upper right", frameon=True)
         return self._save_figure(figure, "figure_1a_technical_social_20_80", dpi, save_svg)
+
+    def _plot_rq1_multifaceted_conditional_prevalence(
+        self,
+        dpi: int,
+        save_svg: bool,
+    ) -> tuple[Path, Path, Path]:
+        conditional_rows = self._load_rq1_conditional_rows()
+        if not conditional_rows:
+            raise ValueError("No conditional rows available for RQ1 multifaceted prevalence.")
+
+        summary_by_condition = summarize_rq1_conditional_prevalence(conditional_rows)
+        plot_data_dir = self._plot_data_dir()
+
+        project_csv_path = self._write_csv_rows(
+            plot_data_dir / "rq1_multifaceted_conditional_project.csv",
+            [
+                "condition_id",
+                "condition_label",
+                "condition_description",
+                "project_name",
+                "numerator_count",
+                "denominator_count",
+                "percentage",
+            ],
+            [
+                [
+                    str(row["condition_id"]),
+                    str(row["condition_label"]),
+                    RQ1_CONDITIONAL_DESCRIPTION[str(row["condition_id"])],
+                    str(row["project_name"]),
+                    int(row["numerator_count"]),
+                    int(row["denominator_count"]),
+                    float(row["percentage"]),
+                ]
+                for row in sorted(
+                    conditional_rows,
+                    key=lambda row: (
+                        RQ1_CONDITIONAL_ORDER.index(str(row["condition_id"])),
+                        str(row["project_name"]),
+                    ),
+                )
+            ],
+        )
+        summary_csv_path = self._write_csv_rows(
+            plot_data_dir / "rq1_multifaceted_conditional_summary.csv",
+            [
+                "condition_id",
+                "condition_label",
+                "condition_description",
+                "n_projects",
+                "non_zero_projects",
+                "median_pct",
+                "q1_pct",
+                "q3_pct",
+                "mean_pct",
+                "max_pct",
+            ],
+            [
+                [
+                    condition_id,
+                    RQ1_CONDITIONAL_LABELS[condition_id],
+                    RQ1_CONDITIONAL_DESCRIPTION[condition_id],
+                    summary_by_condition[condition_id].n_projects,
+                    summary_by_condition[condition_id].non_zero_projects,
+                    summary_by_condition[condition_id].median,
+                    summary_by_condition[condition_id].q1,
+                    summary_by_condition[condition_id].q3,
+                    summary_by_condition[condition_id].mean,
+                    summary_by_condition[condition_id].maximum,
+                ]
+                for condition_id in RQ1_CONDITIONAL_ORDER
+            ],
+        )
+
+        values_by_condition: dict[str, list[float]] = {
+            condition_id: [
+                float(row["percentage"])
+                for row in conditional_rows
+                if str(row["condition_id"]) == condition_id
+            ]
+            for condition_id in RQ1_CONDITIONAL_ORDER
+        }
+
+        positions = np.arange(1, len(RQ1_CONDITIONAL_ORDER) + 1)
+        datasets = [values_by_condition[condition_id] for condition_id in RQ1_CONDITIONAL_ORDER]
+
+        figure, axis = plt.subplots(figsize=(11.2, 5.8))
+        violins = axis.violinplot(
+            datasets,
+            positions=positions,
+            widths=0.72,
+            showmeans=False,
+            showmedians=False,
+            showextrema=False,
+        )
+        for body, condition_id in zip(violins["bodies"], RQ1_CONDITIONAL_ORDER, strict=True):
+            body.set_facecolor(RQ1_CONDITIONAL_COLORS[condition_id])
+            body.set_edgecolor("#1A202C")
+            body.set_alpha(0.35)
+
+        boxplot = axis.boxplot(
+            datasets,
+            positions=positions,
+            widths=0.20,
+            showfliers=False,
+            patch_artist=True,
+            medianprops={"color": "#1A202C", "linewidth": 1.6},
+            whiskerprops={"color": "#2D3748", "linewidth": 1.0},
+            capprops={"color": "#2D3748", "linewidth": 1.0},
+        )
+        for patch, condition_id in zip(boxplot["boxes"], RQ1_CONDITIONAL_ORDER, strict=True):
+            patch.set_facecolor("#FFFFFF")
+            patch.set_edgecolor(RQ1_CONDITIONAL_COLORS[condition_id])
+            patch.set_linewidth(1.4)
+
+        jitter_rng = np.random.default_rng(42)
+        for position, condition_id in zip(positions, RQ1_CONDITIONAL_ORDER, strict=True):
+            values = np.array(values_by_condition[condition_id], dtype=float)
+            jitter = jitter_rng.uniform(-0.11, 0.11, size=len(values))
+            axis.scatter(
+                np.full(len(values), position) + jitter,
+                values,
+                s=12,
+                alpha=0.28,
+                color=RQ1_CONDITIONAL_COLORS[condition_id],
+                edgecolor="none",
+                zorder=2,
+            )
+
+            summary = summary_by_condition[condition_id]
+            if not _is_nan(summary.median):
+                axis.scatter(
+                    position,
+                    summary.median,
+                    marker="D",
+                    s=32,
+                    color="#1A202C",
+                    zorder=3,
+                )
+                axis.text(
+                    position,
+                    min(summary.median + 2.2, 99.0),
+                    f"med={summary.median:.1f}%",
+                    ha="center",
+                    va="bottom",
+                    fontsize=8.8,
+                    color="#1A202C",
+                )
+
+        axis.set_ylim(0, 100)
+        axis.set_ylabel("Conditional percentage per project")
+        axis.set_xticks(positions)
+        axis.set_xticklabels(
+            [
+                (
+                    f"{RQ1_CONDITIONAL_LABELS[condition_id]}\n"
+                    f"(n={summary_by_condition[condition_id].n_projects}, "
+                    f"nz={summary_by_condition[condition_id].non_zero_projects})"
+                )
+                for condition_id in RQ1_CONDITIONAL_ORDER
+            ],
+            fontsize=10.2,
+        )
+        axis.grid(axis="y", alpha=0.22)
+        axis.set_axisbelow(True)
+        axis.set_title(
+            "Figure 1B. Multifaceted Hero Prevalence as Conditional Percentages",
+            loc="left",
+            fontsize=13,
+            fontweight="bold",
+        )
+
+        legend_handles = [
+            Patch(
+                facecolor=RQ1_CONDITIONAL_COLORS[condition_id],
+                edgecolor="#1A202C",
+                alpha=0.35,
+                label=RQ1_CONDITIONAL_DESCRIPTION[condition_id],
+            )
+            for condition_id in RQ1_CONDITIONAL_ORDER
+        ]
+        axis.legend(handles=legend_handles, loc="upper right", fontsize=8.6, frameon=True)
+        axis.text(
+            0.01,
+            -0.22,
+            "n = projects with non-empty denominator; nz = projects with conditional % > 0.",
+            transform=axis.transAxes,
+            fontsize=8.8,
+            color="#2D3748",
+        )
+
+        figure_path = self._save_figure(
+            figure,
+            "figure_1b_multifaceted_conditional_prevalence",
+            dpi,
+            save_svg,
+        )
+        return figure_path, project_csv_path, summary_csv_path
 
     def _plot_rq1_technical_social_threshold_ranges(
         self,
@@ -562,7 +969,7 @@ class FinalFigureGenerator:
         axis.grid(axis="y", alpha=0.22)
         axis.set_axisbelow(True)
         axis.set_title(
-            "Figure 1B. Technical/Social Hero Prevalence Under Alternative Ratios",
+            "Figure 1C. Technical/Social Hero Prevalence Under Alternative Ratios",
             loc="left",
             fontsize=13,
             fontweight="bold",
@@ -580,7 +987,7 @@ class FinalFigureGenerator:
 
         figure_path = self._save_figure(
             figure,
-            "figure_1b_technical_social_threshold_ranges",
+            "figure_1c_technical_social_threshold_ranges",
             dpi,
             save_svg,
         )
