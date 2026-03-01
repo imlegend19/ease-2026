@@ -22,3 +22,5 @@ uv sync
 - Add new pipelines and analyses incrementally for the revised EASE-2026 direction.
 - Smoke test Mongo connectivity:
   - `python -m ease2026.cli.run_smoke`
+- Generate inferential RQ3 artifacts (Kendall tau + Scott-Knott ESD via Docker):
+  - `python -m ease2026.cli.compute_rq3_inferential --fixer both`
