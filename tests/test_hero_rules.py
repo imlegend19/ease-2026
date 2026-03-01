@@ -47,4 +47,3 @@ def test_hero_selection_stable_when_top_fraction_changes() -> None:
     assert is_hero_large
     assert heroes_small == small
     assert heroes_large == large
-

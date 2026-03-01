@@ -59,4 +59,3 @@ def get_mongo_database(db_name: str | None = None) -> Database:
 
 def get_mongo_collection(collection_name: str, db_name: str | None = None) -> Collection:
     return MongoConnectionManager.get_collection(collection_name=collection_name, db_name=db_name)
-

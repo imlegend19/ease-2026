@@ -12,7 +12,9 @@ AuthorId = Hashable
 ProjectContributionMap = dict[str, dict[AuthorId, int]]
 
 
-def _sorted_project_contributions(project_contributions: ProjectContributionMap) -> ProjectContributionMap:
+def _sorted_project_contributions(
+    project_contributions: ProjectContributionMap,
+) -> ProjectContributionMap:
     sorted_output: ProjectContributionMap = {}
     for project_name, author_counts in sorted(project_contributions.items()):
         sorted_output[project_name] = dict(
@@ -78,4 +80,3 @@ def compute_issue_participation_contributions() -> ProjectContributionMap:
         }
 
     return _sorted_project_contributions(project_author_counts)
-

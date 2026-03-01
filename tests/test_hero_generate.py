@@ -36,4 +36,3 @@ def test_generate_hero_outputs_writes_expected_csv_schema(tmp_path: Path) -> Non
     csv_text = result.csv_path.read_text(encoding="utf-8").strip().splitlines()
     assert csv_text[0] == "project_name,author_id,metric_value"
     assert csv_text[1] == "p1,a,80"
-

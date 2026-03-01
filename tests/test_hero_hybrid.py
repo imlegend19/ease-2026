@@ -62,4 +62,3 @@ def test_hybrid_handles_empty_projects_defensively() -> None:
 
     assert project_quantile_threshold({}, 0.5) is None
     assert sociotechnical_heroes(social_heroes, technical_contributions, quantile=0.5) == {}
-

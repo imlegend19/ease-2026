@@ -61,4 +61,3 @@ class ReverseIdentityResolver:
             cache_path=str(self.cache_path),
             people_count=len(reverse_identity_map),
         )
-

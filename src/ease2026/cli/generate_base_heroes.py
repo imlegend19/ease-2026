@@ -10,7 +10,11 @@ from ease2026.core.constants import (
     DEFAULT_TOP_CONTRIBUTOR_FRACTION,
 )
 from ease2026.core.logging import setup_logging
-from ease2026.hero.generate import HeroGenerationResult, ProjectContributionMap, generate_hero_outputs
+from ease2026.hero.generate import (
+    HeroGenerationResult,
+    ProjectContributionMap,
+    generate_hero_outputs,
+)
 from ease2026.hero.social import (
     compute_comment_count_contributions,
     compute_issue_participation_contributions,
@@ -86,4 +90,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

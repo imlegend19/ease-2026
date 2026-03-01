@@ -85,4 +85,3 @@ def generate_hero_outputs(
         hero_members=hero_members,
         csv_path=csv_path,
     )
-

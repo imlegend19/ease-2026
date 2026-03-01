@@ -239,4 +239,3 @@ def generate_super(
     output_path = hybrid_output_path("super", spec.code)
     write_hybrid_csv(rows, output_path)
     return spec.code, output_path, rows
-

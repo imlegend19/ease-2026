@@ -13,7 +13,9 @@ ProjectContributionMap = dict[str, dict[AuthorId, int]]
 CommitProjectAuthorIndex = dict[Any, tuple[str, AuthorId]]
 
 
-def _sorted_project_contributions(project_contributions: ProjectContributionMap) -> ProjectContributionMap:
+def _sorted_project_contributions(
+    project_contributions: ProjectContributionMap,
+) -> ProjectContributionMap:
     sorted_output: ProjectContributionMap = {}
     for project_name, author_counts in sorted(project_contributions.items()):
         sorted_output[project_name] = dict(
@@ -84,7 +86,9 @@ def compute_file_touch_contributions() -> ProjectContributionMap:
             continue
 
         project_name, author_id = project_and_author
-        author_files = project_author_files.setdefault(project_name, {}).setdefault(author_id, set())
+        author_files = project_author_files.setdefault(project_name, {}).setdefault(
+            author_id, set()
+        )
         author_files.add(file_id)
 
     project_author_counts: ProjectContributionMap = {}
@@ -129,4 +133,3 @@ def compute_loc_churn_contributions() -> ProjectContributionMap:
         author_counts[author_id] = author_counts.get(author_id, 0) + loc_churn
 
     return _sorted_project_contributions(project_author_counts)
-

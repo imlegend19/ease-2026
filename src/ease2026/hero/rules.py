@@ -59,4 +59,3 @@ def hero_project_and_heroes(
     top_work = sum(heroes.values())
     required_work = coverage_fraction * total_work
     return top_work >= required_work, heroes
-
