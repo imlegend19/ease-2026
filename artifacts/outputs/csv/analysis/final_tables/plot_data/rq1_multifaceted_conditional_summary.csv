@@ -1,0 +1,4 @@
+condition_id,condition_label,condition_description,n_projects,non_zero_projects,median_pct,q1_pct,q3_pct,mean_pct,max_pct
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,90,5,0.0,0.0,0.0,0.819471503883476,27.171492204899778
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,96,4,0.0,0.0,0.0,1.4125644509476032,44.02173913043478
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,98,4,0.0,0.0,0.0,0.3163235587129705,13.237924865831843

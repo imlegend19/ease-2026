@@ -1,0 +1,285 @@
+condition_id,condition_label,condition_description,project_name,numerator_count,denominator_count,percentage
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,activemq,0,593,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,airavata,0,27,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,ant-ivy,4,109,3.669724770642202
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,archiva,0,100,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,avro,0,238,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,bigtop,0,80,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,calcite,0,65,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,cayenne,0,53,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-bcel,0,25,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-codec,0,39,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-collections,0,62,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-compress,0,50,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-configuration,0,79,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-imaging,0,21,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-io,0,57,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-jcs,0,14,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-jexl,0,17,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-lang,0,141,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-math,12,91,13.186813186813188
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-net,0,83,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-rdf,0,4,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-scxml,0,16,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-validator,0,48,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,commons-vfs,0,60,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,curator,0,66,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,deltaspike,0,40,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,derby,0,189,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,directory-fortress-core,0,3,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,directory-kerby,0,13,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,directory-studio,0,100,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,eagle,0,10,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,falcon,0,27,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,fineract,0,33,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,flume,0,154,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,freemarker,0,16,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,giraph,0,42,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,gora,0,24,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,helix,0,10,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,httpcomponents-client,0,263,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,httpcomponents-core,0,63,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,jackrabbit,0,159,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,james,0,103,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,jena,0,70,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,jspwiki,0,62,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,juddi,0,20,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,kafka,122,449,27.171492204899778
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,karaf-cellar,0,180,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,knox,0,39,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,kylin,0,80,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,lens,0,18,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,mahout,0,140,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,manifoldcf,0,45,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,maven,0,575,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,maven-doxia,0,39,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,maven-scm,0,94,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,maven-surefire,0,218,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,mina-sshd,0,59,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,nifi,0,128,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,nutch,0,159,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,oodt,0,16,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,oozie,0,100,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,openjpa,0,136,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,opennlp,0,33,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,openwebbeans,0,31,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,parquet-mr,0,70,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,pdfbox,0,364,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,phoenix,0,125,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,pig,0,184,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,portals-pluto,0,28,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,qpid-jms,0,16,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,ranger,0,39,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,reef,0,19,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,roller,0,87,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,samza,0,55,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,santuario-java,0,45,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,sis,0,15,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,storm,0,122,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,streams,0,5,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,struts,0,346,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,systemml,0,15,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,tapestry-5,0,180,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,tez,0,50,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,tika,0,203,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,uima-ducc,0,43,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,usergrid,0,14,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,velocity-engine,0,80,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,velocity-tools,0,18,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,xerces2-j,0,151,0.0
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,zeppelin,43,173,24.85549132947977
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,zookeeper,13,267,4.868913857677903
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,activemq,0,34,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,airavata,0,37,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,ant-ivy,0,9,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,archiva,0,13,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,avro,0,57,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,bigtop,0,67,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,calcite,0,61,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,cayenne,0,18,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-bcel,0,6,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-beanutils,0,13,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-codec,0,6,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-collections,0,20,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-compress,0,18,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-configuration,0,8,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-dbcp,0,14,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-digester,0,10,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-imaging,0,7,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-io,0,19,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-jcs,0,7,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-jexl,0,8,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-lang,0,42,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-math,5,16,31.25
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-net,0,7,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-rdf,0,6,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-scxml,0,5,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-validator,0,12,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,commons-vfs,0,9,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,curator,0,42,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,cxf-fediz,0,7,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,deltaspike,0,19,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,derby,0,8,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,directory-fortress-core,0,5,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,directory-kerby,0,10,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,directory-studio,0,7,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,eagle,0,15,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,falcon,0,18,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,fineract,0,71,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,flume,0,20,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,freemarker,0,12,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,giraph,0,11,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,gora,0,14,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,helix,0,19,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,httpcomponents-client,0,13,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,httpcomponents-core,0,14,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,jackrabbit,0,13,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,james,0,17,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,jena,0,29,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,jspwiki,0,4,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,juddi,0,6,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,kafka,81,184,44.02173913043478
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,karaf-cellar,0,10,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,knox,0,7,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,kylin,0,63,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,lens,0,28,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,mahout,0,19,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,manifoldcf,0,7,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,maven,0,43,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,maven-archetype,0,14,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,maven-doxia,0,12,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,maven-scm,0,20,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,maven-surefire,0,41,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,maven-wagon,0,19,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,mina-sshd,0,15,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,nifi,0,79,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,nutch,0,26,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,oodt,0,20,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,oozie,0,9,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,openjpa,0,10,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,opennlp,0,17,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,openwebbeans,0,9,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,parquet-mr,0,39,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,pdfbox,0,7,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,phoenix,0,42,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,pig,0,8,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,portals-pluto,0,9,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,qpid-jms,0,6,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,ranger,0,27,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,reef,0,31,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,roller,0,10,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,samza,0,49,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,santuario-java,0,4,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,sis,0,8,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,storm,0,139,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,streams,0,12,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,struts,0,24,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,systemml,0,26,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,tapestry-5,0,14,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,tez,0,10,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,tika,0,31,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,usergrid,0,39,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,velocity-tools,0,4,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,wss4j,0,6,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,xerces2-j,0,7,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,xmlgraphics-batik,0,5,0.0
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,zeppelin,34,115,29.565217391304348
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,zookeeper,8,26,30.76923076923077
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,activemq,0,627,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,airavata,0,64,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,ant-ivy,0,118,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,archiva,0,113,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,avro,0,295,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,bigtop,0,147,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,calcite,0,126,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,cayenne,0,71,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-bcel,0,31,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-beanutils,0,13,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-codec,0,45,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-collections,0,82,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-compress,0,68,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-configuration,0,87,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-dbcp,0,14,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-digester,0,10,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-imaging,0,28,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-io,0,76,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-jcs,0,21,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-jexl,0,25,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-lang,0,183,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-math,5,102,4.901960784313726
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-net,0,90,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-rdf,0,10,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-scxml,0,21,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-validator,0,60,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,commons-vfs,0,69,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,curator,0,108,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,cxf-fediz,0,7,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,deltaspike,0,59,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,derby,0,197,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,directory-fortress-core,0,8,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,directory-kerby,0,23,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,directory-studio,0,107,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,eagle,0,25,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,falcon,0,45,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,fineract,0,104,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,flume,0,174,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,freemarker,0,28,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,giraph,0,53,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,gora,0,38,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,helix,0,29,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,httpcomponents-client,0,276,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,httpcomponents-core,0,77,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,jackrabbit,0,172,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,james,0,120,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,jena,0,99,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,jspwiki,0,66,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,juddi,0,26,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,kafka,74,559,13.237924865831843
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,karaf-cellar,0,190,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,knox,0,46,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,kylin,0,143,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,lens,0,46,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,mahout,0,159,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,manifoldcf,0,52,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,maven,0,618,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,maven-archetype,0,14,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,maven-doxia,0,51,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,maven-scm,0,114,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,maven-surefire,0,259,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,maven-wagon,0,19,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,mina-sshd,0,74,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,nifi,0,207,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,nutch,0,185,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,oodt,0,36,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,oozie,0,109,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,openjpa,0,146,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,opennlp,0,50,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,openwebbeans,0,40,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,parquet-mr,0,109,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,pdfbox,0,371,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,phoenix,0,167,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,pig,0,192,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,portals-pluto,0,37,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,qpid-jms,0,22,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,ranger,0,66,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,reef,0,50,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,roller,0,97,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,samza,0,104,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,santuario-java,0,49,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,sis,0,23,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,storm,0,261,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,streams,0,17,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,struts,0,370,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,systemml,0,41,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,tapestry-5,0,194,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,tez,0,60,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,tika,0,234,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,uima-ducc,0,43,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,usergrid,0,53,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,velocity-engine,0,80,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,velocity-tools,0,22,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,wss4j,0,6,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,xerces2-j,0,158,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,xmlgraphics-batik,0,5,0.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,zeppelin,28,260,10.76923076923077
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,zookeeper,6,287,2.0905923344947737
