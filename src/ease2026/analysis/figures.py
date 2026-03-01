@@ -34,6 +34,19 @@ HERO_TYPE_COLORS: dict[str, str] = {
     "super": "#4A5568",
 }
 
+RQ1_BASE_METRIC_ORDER: tuple[str, ...] = ("T1", "T2", "T3", "S1", "S2")
+RQ1_METRIC_TO_DIMENSION: dict[str, str] = {
+    "T1": "technical",
+    "T2": "technical",
+    "T3": "technical",
+    "S1": "social",
+    "S2": "social",
+}
+RQ1_DIMENSION_COLORS: dict[str, str] = {
+    "technical": "#4C78A8",
+    "social": "#E15759",
+}
+
 
 @dataclass(frozen=True, slots=True)
 class Rq3Cell:
@@ -42,8 +55,50 @@ class Rq3Cell:
     n_projects_with_assigned: int
 
 
+@dataclass(frozen=True, slots=True)
+class Rq1MetricSummary:
+    minimum: float
+    q1: float
+    median: float
+    q3: float
+    maximum: float
+
+
 def _is_nan(value: float) -> bool:
     return math.isnan(value)
+
+
+def summarize_rq1_threshold_prevalence(
+    rows: list[dict[str, float | str]],
+    metric_order: tuple[str, ...] = RQ1_BASE_METRIC_ORDER,
+) -> dict[str, Rq1MetricSummary]:
+    """Summarize threshold prevalence with dedupe by (top_fraction, coverage_fraction)."""
+    by_metric_and_ratio: dict[str, dict[tuple[float, float], float]] = {
+        metric_code: {} for metric_code in metric_order
+    }
+    for row in rows:
+        metric_code = str(row["metric_code"])
+        if metric_code not in by_metric_and_ratio:
+            continue
+        ratio_key = (float(row["top_fraction"]), float(row["coverage_fraction"]))
+        by_metric_and_ratio[metric_code][ratio_key] = float(row["project_prevalence_pct"])
+
+    summary: dict[str, Rq1MetricSummary] = {}
+    for metric_code in metric_order:
+        values = sorted(by_metric_and_ratio[metric_code].values())
+        if not values:
+            nan = float("nan")
+            summary[metric_code] = Rq1MetricSummary(nan, nan, nan, nan, nan)
+            continue
+        summary[metric_code] = Rq1MetricSummary(
+            minimum=float(values[0]),
+            q1=float(np.quantile(values, 0.25)),
+            median=float(np.quantile(values, 0.5)),
+            q3=float(np.quantile(values, 0.75)),
+            maximum=float(values[-1]),
+        )
+
+    return summary
 
 
 def build_type_overlap_matrix(
@@ -157,10 +212,29 @@ class FinalFigureGenerator:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         outputs: dict[str, Path] = {}
 
-        outputs["figure_1_prevalence"] = self._plot_figure_1_prevalence(dpi=dpi, save_svg=save_svg)
+        outputs["figure_1_technical_social"] = self._plot_rq1_technical_social_prevalence(
+            dpi=dpi,
+            save_svg=save_svg,
+        )
+        outputs["figure_1_hero_type_appendix"] = self._plot_figure_1_prevalence(
+            dpi=dpi,
+            save_svg=save_svg,
+        )
         if self.robustness_csv_path.exists():
-            outputs["figure_1_prevalence_thresholds"] = self._plot_figure_1_prevalence_thresholds(
-                dpi=dpi, save_svg=save_svg
+            (
+                threshold_figure_path,
+                baseline_csv_path,
+                threshold_long_csv_path,
+                threshold_summary_csv_path,
+            ) = self._plot_rq1_technical_social_threshold_ranges(dpi=dpi, save_svg=save_svg)
+            outputs["figure_1_technical_social_threshold_ranges"] = threshold_figure_path
+            outputs["rq1_tikz_baseline_csv"] = baseline_csv_path
+            outputs["rq1_tikz_threshold_long_csv"] = threshold_long_csv_path
+            outputs["rq1_tikz_threshold_summary_csv"] = threshold_summary_csv_path
+        else:
+            logger.warning(
+                "Skipping RQ1 threshold figure and CSV exports; robustness CSV not found",
+                path=str(self.robustness_csv_path),
             )
         outputs["figure_2_overlap"] = self._plot_figure_2_overlap(dpi=dpi, save_svg=save_svg)
         outputs["figure_3_bug_performance"] = self._plot_figure_3_bug_performance(
@@ -187,6 +261,330 @@ class FinalFigureGenerator:
             fixer_for_rq3=fixer_for_rq3,
         )
         return outputs
+
+    def _load_rq1_base_metric_rows(self, csv_path: Path) -> list[dict[str, str]]:
+        rows = self._read_csv(csv_path)
+        return [row for row in rows if row.get("hero_code", "").strip() in RQ1_BASE_METRIC_ORDER]
+
+    def _load_threshold_base_metric_rows(self) -> list[dict[str, float | str]]:
+        rows = self._read_csv(self.robustness_csv_path)
+        metric_rows: list[dict[str, float | str]] = []
+        for row in rows:
+            if row.get("status", "").strip() != "success":
+                continue
+            run_dir = Path(str(row["run_dir"]))
+            prevalence_path = (
+                run_dir
+                / "outputs"
+                / "csv"
+                / "analysis"
+                / "final_tables"
+                / "rq1_base_metric_prevalence.csv"
+            )
+            if not prevalence_path.exists():
+                logger.warning(
+                    "Missing run base prevalence CSV for RQ1 threshold figure",
+                    run_id=row.get("run_id", ""),
+                    path=str(prevalence_path),
+                )
+                continue
+            run_rows = self._load_rq1_base_metric_rows(prevalence_path)
+            for run_row in run_rows:
+                metric_rows.append(
+                    {
+                        "run_id": str(row["run_id"]),
+                        "top_fraction": float(row["top_fraction"]),
+                        "coverage_fraction": float(row["coverage_fraction"]),
+                        "hybrid_quantile": float(row["hybrid_quantile"]),
+                        "metric_code": str(run_row["hero_code"]),
+                        "project_prevalence_pct": float(run_row["project_prevalence_pct"]),
+                    }
+                )
+        return metric_rows
+
+    def _plot_data_dir(self) -> Path:
+        directory = self.final_tables_dir / "plot_data"
+        directory.mkdir(parents=True, exist_ok=True)
+        return directory
+
+    def _write_csv_rows(
+        self,
+        output_path: Path,
+        header: list[str],
+        rows: list[list[object]],
+    ) -> Path:
+        with output_path.open("w", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerow(header)
+            writer.writerows(rows)
+        return output_path
+
+    def _plot_rq1_technical_social_prevalence(self, dpi: int, save_svg: bool) -> Path:
+        base_rows = self._load_rq1_base_metric_rows(
+            self.final_tables_dir / "rq1_base_metric_prevalence.csv"
+        )
+        base_by_metric = {row["hero_code"]: row for row in base_rows}
+
+        prevalences = np.array(
+            [
+                float(base_by_metric.get(metric_code, {}).get("project_prevalence_pct", "nan"))
+                for metric_code in RQ1_BASE_METRIC_ORDER
+            ],
+            dtype=float,
+        )
+        x_positions = np.arange(len(RQ1_BASE_METRIC_ORDER))
+        colors = [
+            RQ1_DIMENSION_COLORS[RQ1_METRIC_TO_DIMENSION[metric_code]]
+            for metric_code in RQ1_BASE_METRIC_ORDER
+        ]
+
+        figure, axis = plt.subplots(figsize=(10.8, 5.6))
+        bars = axis.bar(
+            x_positions,
+            prevalences,
+            color=colors,
+            alpha=0.85,
+            edgecolor="#1A202C",
+            linewidth=0.6,
+        )
+
+        axis.set_ylim(0, 100)
+        axis.set_ylabel("Percentage of Projects")
+        axis.set_xlabel("Technical fronts                                      Social fronts")
+        axis.set_xticks(x_positions)
+        axis.set_xticklabels(RQ1_BASE_METRIC_ORDER, fontsize=12, fontweight="bold")
+        axis.grid(axis="y", alpha=0.22)
+        axis.set_axisbelow(True)
+        axis.axvline(2.5, color="#4A5568", linestyle="--", linewidth=1.0, alpha=0.7)
+        axis.set_title(
+            "Figure 1A. Hero-Project Prevalence Across Technical and Social Metrics (20/80)",
+            loc="left",
+            fontsize=13,
+            fontweight="bold",
+        )
+
+        for bar, value in zip(bars, prevalences, strict=True):
+            if np.isnan(value):
+                continue
+            axis.text(
+                bar.get_x() + bar.get_width() / 2.0,
+                value + 1.0,
+                f"{value:.1f}%",
+                ha="center",
+                va="bottom",
+                fontsize=10.5,
+                fontweight="bold",
+            )
+
+        legend_handles = [
+            Patch(
+                facecolor=RQ1_DIMENSION_COLORS["technical"], edgecolor="#1A202C", label="Technical"
+            ),
+            Patch(facecolor=RQ1_DIMENSION_COLORS["social"], edgecolor="#1A202C", label="Social"),
+        ]
+        axis.legend(handles=legend_handles, loc="upper right", frameon=True)
+        return self._save_figure(figure, "figure_1a_technical_social_20_80", dpi, save_svg)
+
+    def _plot_rq1_technical_social_threshold_ranges(
+        self,
+        dpi: int,
+        save_svg: bool,
+    ) -> tuple[Path, Path, Path, Path]:
+        base_rows = self._load_rq1_base_metric_rows(
+            self.final_tables_dir / "rq1_base_metric_prevalence.csv"
+        )
+        threshold_rows = self._load_threshold_base_metric_rows()
+        if not threshold_rows:
+            raise ValueError("No threshold rows available for RQ1 technical/social ranges.")
+
+        base_by_metric = {row["hero_code"]: row for row in base_rows}
+        baseline_values = {
+            metric_code: float(base_by_metric[metric_code]["project_prevalence_pct"])
+            for metric_code in RQ1_BASE_METRIC_ORDER
+            if metric_code in base_by_metric
+        }
+        summary_by_metric = summarize_rq1_threshold_prevalence(threshold_rows)
+
+        plot_data_dir = self._plot_data_dir()
+        baseline_csv_path = self._write_csv_rows(
+            plot_data_dir / "rq1_technical_social_baseline.csv",
+            [
+                "metric_code",
+                "dimension",
+                "project_prevalence_pct",
+                "project_count_hero",
+                "project_count_total",
+            ],
+            [
+                [
+                    metric_code,
+                    RQ1_METRIC_TO_DIMENSION[metric_code],
+                    baseline_values.get(metric_code, float("nan")),
+                    int(base_by_metric[metric_code]["project_count_hero"]),
+                    int(base_by_metric[metric_code]["project_count_total"]),
+                ]
+                for metric_code in RQ1_BASE_METRIC_ORDER
+                if metric_code in base_by_metric
+            ],
+        )
+        threshold_long_csv_path = self._write_csv_rows(
+            plot_data_dir / "rq1_technical_social_threshold_long.csv",
+            [
+                "run_id",
+                "top_fraction",
+                "coverage_fraction",
+                "hybrid_quantile",
+                "metric_code",
+                "project_prevalence_pct",
+            ],
+            [
+                [
+                    str(row["run_id"]),
+                    float(row["top_fraction"]),
+                    float(row["coverage_fraction"]),
+                    float(row["hybrid_quantile"]),
+                    str(row["metric_code"]),
+                    float(row["project_prevalence_pct"]),
+                ]
+                for row in threshold_rows
+            ],
+        )
+        threshold_summary_csv_path = self._write_csv_rows(
+            plot_data_dir / "rq1_technical_social_threshold_summary.csv",
+            [
+                "metric_code",
+                "dimension",
+                "baseline_prevalence_pct",
+                "prevalence_min",
+                "prevalence_q1",
+                "prevalence_median",
+                "prevalence_q3",
+                "prevalence_max",
+            ],
+            [
+                [
+                    metric_code,
+                    RQ1_METRIC_TO_DIMENSION[metric_code],
+                    baseline_values.get(metric_code, float("nan")),
+                    summary_by_metric[metric_code].minimum,
+                    summary_by_metric[metric_code].q1,
+                    summary_by_metric[metric_code].median,
+                    summary_by_metric[metric_code].q3,
+                    summary_by_metric[metric_code].maximum,
+                ]
+                for metric_code in RQ1_BASE_METRIC_ORDER
+            ],
+        )
+
+        x_positions = np.arange(len(RQ1_BASE_METRIC_ORDER))
+        bar_colors = [
+            RQ1_DIMENSION_COLORS[RQ1_METRIC_TO_DIMENSION[metric_code]]
+            for metric_code in RQ1_BASE_METRIC_ORDER
+        ]
+        baseline_series = np.array(
+            [
+                baseline_values.get(metric_code, float("nan"))
+                for metric_code in RQ1_BASE_METRIC_ORDER
+            ],
+            dtype=float,
+        )
+        min_series = np.array(
+            [summary_by_metric[metric_code].minimum for metric_code in RQ1_BASE_METRIC_ORDER],
+            dtype=float,
+        )
+        median_series = np.array(
+            [summary_by_metric[metric_code].median for metric_code in RQ1_BASE_METRIC_ORDER],
+            dtype=float,
+        )
+        max_series = np.array(
+            [summary_by_metric[metric_code].maximum for metric_code in RQ1_BASE_METRIC_ORDER],
+            dtype=float,
+        )
+
+        figure, axis = plt.subplots(figsize=(10.8, 5.8))
+        bars = axis.bar(
+            x_positions,
+            baseline_series,
+            color=bar_colors,
+            alpha=0.72,
+            edgecolor="#1A202C",
+            linewidth=0.6,
+            label="Baseline (top=0.20, coverage=0.80)",
+        )
+        axis.vlines(
+            x_positions,
+            min_series,
+            max_series,
+            colors="#2D3748",
+            linewidth=2.0,
+            label="Threshold range (min-max)",
+        )
+        axis.scatter(
+            x_positions,
+            median_series,
+            marker="D",
+            color="#1A202C",
+            s=45,
+            zorder=3,
+            label="Threshold median",
+        )
+
+        for bar, baseline, min_value, max_value in zip(
+            bars, baseline_series, min_series, max_series, strict=True
+        ):
+            if np.isnan(baseline):
+                continue
+            axis.text(
+                bar.get_x() + bar.get_width() / 2.0,
+                baseline + 0.9,
+                f"{baseline:.1f}%",
+                ha="center",
+                va="bottom",
+                fontsize=9.8,
+                fontweight="bold",
+            )
+            axis.text(
+                bar.get_x() + bar.get_width() / 2.0,
+                max_value + 0.8,
+                f"{min_value:.1f}-{max_value:.1f}",
+                ha="center",
+                va="bottom",
+                fontsize=8.2,
+                color="#2D3748",
+            )
+
+        axis.set_ylim(0, 100)
+        axis.set_ylabel("Percentage of Projects")
+        axis.set_xlabel("Technical fronts                                      Social fronts")
+        axis.set_xticks(x_positions)
+        axis.set_xticklabels(RQ1_BASE_METRIC_ORDER, fontsize=12, fontweight="bold")
+        axis.axvline(2.5, color="#4A5568", linestyle="--", linewidth=1.0, alpha=0.7)
+        axis.grid(axis="y", alpha=0.22)
+        axis.set_axisbelow(True)
+        axis.set_title(
+            "Figure 1B. Technical/Social Hero Prevalence Under Alternative Ratios",
+            loc="left",
+            fontsize=13,
+            fontweight="bold",
+        )
+        axis.legend(loc="upper right", fontsize=8.8, frameon=True)
+        axis.text(
+            0.01,
+            -0.2,
+            "Range computed across top_fraction in {0.15,0.20,0.25,0.30} and "
+            "coverage_fraction in {0.70,0.80,0.85}.",
+            transform=axis.transAxes,
+            fontsize=8.8,
+            color="#2D3748",
+        )
+
+        figure_path = self._save_figure(
+            figure,
+            "figure_1b_technical_social_threshold_ranges",
+            dpi,
+            save_svg,
+        )
+        return figure_path, baseline_csv_path, threshold_long_csv_path, threshold_summary_csv_path
 
     def _load_threshold_prevalence_rows(self) -> list[dict[str, float | str]]:
         rows = self._read_csv(self.robustness_csv_path)
