@@ -1,0 +1,93 @@
+fixer,severity,hero_type,outcome_metric,reference_code,n_codes_with_data,direction_consistent_vs_reference,code_medians
+assignee,blocker,social,fix_rate,S1,2,True,S1:93.948296; S2:93.750000
+assignee,blocker,social,reopen_rate,S1,2,True,S1:6.666667; S2:6.666667
+assignee,blocker,sociotechnical,fix_rate,ST1,6,True,ST1:95.535714; ST2:95.535714; ST3:96.875000; ST4:96.875000; ST5:96.780303; ST6:96.780303
+assignee,blocker,sociotechnical,reopen_rate,ST1,6,False,ST1:4.404396; ST2:4.396135; ST3:4.412719; ST4:4.404396; ST5:4.438064; ST6:4.429552
+assignee,blocker,super,fix_rate,SH1,6,True,SH1:97.674419; SH2:97.674419; SH3:95.652174; SH4:95.652174; SH5:96.663296; SH6:96.663296
+assignee,blocker,super,reopen_rate,SH1,6,True,SH1:7.142857; SH2:7.142857; SH3:4.545455; SH4:4.545455; SH5:4.663166; SH6:4.653680
+assignee,blocker,technical,fix_rate,T1,3,True,T1:97.674419; T2:95.652174; T3:96.663296
+assignee,blocker,technical,reopen_rate,T1,3,True,T1:7.142857; T2:4.545455; T3:4.653680
+assignee,blocker,technosocial,fix_rate,TS1,6,True,TS1:97.674419; TS2:97.674419; TS3:95.652174; TS4:95.652174; TS5:96.663296; TS6:96.663296
+assignee,blocker,technosocial,reopen_rate,TS1,6,True,TS1:7.142857; TS2:7.142857; TS3:4.545455; TS4:4.545455; TS5:4.653680; TS6:4.653680
+assignee,critical,social,fix_rate,S1,2,True,S1:82.710598; S2:82.456140
+assignee,critical,social,reopen_rate,S1,2,True,S1:5.263158; S2:5.107527
+assignee,critical,sociotechnical,fix_rate,ST1,6,True,ST1:87.804878; ST2:87.804878; ST3:83.783784; ST4:83.783784; ST5:86.666667; ST6:86.666667
+assignee,critical,sociotechnical,reopen_rate,ST1,6,False,ST1:2.884615; ST2:2.857143; ST3:2.912621; ST4:2.884615; ST5:3.000000; ST6:2.970297
+assignee,critical,super,fix_rate,SH1,6,True,SH1:86.206897; SH2:86.206897; SH3:86.206897; SH4:86.206897; SH5:86.206897; SH6:86.206897
+assignee,critical,super,reopen_rate,SH1,6,True,SH1:8.000000; SH2:8.000000; SH3:3.157895; SH4:3.125000; SH5:3.488372; SH6:3.448276
+assignee,critical,technical,fix_rate,T1,3,True,T1:86.206897; T2:86.206897; T3:86.206897
+assignee,critical,technical,reopen_rate,T1,3,True,T1:8.000000; T2:3.092784; T3:3.409091
+assignee,critical,technosocial,fix_rate,TS1,6,True,TS1:86.206897; TS2:86.206897; TS3:86.206897; TS4:86.206897; TS5:86.206897; TS6:86.206897
+assignee,critical,technosocial,reopen_rate,TS1,6,True,TS1:8.000000; TS2:8.000000; TS3:3.092784; TS4:3.092784; TS5:3.409091; TS6:3.409091
+assignee,major,social,fix_rate,S1,2,True,S1:83.333333; S2:83.493105
+assignee,major,social,reopen_rate,S1,2,True,S1:5.561862; S2:5.615398
+assignee,major,sociotechnical,fix_rate,ST1,6,True,ST1:86.625648; ST2:86.460997; ST3:85.662898; ST4:85.549451; ST5:86.124233; ST6:85.942495
+assignee,major,sociotechnical,reopen_rate,ST1,6,True,ST1:4.350825; ST2:4.279687; ST3:3.643721; ST4:3.561041; ST5:3.344317; ST6:3.274428
+assignee,major,super,fix_rate,SH1,6,True,SH1:86.658796; SH2:86.658796; SH3:85.838150; SH4:85.838150; SH5:83.956428; SH6:83.956428
+assignee,major,super,reopen_rate,SH1,6,True,SH1:1.415094; SH2:1.415094; SH3:2.830189; SH4:2.830189; SH5:3.294289; SH6:3.289258
+assignee,major,technical,fix_rate,T1,3,True,T1:86.658796; T2:86.350975; T3:84.213934
+assignee,major,technical,reopen_rate,T1,3,True,T1:1.415094; T2:2.830189; T3:3.284253
+assignee,major,technosocial,fix_rate,TS1,6,True,TS1:86.658796; TS2:86.658796; TS3:85.878963; TS4:85.878963; TS5:83.976938; TS6:83.976938
+assignee,major,technosocial,reopen_rate,TS1,6,True,TS1:1.415094; TS2:1.415094; TS3:2.830189; TS4:2.830189; TS5:3.284253; TS6:3.284253
+assignee,minor,social,fix_rate,S1,2,True,S1:80.000000; S2:80.300328
+assignee,minor,social,reopen_rate,S1,2,True,S1:5.507246; S2:5.623306
+assignee,minor,sociotechnical,fix_rate,ST1,6,False,ST1:85.230024; ST2:85.480094; ST3:85.230024; ST4:85.480094; ST5:80.000000; ST6:80.122951
+assignee,minor,sociotechnical,reopen_rate,ST1,6,True,ST1:1.000000; ST2:0.961538; ST3:1.000000; ST4:0.961538; ST5:0.980392; ST6:0.961538
+assignee,minor,super,fix_rate,SH1,6,False,SH1:82.621951; SH2:82.621951; SH3:84.905660; SH4:84.905660; SH5:75.786164; SH6:75.786164
+assignee,minor,super,reopen_rate,SH1,6,True,SH1:0.000000; SH2:0.000000; SH3:2.222222; SH4:2.222222; SH5:1.111111; SH6:1.111111
+assignee,minor,technical,fix_rate,T1,3,False,T1:82.621951; T2:86.206897; T3:76.436782
+assignee,minor,technical,reopen_rate,T1,3,True,T1:0.000000; T2:2.000000; T3:1.000000
+assignee,minor,technosocial,fix_rate,TS1,6,False,TS1:82.621951; TS2:82.621951; TS3:85.185185; TS4:85.185185; TS5:75.925926; TS6:75.925926
+assignee,minor,technosocial,reopen_rate,TS1,6,True,TS1:0.000000; TS2:0.000000; TS3:2.173913; TS4:2.173913; TS5:1.086957; TS6:1.086957
+assignee,trivial,social,fix_rate,S1,2,True,S1:91.228070; S2:90.897054
+assignee,trivial,social,reopen_rate,S1,2,True,S1:2.003205; S2:2.564103
+assignee,trivial,sociotechnical,fix_rate,ST1,6,True,ST1:100.000000; ST2:100.000000; ST3:100.000000; ST4:100.000000; ST5:100.000000; ST6:100.000000
+assignee,trivial,sociotechnical,reopen_rate,ST1,6,True,ST1:0.000000; ST2:0.000000; ST3:0.000000; ST4:0.000000; ST5:0.000000; ST6:0.000000
+assignee,trivial,super,fix_rate,SH1,6,True,SH1:100.000000; SH2:100.000000; SH3:100.000000; SH4:100.000000; SH5:100.000000; SH6:100.000000
+assignee,trivial,super,reopen_rate,SH1,6,True,SH1:0.000000; SH2:0.000000; SH3:0.000000; SH4:0.000000; SH5:0.000000; SH6:0.000000
+assignee,trivial,technical,fix_rate,T1,3,True,T1:100.000000; T2:100.000000; T3:100.000000
+assignee,trivial,technical,reopen_rate,T1,3,True,T1:0.000000; T2:0.000000; T3:0.000000
+assignee,trivial,technosocial,fix_rate,TS1,6,True,TS1:100.000000; TS2:100.000000; TS3:100.000000; TS4:100.000000; TS5:100.000000; TS6:100.000000
+assignee,trivial,technosocial,reopen_rate,TS1,6,True,TS1:0.000000; TS2:0.000000; TS3:0.000000; TS4:0.000000; TS5:0.000000; TS6:0.000000
+commit_author,blocker,technical,fix_rate,T1,3,True,T1:100.000000; T2:100.000000; T3:100.000000
+commit_author,blocker,technical,reopen_rate,T1,3,True,T1:0.000000; T2:0.000000; T3:0.000000
+commit_author,critical,social,fix_rate,S1,2,True,S1:100.000000; S2:100.000000
+commit_author,critical,social,reopen_rate,S1,2,True,S1:0.000000; S2:0.000000
+commit_author,critical,sociotechnical,fix_rate,ST1,6,True,ST1:100.000000; ST2:100.000000; ST3:100.000000; ST4:100.000000; ST5:100.000000; ST6:100.000000
+commit_author,critical,sociotechnical,reopen_rate,ST1,6,True,ST1:0.000000; ST2:0.000000; ST3:0.000000; ST4:0.000000; ST5:0.000000; ST6:0.000000
+commit_author,critical,super,fix_rate,SH1,4,True,SH1:100.000000; SH2:100.000000; SH5:100.000000; SH6:100.000000
+commit_author,critical,super,reopen_rate,SH1,4,True,SH1:0.000000; SH2:0.000000; SH5:0.000000; SH6:0.000000
+commit_author,critical,technical,fix_rate,T1,3,True,T1:100.000000; T2:100.000000; T3:100.000000
+commit_author,critical,technical,reopen_rate,T1,3,True,T1:0.000000; T2:0.000000; T3:0.000000
+commit_author,critical,technosocial,fix_rate,TS1,4,True,TS1:100.000000; TS2:100.000000; TS5:100.000000; TS6:100.000000
+commit_author,critical,technosocial,reopen_rate,TS1,4,True,TS1:0.000000; TS2:0.000000; TS5:0.000000; TS6:0.000000
+commit_author,major,social,fix_rate,S1,2,True,S1:100.000000; S2:100.000000
+commit_author,major,social,reopen_rate,S1,2,True,S1:18.333333; S2:18.181818
+commit_author,major,sociotechnical,fix_rate,ST1,6,True,ST1:100.000000; ST2:100.000000; ST3:100.000000; ST4:100.000000; ST5:100.000000; ST6:100.000000
+commit_author,major,sociotechnical,reopen_rate,ST1,6,True,ST1:25.757576; ST2:18.181818; ST3:21.590909; ST4:20.000000; ST5:21.590909; ST6:20.000000
+commit_author,major,super,fix_rate,SH1,6,True,SH1:100.000000; SH2:100.000000; SH3:100.000000; SH4:100.000000; SH5:100.000000; SH6:100.000000
+commit_author,major,super,reopen_rate,SH1,6,True,SH1:22.222222; SH2:22.222222; SH3:22.222222; SH4:22.222222; SH5:0.000000; SH6:0.000000
+commit_author,major,technical,fix_rate,T1,3,True,T1:97.872340; T2:98.290320; T3:98.473282
+commit_author,major,technical,reopen_rate,T1,3,False,T1:4.487179; T2:4.598662; T3:3.669725
+commit_author,major,technosocial,fix_rate,TS1,6,True,TS1:100.000000; TS2:100.000000; TS3:100.000000; TS4:100.000000; TS5:100.000000; TS6:100.000000
+commit_author,major,technosocial,reopen_rate,TS1,6,True,TS1:22.222222; TS2:22.222222; TS3:22.222222; TS4:22.222222; TS5:0.000000; TS6:0.000000
+commit_author,minor,social,fix_rate,S1,2,True,S1:100.000000; S2:100.000000
+commit_author,minor,social,reopen_rate,S1,2,True,S1:14.285714; S2:14.285714
+commit_author,minor,sociotechnical,fix_rate,ST1,6,True,ST1:100.000000; ST2:100.000000; ST3:100.000000; ST4:100.000000; ST5:100.000000; ST6:100.000000
+commit_author,minor,sociotechnical,reopen_rate,ST1,6,True,ST1:14.285714; ST2:14.285714; ST3:14.285714; ST4:14.285714; ST5:14.285714; ST6:14.285714
+commit_author,minor,super,fix_rate,SH1,6,True,SH1:100.000000; SH2:100.000000; SH3:100.000000; SH4:100.000000; SH5:100.000000; SH6:100.000000
+commit_author,minor,super,reopen_rate,SH1,6,True,SH1:16.666667; SH2:16.666667; SH3:25.000000; SH4:25.000000; SH5:20.000000; SH6:20.000000
+commit_author,minor,technical,fix_rate,T1,3,True,T1:100.000000; T2:100.000000; T3:100.000000
+commit_author,minor,technical,reopen_rate,T1,3,True,T1:1.388889; T2:0.000000; T3:0.000000
+commit_author,minor,technosocial,fix_rate,TS1,6,True,TS1:100.000000; TS2:100.000000; TS3:100.000000; TS4:100.000000; TS5:100.000000; TS6:100.000000
+commit_author,minor,technosocial,reopen_rate,TS1,6,True,TS1:16.666667; TS2:16.666667; TS3:25.000000; TS4:25.000000; TS5:20.000000; TS6:20.000000
+commit_author,trivial,social,fix_rate,S1,2,True,S1:100.000000; S2:100.000000
+commit_author,trivial,social,reopen_rate,S1,2,True,S1:0.000000; S2:0.000000
+commit_author,trivial,sociotechnical,fix_rate,ST1,6,True,ST1:100.000000; ST2:100.000000; ST3:100.000000; ST4:100.000000; ST5:100.000000; ST6:100.000000
+commit_author,trivial,sociotechnical,reopen_rate,ST1,6,True,ST1:0.000000; ST2:0.000000; ST3:0.000000; ST4:0.000000; ST5:0.000000; ST6:0.000000
+commit_author,trivial,super,fix_rate,SH1,4,True,SH1:100.000000; SH2:100.000000; SH3:100.000000; SH4:100.000000
+commit_author,trivial,super,reopen_rate,SH1,4,True,SH1:0.000000; SH2:0.000000; SH3:0.000000; SH4:0.000000
+commit_author,trivial,technical,fix_rate,T1,3,True,T1:100.000000; T2:100.000000; T3:100.000000
+commit_author,trivial,technical,reopen_rate,T1,3,True,T1:0.000000; T2:0.000000; T3:0.000000
+commit_author,trivial,technosocial,fix_rate,TS1,4,True,TS1:100.000000; TS2:100.000000; TS3:100.000000; TS4:100.000000
+commit_author,trivial,technosocial,reopen_rate,TS1,4,True,TS1:0.000000; TS2:0.000000; TS3:0.000000; TS4:0.000000

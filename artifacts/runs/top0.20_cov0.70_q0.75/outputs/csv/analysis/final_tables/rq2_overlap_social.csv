@@ -1,0 +1,2 @@
+group_a,group_b,a_project_author_pairs,b_project_author_pairs,pair_intersection,pair_union,pair_jaccard,a_projects,b_projects,project_intersection,project_union,project_jaccard
+S1,S2,7757,7753,5906,9604,0.6149521032902957,98,97,97,98,0.9897959183673469

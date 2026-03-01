@@ -1,0 +1,16 @@
+{
+  "run_id": "top0.25_cov0.85_q0.75",
+  "top_fraction": 0.25,
+  "coverage_fraction": 0.85,
+  "hybrid_quantile": 0.75,
+  "status": "success",
+  "run_dir": "C:\\Users\\mahen\\Work\\Research\\experiments\\ease-2026\\artifacts\\runs\\top0.25_cov0.85_q0.75",
+  "duration_seconds": 14.929032199986978,
+  "technical_overlap_mean_jaccard": 0.6099127624664445,
+  "social_overlap_jaccard": 0.5661250615460365,
+  "rq3_direction_preserved_assignee_fix_rate": false,
+  "rq3_direction_consistency_share_assignee_fix_rate": 0.8,
+  "rq3_direction_rows_assignee_fix_rate": 25,
+  "generated_at_utc": "2026-03-01T15:18:10.027516+00:00",
+  "error": ""
+}
