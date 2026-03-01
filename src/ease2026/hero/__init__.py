@@ -6,6 +6,19 @@ from ease2026.hero.generate import (
     generate_hero_outputs,
     write_hero_members_csv,
 )
+from ease2026.hero.hybrid import (
+    SOCIOTECHNICAL_SPECS,
+    SUPER_SPECS,
+    TECHNOSOCIAL_SPECS,
+    generate_sociotechnical,
+    generate_super,
+    generate_technosocial,
+    project_quantile_threshold,
+    project_quantile_thresholds,
+    sociotechnical_heroes,
+    superheroes,
+    technosocial_heroes,
+)
 from ease2026.hero.rules import (
     hero_project_and_heroes,
     is_hero_project,
@@ -34,4 +47,15 @@ __all__ = [
     "build_hero_flags_and_members",
     "write_hero_members_csv",
     "generate_hero_outputs",
+    "project_quantile_threshold",
+    "project_quantile_thresholds",
+    "sociotechnical_heroes",
+    "technosocial_heroes",
+    "superheroes",
+    "generate_sociotechnical",
+    "generate_technosocial",
+    "generate_super",
+    "SOCIOTECHNICAL_SPECS",
+    "TECHNOSOCIAL_SPECS",
+    "SUPER_SPECS",
 ]
