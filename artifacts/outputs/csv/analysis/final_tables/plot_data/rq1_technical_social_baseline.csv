@@ -1,0 +1,6 @@
+metric_code,dimension,project_prevalence_pct,project_count_hero,project_count_total
+T1,technical,84.6938775510204,83,98
+T2,technical,78.57142857142857,77,98
+T3,technical,94.89795918367348,93,98
+S1,social,91.83673469387756,90,98
+S2,social,78.57142857142857,77,98
