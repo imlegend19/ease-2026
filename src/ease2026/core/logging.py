@@ -88,7 +88,10 @@ def setup_logging(debug: bool = False, log_file_path: str | None = None) -> None
         cache_logger_on_first_use=True,
     )
 
-    get_logger("core.logging").info("Logging configured", level=logging.getLevelName(root_level))
+    get_logger("ease2026.core.logging").info(
+        "Logging configured",
+        level=logging.getLevelName(root_level),
+    )
 
 
 def cleanup_duplicate_handlers() -> None:
@@ -98,10 +101,11 @@ def cleanup_duplicate_handlers() -> None:
             child_logger.handlers = []
             child_logger.propagate = True
 
-    get_logger("core.logging").debug("Duplicate handlers cleaned up")
+    get_logger("ease2026.core.logging").debug("Duplicate handlers cleaned up")
 
 
 bind_logger_contextvars: Callable[[Any], Mapping[str, Token]] = (
     structlog.contextvars.bind_contextvars
 )
 clear_logger_contextvars: Callable[[], None] = structlog.contextvars.clear_contextvars
+

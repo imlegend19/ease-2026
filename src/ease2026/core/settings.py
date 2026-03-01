@@ -6,7 +6,19 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+
+def _discover_base_dir() -> Path:
+    current_file = Path(__file__).resolve()
+    for parent in current_file.parents:
+        if (parent / "pyproject.toml").exists():
+            return parent
+
+    parents = current_file.parents
+    fallback_index = 3 if len(parents) > 3 else len(parents) - 1
+    return parents[fallback_index]
+
+
+BASE_DIR = _discover_base_dir()
 ENV_FILE_PATH = BASE_DIR / ".env"
 
 if ENV_FILE_PATH.exists():
@@ -32,3 +44,4 @@ class Settings:
 
 
 settings = Settings()
+

@@ -8,7 +8,7 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
 
-from core.settings import settings
+from ease2026.core.settings import settings
 
 
 class MongoConnectionManager:
@@ -59,3 +59,4 @@ def get_mongo_database(db_name: str | None = None) -> Database:
 
 def get_mongo_collection(collection_name: str, db_name: str | None = None) -> Collection:
     return MongoConnectionManager.get_collection(collection_name=collection_name, db_name=db_name)
+
