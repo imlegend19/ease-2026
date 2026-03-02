@@ -6,12 +6,16 @@ from ease2026.outcomes.definitions import (
     normalize_priority,
 )
 from ease2026.outcomes.issue_outcomes import (
+    AssigneeChangeEvent,
     IssueOutcome,
     IssueEvent,
     IssueRecord,
+    _assignee_id_at_timestamp,
     _build_outcome_row,
     _extract_assignee_ids,
+    _extract_current_assignee_id,
     _event_outcome_flags,
+    _first_fixed_timestamp,
     _match_issue_ids_for_heroes,
 )
 
@@ -74,6 +78,25 @@ def test_match_issue_ids_for_heroes_assignee() -> None:
         hero_authors={"h1"},
         issue_records=issue_records,
         fixer_policy=FixerAttributionPolicy.ASSIGNEE,
+        fix_time_assignee_by_issue={},
+        fix_authors_by_issue={},
+    )
+
+    assert matched == ["i1"]
+
+
+def test_match_issue_ids_for_heroes_assignee_at_fix_time() -> None:
+    issue_records = {
+        "i1": IssueRecord("i1", "p", "major", frozenset({"fallback_1"}), False),
+        "i2": IssueRecord("i2", "p", "major", frozenset({"fallback_2"}), False),
+    }
+
+    matched = _match_issue_ids_for_heroes(  # noqa: SLF001
+        issue_ids=["i1", "i2"],
+        hero_authors={"h1"},
+        issue_records=issue_records,
+        fixer_policy=FixerAttributionPolicy.ASSIGNEE_AT_FIX_TIME,
+        fix_time_assignee_by_issue={"i1": "h1", "i2": "h2"},
         fix_authors_by_issue={},
     )
 
@@ -125,3 +148,47 @@ def test_extract_assignee_ids_resolves_canonical_identity() -> None:
     )
 
     assert assignee_ids == {"canon_1", "raw_2", "canon_3"}
+
+
+def test_extract_current_assignee_id_prefers_primary_assignee_field() -> None:
+    class DummyResolver:
+        @staticmethod
+        def resolve_person_id(person_id, reverse_identity_map):  # noqa: ANN001,ANN002
+            return reverse_identity_map.get(person_id, person_id)
+
+    issue_doc = {
+        "assignee_id": "raw_primary",
+        "assignees": ["raw_secondary"],
+    }
+
+    assignee_id = _extract_current_assignee_id(  # noqa: SLF001
+        issue_doc=issue_doc,
+        reverse_identity_map={"raw_primary": "canon_primary"},
+        reverse_identity_resolver=DummyResolver(),
+    )
+
+    assert assignee_id == "canon_primary"
+
+
+def test_first_fixed_timestamp_uses_first_resolution_fixed_event() -> None:
+    events = [
+        IssueEvent("i1", datetime(2021, 1, 3), "resolution", "fixed"),
+        IssueEvent("i1", datetime(2021, 1, 2), "resolution", "fixed"),
+        IssueEvent("i1", datetime(2021, 1, 1), "status", "reopened"),
+    ]
+
+    assert _first_fixed_timestamp(events) == datetime(2021, 1, 2)  # noqa: SLF001
+
+
+def test_assignee_id_at_timestamp_replays_events_up_to_cutoff() -> None:
+    assignee_events = [
+        AssigneeChangeEvent("i1", datetime(2021, 1, 1), "u1"),
+        AssigneeChangeEvent("i1", datetime(2021, 1, 2), "u2"),
+        AssigneeChangeEvent("i1", datetime(2021, 1, 4), "u3"),
+    ]
+
+    assignee_id = _assignee_id_at_timestamp(  # noqa: SLF001
+        assignee_events=assignee_events,
+        cutoff_timestamp=datetime(2021, 1, 3),
+    )
+    assert assignee_id == "u2"

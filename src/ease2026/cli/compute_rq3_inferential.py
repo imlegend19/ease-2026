@@ -21,6 +21,7 @@ def parse_args() -> argparse.Namespace:
         "--fixer",
         choices=(
             FixerAttributionPolicy.ASSIGNEE.value,
+            FixerAttributionPolicy.ASSIGNEE_AT_FIX_TIME.value,
             FixerAttributionPolicy.COMMIT_AUTHOR.value,
             "both",
         ),
@@ -45,6 +46,7 @@ def _selected_fixer_policies(raw: str) -> tuple[FixerAttributionPolicy, ...]:
     if raw == "both":
         return (
             FixerAttributionPolicy.ASSIGNEE,
+            FixerAttributionPolicy.ASSIGNEE_AT_FIX_TIME,
             FixerAttributionPolicy.COMMIT_AUTHOR,
         )
     return (FixerAttributionPolicy(raw),)

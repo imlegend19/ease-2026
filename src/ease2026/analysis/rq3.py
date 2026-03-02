@@ -10,11 +10,16 @@ from pathlib import Path
 from ease2026.analysis.rq1 import hero_type_from_code
 from ease2026.core.logging import get_logger
 from ease2026.core.settings import settings
+from ease2026.outcomes.definitions import FixerAttributionPolicy
 
 logger = get_logger(__name__)
 
 SEVERITY_ORDER: tuple[str, ...] = ("blocker", "critical", "major", "minor", "trivial")
-FIXER_ORDER: tuple[str, ...] = ("assignee", "commit_author")
+FIXER_ORDER: tuple[str, ...] = (
+    FixerAttributionPolicy.ASSIGNEE.value,
+    FixerAttributionPolicy.ASSIGNEE_AT_FIX_TIME.value,
+    FixerAttributionPolicy.COMMIT_AUTHOR.value,
+)
 
 
 @dataclass(frozen=True, slots=True)

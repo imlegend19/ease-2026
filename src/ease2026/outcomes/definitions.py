@@ -16,6 +16,7 @@ class SeverityPolicy(StrEnum):
 
 class FixerAttributionPolicy(StrEnum):
     ASSIGNEE = "assignee"
+    ASSIGNEE_AT_FIX_TIME = "assignee_at_fix_time"
     COMMIT_AUTHOR = "commit_author"
 
 
