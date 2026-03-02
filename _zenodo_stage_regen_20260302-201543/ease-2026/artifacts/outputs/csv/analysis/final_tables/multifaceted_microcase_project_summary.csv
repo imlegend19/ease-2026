@@ -1,6 +1,0 @@
-project_name,h_st_size,h_sup_size,h_st_or_sup_size,n_contributors_union_base_metrics,top_author_ids
-ant-ivy,0,1,1,562,58c898d7c03bb43517bca1b4
-commons-math,6,8,8,400,58bfd79d3cff546cc9b42a28|58bfd79e3cff546cd4b42a2e|58bfd7b73cff546ccdb43d31
-kafka,93,106,106,2272,58bfca5b02ca40f8bf1479d4|5b0fc400065f39020b8de36a|5b0fc400065f3902048de36a
-zeppelin,32,35,35,1011,5b110f44e5cffa4688f4b7d1|59e4f10cf2a4565fe9c550f2|5b110f4fe5cffa468ef4bb64
-zookeeper,6,8,8,1170,58b938adf04620b395fccf94|58b938adf04620b39bfccf95|58b938acf04620b379fccf94
