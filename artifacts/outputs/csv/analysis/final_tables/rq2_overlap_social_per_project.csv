@@ -1,2 +1,0 @@
-group_a,group_b,a_project_author_pairs,b_project_author_pairs,pair_intersection,pair_union,pair_jaccard,a_projects,b_projects,project_intersection,project_union,project_jaccard,per_project_n,per_project_mean_jaccard,per_project_median_jaccard,per_project_std_jaccard,per_project_iqr_jaccard
-S1,S2,7328,6517,5053,8792,0.5747270245677889,90,77,77,90,0.8555555555555555,77,0.6880050312037514,0.6727272727272727,0.13969971603764084,0.16190476190476188

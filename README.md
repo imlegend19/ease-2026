@@ -48,17 +48,12 @@ uv run python -m ease2026.cli.generate_base_heroes --top-fraction 0.20 --coverag
 uv run python -m ease2026.cli.generate_hybrid_heroes --top-fraction 0.20 --coverage-fraction 0.80 --hybrid-quantile 0.50
 ```
 
-3. Compute RQ3 outcomes for all fixer policies:
+3. Compute RQ3 outcomes for both fixer policies:
 
 ```powershell
 uv run python -m ease2026.cli.compute_rq3_outcomes --fixer assignee
-uv run python -m ease2026.cli.compute_rq3_outcomes --fixer assignee_at_fix_time
 uv run python -m ease2026.cli.compute_rq3_outcomes --fixer commit_author
 ```
-
-`assignee_at_fix_time` attributes each issue to the assignee active at the first
-`resolution -> fixed` timestamp (replayed from assignee-change events). If that assignee
-cannot be determined, it falls back to current assignee fields on the issue record.
 
 4. Generate final analysis tables (RQ1/RQ2/RQ3) and inferential RQ3 outputs:
 

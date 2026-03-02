@@ -1,5 +1,6 @@
 """Hybrid hero generation (sociotechnical, technosocial, and super)."""
 
+from __future__ import annotations
 
 import csv
 import math

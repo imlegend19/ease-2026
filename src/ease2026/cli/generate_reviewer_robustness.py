@@ -1,5 +1,6 @@
 """Generate reviewer-focused robustness artifacts for threshold sensitivity."""
 
+from __future__ import annotations
 
 import argparse
 

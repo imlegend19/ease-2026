@@ -1,4 +1,6 @@
+from __future__ import annotations
 
+import csv
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -111,3 +113,119 @@ def test_resolve_run_dir_prefers_experiment_root_relative_paths(
     resolved = generator._resolve_run_dir("artifacts/runs/top0.20_cov0.80_q0.50")
 
     assert resolved == target_run_dir
+
+
+def test_load_rq1_conditional_rows_computes_superhero_over_social_and_technical(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    heroes_root = tmp_path / "heroes"
+    (heroes_root / "T1").mkdir(parents=True)
+    (heroes_root / "S1").mkdir(parents=True)
+    (heroes_root / "hybrid" / "super").mkdir(parents=True)
+
+    (heroes_root / "T1" / "heroes.csv").write_text(
+        "project_name,author_id\nproj,a\nproj,b\nproj,c\n",
+        encoding="utf-8",
+    )
+    (heroes_root / "S1" / "heroes.csv").write_text(
+        "project_name,author_id\nproj,b\nproj,c\nproj,d\n",
+        encoding="utf-8",
+    )
+    # Include an extra superhero not in social/technical sets to verify intersection logic.
+    (heroes_root / "hybrid" / "super" / "SH1.csv").write_text(
+        "project_name,author_id\nproj,b\nproj,c\nproj,e\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        figures_module,
+        "settings",
+        SimpleNamespace(
+            outputs_csv_dir=tmp_path,
+            outputs_dir=tmp_path / "outputs",
+            artifacts_dir=tmp_path / "artifacts",
+        ),
+    )
+
+    generator = FinalFigureGenerator()
+    rows = generator._load_rq1_conditional_rows(include_superhero_denominator_conditions=True)
+    by_condition = {
+        str(row["condition_id"]): row
+        for row in rows
+        if str(row["project_name"]) == "proj"
+        and str(row["condition_id"]) in {"sh_over_t", "sh_over_s"}
+    }
+
+    assert int(by_condition["sh_over_t"]["numerator_count"]) == 2
+    assert int(by_condition["sh_over_t"]["denominator_count"]) == 3
+    assert float(by_condition["sh_over_t"]["percentage"]) == pytest.approx(66.6666666667)
+
+    assert int(by_condition["sh_over_s"]["numerator_count"]) == 2
+    assert int(by_condition["sh_over_s"]["denominator_count"]) == 3
+    assert float(by_condition["sh_over_s"]["percentage"]) == pytest.approx(66.6666666667)
+
+
+def test_write_rq1_superhero_conditional_packet_rows_outputs_new_csvs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        figures_module,
+        "settings",
+        SimpleNamespace(
+            outputs_csv_dir=tmp_path / "csv",
+            outputs_dir=tmp_path / "outputs",
+            artifacts_dir=tmp_path / "artifacts",
+        ),
+    )
+
+    generator = FinalFigureGenerator()
+    output_paths = generator._write_rq1_superhero_conditional_packet_rows(
+        [
+            {
+                "condition_id": "sh_over_t",
+                "condition_label": "SH*/T*",
+                "project_name": "p2",
+                "numerator_count": 0,
+                "denominator_count": 1,
+                "percentage": 0.0,
+            },
+            {
+                "condition_id": "sh_over_t",
+                "condition_label": "SH*/T*",
+                "project_name": "p1",
+                "numerator_count": 1,
+                "denominator_count": 2,
+                "percentage": 50.0,
+            },
+            {
+                "condition_id": "sh_over_s",
+                "condition_label": "SH*/S*",
+                "project_name": "p1",
+                "numerator_count": 2,
+                "denominator_count": 4,
+                "percentage": 50.0,
+            },
+        ]
+    )
+
+    expected_keys = {
+        "rq1_coauthor_sh_over_t_project_csv",
+        "rq1_coauthor_sh_over_t_summary_csv",
+        "rq1_coauthor_sh_over_s_project_csv",
+        "rq1_coauthor_sh_over_s_summary_csv",
+    }
+    assert set(output_paths.keys()) == expected_keys
+    for path in output_paths.values():
+        assert path.exists()
+
+    sh_over_t_summary_path = output_paths["rq1_coauthor_sh_over_t_summary_csv"]
+    with sh_over_t_summary_path.open("r", newline="", encoding="utf-8") as file:
+        rows = list(csv.DictReader(file))
+    assert len(rows) == 1
+    assert rows[0]["condition_id"] == "sh_over_t"
+    assert int(rows[0]["n_projects"]) == 2
+    assert int(rows[0]["non_zero_projects"]) == 1
+    assert float(rows[0]["median_pct"]) == pytest.approx(25.0)
+    assert float(rows[0]["mean_pct"]) == pytest.approx(25.0)

@@ -1,6 +1,79 @@
+# Shared baseline copied from repository root .gitignore.base
+# Replication package artifacts
+/experiments/*-replication-package-*.zip
+/experiments/_zip_staging_*/
+
+# Python environments and caches
 .venv/
+venv/
+*.egg-info/
 __pycache__/
-*.pyc
+*.py[cod]
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# IDE/editor
+.idea/
+.vscode/
+.vs/
+.cursor/
+*.code-workspace
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# LaTeX / latexmk / LaTeX Workshop build artifacts
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.nav
+*.out
+*.pdfsync
+*.run.xml
+*.snm
+*.synctex.gz
+*.toc
+*.xdv
+*.dvi
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.ist
+_minted*/
+*.pyg
+
+# Temporary files
+*~
+*.tmp
+*.swp
+*.swo
+.temp/
+
+# ignore latexindent temporary files
+__latexindent_temp*.*
+
+# Project-specific additions
 .env
 
 # Replication artifacts: keep final outputs only

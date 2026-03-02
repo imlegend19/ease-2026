@@ -1,5 +1,6 @@
 """RQ1 prevalence tables for base metrics and hero-type aggregates."""
 
+from __future__ import annotations
 
 import csv
 from dataclasses import dataclass

@@ -1,5 +1,6 @@
 """Generate final paper figures from analysis outputs."""
 
+from __future__ import annotations
 
 import argparse
 
@@ -16,7 +17,6 @@ def parse_args() -> argparse.Namespace:
         "--fixer",
         choices=(
             FixerAttributionPolicy.ASSIGNEE.value,
-            FixerAttributionPolicy.ASSIGNEE_AT_FIX_TIME.value,
             FixerAttributionPolicy.COMMIT_AUTHOR.value,
         ),
         default=FixerAttributionPolicy.ASSIGNEE.value,

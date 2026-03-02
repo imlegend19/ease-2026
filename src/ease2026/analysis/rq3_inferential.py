@@ -1,5 +1,6 @@
 """Inferential RQ3 outputs: mean rankings, Kendall tau, and Scott-Knott ESD."""
 
+from __future__ import annotations
 
 import csv
 import math

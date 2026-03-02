@@ -1,5 +1,6 @@
 """Generate publication-ready figures for EASE 2026 RQs."""
 
+from __future__ import annotations
 
 import csv
 import math
@@ -57,20 +58,30 @@ RQ1_CONDITIONAL_ORDER: tuple[str, ...] = (
     "ts_over_t",
     "sh_over_s_union_t",
 )
+RQ1_SUPERHERO_CONDITIONAL_ORDER: tuple[str, ...] = (
+    "sh_over_t",
+    "sh_over_s",
+)
 RQ1_CONDITIONAL_LABELS: dict[str, str] = {
     "st_over_s": "ST*/S*",
     "ts_over_t": "TS*/T*",
     "sh_over_s_union_t": "SH*/(S∪T)",
+    "sh_over_t": "SH*/T*",
+    "sh_over_s": "SH*/S*",
 }
 RQ1_CONDITIONAL_DESCRIPTION: dict[str, str] = {
     "st_over_s": "% of social heroes that are sociotechnical",
     "ts_over_t": "% of technical heroes that are technosocial",
     "sh_over_s_union_t": "% of heroes (social/technical union) that are superheroes",
+    "sh_over_t": "% of technical heroes that are superheroes",
+    "sh_over_s": "% of social heroes that are superheroes",
 }
 RQ1_CONDITIONAL_COLORS: dict[str, str] = {
     "st_over_s": "#DD6B20",
     "ts_over_t": "#33658A",
     "sh_over_s_union_t": "#6B46C1",
+    "sh_over_t": "#1E40AF",
+    "sh_over_s": "#2B6CB0",
 }
 
 
@@ -281,6 +292,12 @@ class FinalFigureGenerator:
     def output_dir(self) -> Path:
         return settings.outputs_plots_dir / "analysis" / "final_figures"
 
+    @property
+    def coauthor_packet_dir(self) -> Path:
+        directory = settings.outputs_dir / "coauthor_packet"
+        directory.mkdir(parents=True, exist_ok=True)
+        return directory
+
     def run(
         self,
         fixer_for_rq3: str = "assignee",
@@ -294,14 +311,22 @@ class FinalFigureGenerator:
             dpi=dpi,
             save_svg=save_svg,
         )
+        all_conditional_rows = self._load_rq1_conditional_rows(
+            include_superhero_denominator_conditions=True
+        )
         (
             multifaceted_figure_path,
             multifaceted_project_csv_path,
             multifaceted_summary_csv_path,
-        ) = self._plot_rq1_multifaceted_conditional_prevalence(dpi=dpi, save_svg=save_svg)
+        ) = self._plot_rq1_multifaceted_conditional_prevalence(
+            dpi=dpi,
+            save_svg=save_svg,
+            conditional_rows=all_conditional_rows,
+        )
         outputs["figure_1_multifaceted_conditional"] = multifaceted_figure_path
         outputs["rq1_tikz_multifaceted_conditional_project_csv"] = multifaceted_project_csv_path
         outputs["rq1_tikz_multifaceted_conditional_summary_csv"] = multifaceted_summary_csv_path
+        outputs.update(self._write_rq1_superhero_conditional_packet_rows(all_conditional_rows))
         outputs["figure_1_hero_type_appendix"] = self._plot_figure_1_prevalence(
             dpi=dpi,
             save_svg=save_svg,
@@ -432,7 +457,10 @@ class FinalFigureGenerator:
                 merged[project_name].update(author_ids)
         return merged
 
-    def _load_rq1_conditional_rows(self) -> list[dict[str, float | str]]:
+    def _load_rq1_conditional_rows(
+        self,
+        include_superhero_denominator_conditions: bool = False,
+    ) -> list[dict[str, float | str]]:
         heroes_dir = settings.outputs_csv_dir / "heroes"
 
         social_map = self._merge_project_member_sets(
@@ -524,6 +552,33 @@ class FinalFigureGenerator:
                     }
                 )
 
+            if include_superhero_denominator_conditions and technical_members:
+                superhero_in_technical = superhero_members.intersection(technical_members)
+                conditional_rows.append(
+                    {
+                        "condition_id": "sh_over_t",
+                        "condition_label": RQ1_CONDITIONAL_LABELS["sh_over_t"],
+                        "project_name": project_name,
+                        "numerator_count": len(superhero_in_technical),
+                        "denominator_count": len(technical_members),
+                        "percentage": (len(superhero_in_technical) / len(technical_members))
+                        * 100.0,
+                    }
+                )
+
+            if include_superhero_denominator_conditions and social_members:
+                superhero_in_social = superhero_members.intersection(social_members)
+                conditional_rows.append(
+                    {
+                        "condition_id": "sh_over_s",
+                        "condition_label": RQ1_CONDITIONAL_LABELS["sh_over_s"],
+                        "project_name": project_name,
+                        "numerator_count": len(superhero_in_social),
+                        "denominator_count": len(social_members),
+                        "percentage": (len(superhero_in_social) / len(social_members)) * 100.0,
+                    }
+                )
+
         return conditional_rows
 
     def _plot_data_dir(self) -> Path:
@@ -542,6 +597,89 @@ class FinalFigureGenerator:
             writer.writerow(header)
             writer.writerows(rows)
         return output_path
+
+    def _write_rq1_superhero_conditional_packet_rows(
+        self,
+        conditional_rows: list[dict[str, float | str]],
+    ) -> dict[str, Path]:
+        superhero_rows = [
+            row
+            for row in conditional_rows
+            if str(row["condition_id"]) in RQ1_SUPERHERO_CONDITIONAL_ORDER
+        ]
+        summary_by_condition = summarize_rq1_conditional_prevalence(
+            superhero_rows,
+            condition_order=RQ1_SUPERHERO_CONDITIONAL_ORDER,
+        )
+        paths: dict[str, Path] = {}
+
+        for condition_id in RQ1_SUPERHERO_CONDITIONAL_ORDER:
+            condition_rows = sorted(
+                (
+                    row
+                    for row in superhero_rows
+                    if str(row["condition_id"]) == condition_id
+                ),
+                key=lambda row: str(row["project_name"]),
+            )
+            project_path = self._write_csv_rows(
+                self.coauthor_packet_dir / f"C_rq1_{condition_id}_project.csv",
+                [
+                    "condition_id",
+                    "condition_label",
+                    "condition_description",
+                    "project_name",
+                    "numerator_count",
+                    "denominator_count",
+                    "percentage",
+                ],
+                [
+                    [
+                        condition_id,
+                        RQ1_CONDITIONAL_LABELS[condition_id],
+                        RQ1_CONDITIONAL_DESCRIPTION[condition_id],
+                        str(row["project_name"]),
+                        int(row["numerator_count"]),
+                        int(row["denominator_count"]),
+                        float(row["percentage"]),
+                    ]
+                    for row in condition_rows
+                ],
+            )
+            summary = summary_by_condition[condition_id]
+            summary_path = self._write_csv_rows(
+                self.coauthor_packet_dir / f"C_rq1_{condition_id}_summary.csv",
+                [
+                    "condition_id",
+                    "condition_label",
+                    "condition_description",
+                    "n_projects",
+                    "non_zero_projects",
+                    "median_pct",
+                    "q1_pct",
+                    "q3_pct",
+                    "mean_pct",
+                    "max_pct",
+                ],
+                [
+                    [
+                        condition_id,
+                        RQ1_CONDITIONAL_LABELS[condition_id],
+                        RQ1_CONDITIONAL_DESCRIPTION[condition_id],
+                        summary.n_projects,
+                        summary.non_zero_projects,
+                        summary.median,
+                        summary.q1,
+                        summary.q3,
+                        summary.mean,
+                        summary.maximum,
+                    ]
+                ],
+            )
+            paths[f"rq1_coauthor_{condition_id}_project_csv"] = project_path
+            paths[f"rq1_coauthor_{condition_id}_summary_csv"] = summary_path
+
+        return paths
 
     def _plot_rq1_technical_social_prevalence(self, dpi: int, save_svg: bool) -> Path:
         base_rows = self._load_rq1_base_metric_rows(
@@ -613,8 +751,15 @@ class FinalFigureGenerator:
         self,
         dpi: int,
         save_svg: bool,
+        conditional_rows: list[dict[str, float | str]] | None = None,
     ) -> tuple[Path, Path, Path]:
-        conditional_rows = self._load_rq1_conditional_rows()
+        if conditional_rows is None:
+            conditional_rows = self._load_rq1_conditional_rows()
+        conditional_rows = [
+            row
+            for row in conditional_rows
+            if str(row["condition_id"]) in RQ1_CONDITIONAL_ORDER
+        ]
         if not conditional_rows:
             raise ValueError("No conditional rows available for RQ1 multifaceted prevalence.")
 

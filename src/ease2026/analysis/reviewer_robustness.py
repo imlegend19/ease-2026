@@ -1,5 +1,6 @@
 """Reviewer-facing robustness summary for Pareto/quantile neighborhood checks."""
 
+from __future__ import annotations
 
 import csv
 import math

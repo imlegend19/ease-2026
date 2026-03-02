@@ -1,5 +1,6 @@
 """Policy definitions for issue-outcome computation."""
 
+from __future__ import annotations
 
 from enum import StrEnum
 from typing import Any
@@ -15,7 +16,6 @@ class SeverityPolicy(StrEnum):
 
 class FixerAttributionPolicy(StrEnum):
     ASSIGNEE = "assignee"
-    ASSIGNEE_AT_FIX_TIME = "assignee_at_fix_time"
     COMMIT_AUTHOR = "commit_author"
 
 

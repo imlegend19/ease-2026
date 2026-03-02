@@ -1,5 +1,6 @@
 """Pareto-style rules for classifying hero projects."""
 
+from __future__ import annotations
 
 import math
 from collections.abc import Hashable
