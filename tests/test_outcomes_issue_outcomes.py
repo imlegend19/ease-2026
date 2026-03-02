@@ -103,6 +103,25 @@ def test_match_issue_ids_for_heroes_assignee_at_fix_time() -> None:
     assert matched == ["i1"]
 
 
+def test_match_issue_ids_for_heroes_combined_uses_assignee_or_fix_author() -> None:
+    issue_records = {
+        "i1": IssueRecord("i1", "p", "major", frozenset({"fallback_1"}), False),
+        "i2": IssueRecord("i2", "p", "major", frozenset({"fallback_2"}), False),
+        "i3": IssueRecord("i3", "p", "major", frozenset({"fallback_3"}), False),
+    }
+
+    matched = _match_issue_ids_for_heroes(  # noqa: SLF001
+        issue_ids=["i1", "i2", "i3"],
+        hero_authors={"h1"},
+        issue_records=issue_records,
+        fixer_policy=FixerAttributionPolicy.COMBINED,
+        fix_time_assignee_by_issue={"i1": "h1", "i2": "u2", "i3": "h1"},
+        fix_authors_by_issue={"i2": {"h1"}, "i3": {"h1"}},
+    )
+
+    assert matched == ["i1", "i2", "i3"]
+
+
 def test_bug_filter_prefers_verified_issue_type() -> None:
     from ease2026.outcomes.definitions import is_bug_issue
 

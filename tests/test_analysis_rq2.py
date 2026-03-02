@@ -104,7 +104,26 @@ def test_rq2_run_writes_new_per_project_outputs(
     def fake_load_membership_set(hero_code: str) -> MembershipSet:
         return memberships[hero_code]
 
+    contribution_maps = {
+        "T1": {
+            "p1": {"a": 1, "b": 2, "c": 3},
+            "p2": {"a": 3, "b": 2, "c": 1},
+        },
+        "T2": {
+            "p1": {"a": 1, "b": 1},
+        },
+        "T3": {},
+        "S1": {
+            "p1": {"a": 10, "b": 20, "c": 30},
+            "p2": {"a": 1, "b": 2, "c": 3},
+        },
+        "S2": {
+            "p1": {"a": 5, "b": 5},
+        },
+    }
+
     monkeypatch.setattr(rq2_module, "_load_membership_set", fake_load_membership_set)
+    monkeypatch.setattr(rq2_module, "_load_base_contribution_maps", lambda: contribution_maps)
 
     output_paths = Rq2Analyzer().run()
 
@@ -115,7 +134,43 @@ def test_rq2_run_writes_new_per_project_outputs(
         "rq2_overlap_social_per_project",
         "rq2_overlap_type_groups",
         "rq2_overlap_type_groups_per_project",
+        "rq2_cross_facet_spearman_per_project",
+        "rq2_cross_facet_spearman_summary",
     }
     assert expected_keys == set(output_paths)
     for output_path in output_paths.values():
         assert output_path.exists()
+
+    with output_paths["rq2_cross_facet_spearman_per_project"].open(
+        "r",
+        newline="",
+        encoding="utf-8",
+    ) as file:
+        per_project_rows = list(csv.DictReader(file))
+
+    t1_s1_p1 = next(
+        row
+        for row in per_project_rows
+        if row["technical_code"] == "T1"
+        and row["social_code"] == "S1"
+        and row["project_name"] == "p1"
+    )
+    assert int(t1_s1_p1["n_developers_nonzero_union"]) == 3
+    assert float(t1_s1_p1["spearman_rho"]) == pytest.approx(1.0)
+
+    with output_paths["rq2_cross_facet_spearman_summary"].open(
+        "r",
+        newline="",
+        encoding="utf-8",
+    ) as file:
+        summary_rows = list(csv.DictReader(file))
+
+    t1_s1_summary = next(
+        row
+        for row in summary_rows
+        if row["technical_code"] == "T1" and row["social_code"] == "S1"
+    )
+    assert int(t1_s1_summary["n_projects_total"]) == 2
+    assert int(t1_s1_summary["n_projects_with_defined_rho"]) == 2
+    assert float(t1_s1_summary["spearman_rho_median"]) == pytest.approx(0.0)
+    assert float(t1_s1_summary["spearman_rho_iqr"]) == pytest.approx(1.0)

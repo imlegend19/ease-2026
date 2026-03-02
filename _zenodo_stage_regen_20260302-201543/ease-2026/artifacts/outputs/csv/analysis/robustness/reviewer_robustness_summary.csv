@@ -1,0 +1,7 @@
+claim_id,finding,default_value,range_across_configs,stable,support
+RQ1-A,Technical and social hero-project prevalence remains high.,T=97.96%; S=91.84%,T 82.65%-100.00%; S 64.29%-100.00%,True,8/8
+RQ1-B,Sociotechnical prevalence stays lower than social prevalence.,ST=5.10%; S=91.84%,ST 4.08%-5.10%; S 64.29%-100.00%,True,8/8
+RQ1-C,Technosocial prevalence stays lower than technical prevalence.,TS=4.08%; T=97.96%,TS 4.08%-5.10%; T 82.65%-100.00%,True,8/8
+RQ1-D,Superhero prevalence stays low and does not exceed technosocial prevalence (rarest/tied-rarest multifaceted pattern).,SH=4.08%; TS=4.08%,SH 4.08%-5.10%; TS 4.08%-5.10%,True,8/8
+RQ2-A,Technosocial--Super remains the strongest type-level overlap pair.,Jaccard=0.883,0.872-1.000,True,8/8
+RQ3-A,"Multifaceted types keep lower-or-equal median reopen rates than social (assignee, severity-wise comparisons).",15/15 comparisons (100.00%),100.00%-100.00%,True,8/8

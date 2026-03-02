@@ -7,6 +7,8 @@ import math
 from dataclasses import dataclass
 from pathlib import Path
 
+from scipy.stats import mannwhitneyu
+
 from ease2026.analysis.rq1 import hero_type_from_code
 from ease2026.core.logging import get_logger
 from ease2026.core.settings import settings
@@ -19,6 +21,7 @@ FIXER_ORDER: tuple[str, ...] = (
     FixerAttributionPolicy.ASSIGNEE.value,
     FixerAttributionPolicy.ASSIGNEE_AT_FIX_TIME.value,
     FixerAttributionPolicy.COMMIT_AUTHOR.value,
+    FixerAttributionPolicy.COMBINED.value,
 )
 
 
@@ -74,6 +77,36 @@ def _is_nan(value: float) -> bool:
     return math.isnan(value)
 
 
+def _cliffs_delta(sample_a: list[float], sample_b: list[float]) -> float:
+    """Return Cliff's delta for two independent samples.
+
+    Positive values indicate sample_a tends to have larger values than sample_b.
+    """
+    if not sample_a or not sample_b:
+        return float("nan")
+
+    n_pairs = len(sample_a) * len(sample_b)
+    greater = 0
+    lower = 0
+    for value_a in sample_a:
+        for value_b in sample_b:
+            if value_a > value_b:
+                greater += 1
+            elif value_a < value_b:
+                lower += 1
+    return (greater - lower) / n_pairs
+
+
+def _mannwhitney_two_sided_pvalue(sample_a: list[float], sample_b: list[float]) -> float:
+    if not sample_a or not sample_b:
+        return float("nan")
+    try:
+        result = mannwhitneyu(sample_a, sample_b, alternative="two-sided", method="auto")
+    except ValueError:
+        return float("nan")
+    return float(result.pvalue)
+
+
 class Rq3Analyzer:
     @property
     def outcomes_root(self) -> Path:
@@ -87,17 +120,27 @@ class Rq3Analyzer:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         records = self._load_records()
         summary_path = self._write_type_summary(records)
+        combined_summary_path = self._write_type_summary(
+            records,
+            output_filename="rq3_type_summary_combined.csv",
+            include_fixers={FixerAttributionPolicy.COMBINED.value},
+        )
         robustness_path = self._write_operationalization_robustness(records)
+        reopen_significance_path = self._write_reopen_rate_social_multifaceted_significance(records)
 
         logger.info(
             "Generated RQ3 final tables",
             record_count=len(records),
             summary_table=str(summary_path),
+            combined_summary_table=str(combined_summary_path),
             robustness_table=str(robustness_path),
+            reopen_significance_table=str(reopen_significance_path),
         )
         return {
             "rq3_type_summary": summary_path,
+            "rq3_type_summary_combined": combined_summary_path,
             "rq3_operationalization_robustness": robustness_path,
+            "rq3_reopen_social_multifaceted_significance": reopen_significance_path,
         }
 
     def _load_records(self) -> list[OutcomeRecord]:
@@ -147,10 +190,22 @@ class Rq3Analyzer:
                         )
         return records
 
-    def _write_type_summary(self, records: list[OutcomeRecord]) -> Path:
-        output_path = self.output_dir / "rq3_type_summary.csv"
+    def _write_type_summary(
+        self,
+        records: list[OutcomeRecord],
+        output_filename: str = "rq3_type_summary.csv",
+        include_fixers: set[str] | None = None,
+    ) -> Path:
+        output_path = self.output_dir / output_filename
+        selected_fixers = (
+            tuple(fixer for fixer in FIXER_ORDER if fixer in include_fixers)
+            if include_fixers is not None
+            else FIXER_ORDER
+        )
         grouped: dict[tuple[str, str, str], list[OutcomeRecord]] = {}
         for record in records:
+            if record.fixer not in selected_fixers:
+                continue
             grouped.setdefault((record.fixer, record.severity, record.hero_type), []).append(record)
 
         with output_path.open("w", newline="", encoding="utf-8") as file:
@@ -174,7 +229,7 @@ class Rq3Analyzer:
                 ]
             )
 
-            for fixer in FIXER_ORDER:
+            for fixer in selected_fixers:
                 for severity in SEVERITY_ORDER:
                     hero_types = sorted(
                         {key[2] for key in grouped if key[0] == fixer and key[1] == severity}
@@ -295,6 +350,74 @@ class Rq3Analyzer:
                         ]
                     )
 
+        return output_path
+
+    def _project_reopen_rates(
+        self,
+        records: list[OutcomeRecord],
+        fixer: str,
+        severity: str,
+        hero_type: str,
+    ) -> list[float]:
+        values_by_project: dict[str, list[float]] = {}
+        for record in records:
+            if record.fixer != fixer or record.severity != severity or record.hero_type != hero_type:
+                continue
+            if record.n_assigned <= 0 or _is_nan(record.reopen_rate):
+                continue
+            values_by_project.setdefault(record.project_name, []).append(record.reopen_rate)
+
+        return [_median(values) for _project_name, values in sorted(values_by_project.items())]
+
+    def _write_reopen_rate_social_multifaceted_significance(
+        self,
+        records: list[OutcomeRecord],
+    ) -> Path:
+        output_path = self.output_dir / "rq3_reopen_social_multifaceted_significance.csv"
+        fixer = FixerAttributionPolicy.ASSIGNEE.value
+        comparisons: tuple[tuple[str, str], ...] = (
+            ("social_vs_sociotechnical", "sociotechnical"),
+            ("social_vs_super", "super"),
+        )
+
+        with output_path.open("w", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerow(
+                [
+                    "fixer",
+                    "severity",
+                    "comparison",
+                    "n_projects_social",
+                    "n_projects_comparison",
+                    "cliffs_delta_social_minus_comparison",
+                    "mannwhitney_p_value",
+                ]
+            )
+            for severity in SEVERITY_ORDER:
+                social_values = self._project_reopen_rates(
+                    records=records,
+                    fixer=fixer,
+                    severity=severity,
+                    hero_type="social",
+                )
+                for comparison_name, comparison_hero_type in comparisons:
+                    comparison_values = self._project_reopen_rates(
+                        records=records,
+                        fixer=fixer,
+                        severity=severity,
+                        hero_type=comparison_hero_type,
+                    )
+                    writer.writerow(
+                        [
+                            fixer,
+                            severity,
+                            comparison_name,
+                            len(social_values),
+                            len(comparison_values),
+                            _cliffs_delta(social_values, comparison_values),
+                            _mannwhitney_two_sided_pvalue(social_values, comparison_values),
+                        ]
+                    )
         return output_path
 
 

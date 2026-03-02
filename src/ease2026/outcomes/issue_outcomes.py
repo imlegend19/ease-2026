@@ -149,7 +149,10 @@ class IssueOutcomesComputer:
         )
 
         fix_time_assignee_by_issue: dict[str, str | None] = {}
-        if fixer_policy is FixerAttributionPolicy.ASSIGNEE_AT_FIX_TIME:
+        if fixer_policy in {
+            FixerAttributionPolicy.ASSIGNEE_AT_FIX_TIME,
+            FixerAttributionPolicy.COMBINED,
+        }:
             fix_time_assignee_by_issue = self._resolve_fix_time_assignee_by_issue(
                 issue_records=issue_records,
                 outcome_events_by_issue=outcome_events_by_issue,
@@ -161,7 +164,10 @@ class IssueOutcomesComputer:
         )
 
         fix_authors_by_issue: dict[str, set[str]] = {}
-        if fixer_policy is FixerAttributionPolicy.COMMIT_AUTHOR:
+        if fixer_policy in {
+            FixerAttributionPolicy.COMMIT_AUTHOR,
+            FixerAttributionPolicy.COMBINED,
+        }:
             fix_authors_by_issue = self._load_fix_authors_by_issue(issue_ids=issue_ids)
 
         rows_by_severity = self._compute_rows_by_severity(
@@ -602,6 +608,19 @@ def _match_issue_ids_for_heroes(
 
     if fixer_policy is FixerAttributionPolicy.COMMIT_AUTHOR:
         for issue_id in issue_ids:
+            fix_authors = fix_authors_by_issue.get(issue_id, set())
+            if fix_authors.intersection(hero_authors):
+                matched.append(issue_id)
+        return matched
+
+    if fixer_policy is FixerAttributionPolicy.COMBINED:
+        for issue_id in issue_ids:
+            assignee_id = fix_time_assignee_by_issue.get(issue_id)
+            assignee_matches = assignee_id is not None and assignee_id in hero_authors
+            if assignee_matches:
+                matched.append(issue_id)
+                continue
+
             fix_authors = fix_authors_by_issue.get(issue_id, set())
             if fix_authors.intersection(hero_authors):
                 matched.append(issue_id)
