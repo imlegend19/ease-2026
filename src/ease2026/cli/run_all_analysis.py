@@ -22,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--skip-inferential",
         action="store_true",
-        help="Skip RQ3 inferential outputs (Kendall tau and Scott-Knott ESD).",
+        help="Skip RQ3 inferential outputs (Kendall tau, Spearman rho, Scott-Knott ESD).",
     )
     parser.add_argument(
         "--inferential-fixer",

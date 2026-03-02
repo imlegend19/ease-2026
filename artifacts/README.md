@@ -15,7 +15,7 @@ Include (under a dataset directory, for example `artifacts/smartshark_2_2/`):
 - `artifacts/<dataset_name>/outputs/csv/analysis/rq3_outcomes/**`
   - RQ3 bug-fix/reopen outcome tables by severity and fixer role.
 - `artifacts/<dataset_name>/outputs/csv/analysis/rq3_inferential/**`
-  - Inferential statistics artifacts (Kendall tau and Scott-Knott ESD inputs/results).
+  - Inferential statistics artifacts (Kendall tau, Spearman rho, Scott-Knott ESD inputs/results).
 - `artifacts/<dataset_name>/outputs/csv/analysis/robustness/threshold_sweep_master.csv`
   - Master threshold sweep summary used for robustness reporting (sanitized paths only).
 - `artifacts/<dataset_name>/outputs/csv/analysis/robustness/reviewer_*.csv`

@@ -1,14 +1,15 @@
-"""Inferential RQ3 outputs: mean rankings, Kendall tau, and Scott-Knott ESD."""
+"""Inferential RQ3 outputs: mean rankings, rank correlations, and Scott-Knott ESD."""
 
 from __future__ import annotations
 
 import csv
 import math
 import subprocess
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from scipy.stats import kendalltau
+from scipy.stats import kendalltau, spearmanr
 
 from ease2026.analysis.rq1 import HERO_CODE_ORDER
 from ease2026.core.logging import get_logger
@@ -104,7 +105,41 @@ def compute_kendall_tables(
     severity_order: tuple[str, ...] = VALID_PRIORITIES,
 ) -> tuple[dict[str, dict[str, float]], dict[str, dict[str, float]], dict[str, dict[str, str]]]:
     """Compute Kendall tau and p-value matrices across severities."""
-    tau_table: dict[str, dict[str, float]] = {
+    return _compute_rank_correlation_tables(
+        ranking_order_by_severity=ranking_order_by_severity,
+        severity_order=severity_order,
+        correlation_fn=_kendall_correlation,
+    )
+
+
+def compute_spearman_tables(
+    ranking_order_by_severity: dict[str, list[str]],
+    severity_order: tuple[str, ...] = VALID_PRIORITIES,
+) -> tuple[dict[str, dict[str, float]], dict[str, dict[str, float]], dict[str, dict[str, str]]]:
+    """Compute Spearman rho and p-value matrices across severities."""
+    return _compute_rank_correlation_tables(
+        ranking_order_by_severity=ranking_order_by_severity,
+        severity_order=severity_order,
+        correlation_fn=_spearman_correlation,
+    )
+
+
+def _kendall_correlation(rank_a: list[int], rank_b: list[int]) -> tuple[float, float]:
+    tau_value, p_value = kendalltau(rank_a, rank_b)
+    return float(tau_value), float(p_value)
+
+
+def _spearman_correlation(rank_a: list[int], rank_b: list[int]) -> tuple[float, float]:
+    rho_value, p_value = spearmanr(rank_a, rank_b)
+    return float(rho_value), float(p_value)
+
+
+def _compute_rank_correlation_tables(
+    ranking_order_by_severity: dict[str, list[str]],
+    severity_order: tuple[str, ...],
+    correlation_fn: Callable[[list[int], list[int]], tuple[float, float]],
+) -> tuple[dict[str, dict[str, float]], dict[str, dict[str, float]], dict[str, dict[str, str]]]:
+    coefficient_table: dict[str, dict[str, float]] = {
         severity: {other: float("nan") for other in severity_order} for severity in severity_order
     }
     p_value_table: dict[str, dict[str, float]] = {
@@ -114,7 +149,7 @@ def compute_kendall_tables(
     for severity_a in severity_order:
         for severity_b in severity_order:
             if severity_a == severity_b:
-                tau_table[severity_a][severity_b] = 1.0
+                coefficient_table[severity_a][severity_b] = 1.0
                 p_value_table[severity_a][severity_b] = 0.0
                 continue
 
@@ -130,21 +165,21 @@ def compute_kendall_tables(
 
             rank_a = [order_a.index(hero_code) + 1 for hero_code in common_heroes]
             rank_b = [order_b.index(hero_code) + 1 for hero_code in common_heroes]
-            tau_value, p_value = kendalltau(rank_a, rank_b)
-            tau_table[severity_a][severity_b] = float(tau_value)
-            p_value_table[severity_a][severity_b] = float(p_value)
+            coefficient_value, p_value = correlation_fn(rank_a, rank_b)
+            coefficient_table[severity_a][severity_b] = coefficient_value
+            p_value_table[severity_a][severity_b] = p_value
 
     formatted_table: dict[str, dict[str, str]] = {}
     for severity in severity_order:
         formatted_table[severity] = {}
         for other in severity_order:
-            tau_value = tau_table[severity][other]
+            coefficient_value = coefficient_table[severity][other]
             p_value = p_value_table[severity][other]
-            tau_str = "nan" if _is_nan(tau_value) else f"{tau_value:.3f}"
+            coefficient_str = "nan" if _is_nan(coefficient_value) else f"{coefficient_value:.3f}"
             p_str = "nan" if _is_nan(p_value) else f"{p_value:.3f}"
-            formatted_table[severity][other] = f"{tau_str} ({p_str})"
+            formatted_table[severity][other] = f"{coefficient_str} ({p_str})"
 
-    return tau_table, p_value_table, formatted_table
+    return coefficient_table, p_value_table, formatted_table
 
 
 class Rq3InferentialAnalyzer:
@@ -197,6 +232,17 @@ class Rq3InferentialAnalyzer:
             output_paths[f"kendall_tau_{metric_name}"] = tau_path
             output_paths[f"kendall_tau_p_values_{metric_name}"] = p_path
             output_paths[f"kendall_tau_formatted_{metric_name}"] = formatted_path
+
+            rho_table, rho_p_table, rho_formatted_table = compute_spearman_tables(ranking_order)
+            rho_path = output_dir / f"spearman_rho_{metric_name}.csv"
+            rho_p_path = output_dir / f"spearman_rho_p_values_{metric_name}.csv"
+            rho_formatted_path = output_dir / f"spearman_rho_formatted_{metric_name}.csv"
+            self._write_matrix_table(rho_path, rho_table)
+            self._write_matrix_table(rho_p_path, rho_p_table)
+            self._write_string_matrix_table(rho_formatted_path, rho_formatted_table)
+            output_paths[f"spearman_rho_{metric_name}"] = rho_path
+            output_paths[f"spearman_rho_p_values_{metric_name}"] = rho_p_path
+            output_paths[f"spearman_rho_formatted_{metric_name}"] = rho_formatted_path
 
         if run_sk_esd:
             if not self.sk_esd_runner_path.exists():

@@ -9,6 +9,7 @@ from ease2026.analysis.rq3_inferential import (
     build_input_matrix,
     compute_kendall_tables,
     compute_mean_ranking,
+    compute_spearman_tables,
 )
 
 
@@ -69,4 +70,29 @@ def test_compute_kendall_tables_matches_expected_values() -> None:
     assert tau_table["blocker"]["minor"] == pytest.approx(1.0 / 3.0, rel=1e-3)
     assert math.isnan(tau_table["blocker"]["trivial"])
     assert tau_table["trivial"]["trivial"] == pytest.approx(1.0)
+    assert formatted_table["blocker"]["major"].startswith("-1.000")
+
+
+def test_compute_spearman_tables_matches_expected_values() -> None:
+    ranking_order_by_severity = {
+        "blocker": ["A", "B", "C"],
+        "critical": ["A", "B", "C"],
+        "major": ["C", "B", "A"],
+        "minor": ["A", "C", "B"],
+        "trivial": [],
+    }
+
+    rho_table, p_value_table, formatted_table = compute_spearman_tables(
+        ranking_order_by_severity=ranking_order_by_severity,
+        severity_order=("blocker", "critical", "major", "minor", "trivial"),
+    )
+
+    assert rho_table["blocker"]["critical"] == pytest.approx(1.0)
+    assert p_value_table["blocker"]["critical"] == pytest.approx(0.0)
+    assert rho_table["blocker"]["major"] == pytest.approx(-1.0)
+    assert p_value_table["blocker"]["major"] == pytest.approx(0.0)
+    assert rho_table["blocker"]["minor"] == pytest.approx(0.5)
+    assert p_value_table["blocker"]["minor"] == pytest.approx(2.0 / 3.0)
+    assert math.isnan(rho_table["blocker"]["trivial"])
+    assert rho_table["trivial"]["trivial"] == pytest.approx(1.0)
     assert formatted_table["blocker"]["major"].startswith("-1.000")

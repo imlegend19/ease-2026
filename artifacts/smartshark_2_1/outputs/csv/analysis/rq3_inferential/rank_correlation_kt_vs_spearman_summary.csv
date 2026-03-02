@@ -1,0 +1,7 @@
+fixer,metric,n_pairs,same_sign_pairs,same_sign_share,kendall_significant_pairs_p_lt_0_05,spearman_significant_pairs_p_lt_0_05,mean_abs_difference,max_abs_difference
+assignee,fix_rate,10,10,1.0,3,2,0.06620553359683796,0.1511857707509882
+assignee,reopen_rate,10,9,0.9,7,6,0.14110671936758895,0.29841897233201586
+assignee_at_fix_time,fix_rate,10,8,0.8,3,2,0.07500000000000001,0.15019762845849804
+assignee_at_fix_time,reopen_rate,10,10,1.0,4,4,0.12075098814229249,0.191699604743083
+commit_author,fix_rate,10,10,1.0,8,5,0.06551383399209487,0.1610671936758894
+commit_author,reopen_rate,10,9,0.9,7,5,0.08250988142292492,0.16699604743083007
