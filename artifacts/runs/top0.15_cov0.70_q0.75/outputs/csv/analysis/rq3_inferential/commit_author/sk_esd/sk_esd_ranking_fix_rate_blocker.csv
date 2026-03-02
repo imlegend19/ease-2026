@@ -1,4 +1,0 @@
-metric,severity,hero_code,rank,method
-fix_rate,blocker,T1,1,mean_fallback_docker
-fix_rate,blocker,T2,2,mean_fallback_docker
-fix_rate,blocker,T3,3,mean_fallback_docker

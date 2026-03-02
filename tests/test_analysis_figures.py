@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+from pathlib import Path
+from types import SimpleNamespace
+
 import numpy as np
 import pytest
 
+import ease2026.analysis.figures as figures_module
 from ease2026.analysis.figures import (
+    FinalFigureGenerator,
     build_rq3_effect_grids,
     build_type_overlap_matrix,
     summarize_rq1_conditional_prevalence,
@@ -86,3 +91,24 @@ def test_summarize_rq1_conditional_prevalence_counts_non_zero_projects() -> None
     assert summary["ts_over_t"].non_zero_projects == 1
     assert summary["sh_over_s_union_t"].n_projects == 1
     assert summary["sh_over_s_union_t"].non_zero_projects == 0
+
+
+def test_resolve_run_dir_prefers_experiment_root_relative_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    experiment_root = tmp_path / "ease-2026"
+    runs_dir = experiment_root / "artifacts" / "runs"
+    target_run_dir = runs_dir / "top0.20_cov0.80_q0.50"
+    target_run_dir.mkdir(parents=True)
+
+    monkeypatch.setattr(
+        figures_module,
+        "settings",
+        SimpleNamespace(artifacts_dir=experiment_root / "artifacts"),
+    )
+
+    generator = FinalFigureGenerator()
+    resolved = generator._resolve_run_dir("artifacts/runs/top0.20_cov0.80_q0.50")
+
+    assert resolved == target_run_dir

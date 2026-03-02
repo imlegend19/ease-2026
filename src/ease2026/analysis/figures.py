@@ -353,13 +353,29 @@ class FinalFigureGenerator:
         rows = self._read_csv(csv_path)
         return [row for row in rows if row.get("hero_code", "").strip() in RQ1_BASE_METRIC_ORDER]
 
+    def _resolve_run_dir(self, run_dir_value: str) -> Path:
+        run_dir = Path(run_dir_value)
+        candidates: list[Path] = []
+        if run_dir.is_absolute():
+            candidates.append(run_dir)
+        else:
+            # Treat sweep paths as relative to the experiment root when present.
+            candidates.append(settings.artifacts_dir.parent / run_dir)
+            candidates.append(run_dir)
+        candidates.append(settings.artifacts_dir / "runs" / run_dir.name)
+
+        for candidate in candidates:
+            if candidate.exists():
+                return candidate
+        return candidates[-1]
+
     def _load_threshold_base_metric_rows(self) -> list[dict[str, float | str]]:
         rows = self._read_csv(self.robustness_csv_path)
         metric_rows: list[dict[str, float | str]] = []
         for row in rows:
             if row.get("status", "").strip() != "success":
                 continue
-            run_dir = Path(str(row["run_dir"]))
+            run_dir = self._resolve_run_dir(str(row["run_dir"]))
             prevalence_path = (
                 run_dir
                 / "outputs"
@@ -1001,7 +1017,7 @@ class FinalFigureGenerator:
             if row.get("status", "").strip() != "success":
                 continue
 
-            run_dir = Path(str(row["run_dir"]))
+            run_dir = self._resolve_run_dir(str(row["run_dir"]))
             prevalence_path = (
                 run_dir
                 / "outputs"

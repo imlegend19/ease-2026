@@ -2,3 +2,8 @@
 __pycache__/
 *.pyc
 .env
+
+# Replication artifacts: keep final outputs only
+artifacts/cache/
+artifacts/runs/
+artifacts/outputs/csv/analysis/robustness/threshold_sweep_master.pre_neighborhood_backup.csv

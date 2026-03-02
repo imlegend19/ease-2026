@@ -1,4 +1,0 @@
-metric,severity,hero_code,rank,method
-reopen_rate,blocker,T2,1,sk_esd_docker
-reopen_rate,blocker,T1,1,sk_esd_docker
-reopen_rate,blocker,T3,1,sk_esd_docker

@@ -1,2 +1,0 @@
-group_a,group_b,a_project_author_pairs,b_project_author_pairs,pair_intersection,pair_union,pair_jaccard,a_projects,b_projects,project_intersection,project_union,project_jaccard
-S1,S2,7328,6517,5053,8792,0.5747270245677889,90,77,77,90,0.8555555555555555

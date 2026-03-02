@@ -103,6 +103,15 @@ def _run_id(config: SweepConfig) -> str:
     )
 
 
+def _path_relative_to_experiment_root(path: Path) -> str:
+    experiment_root = settings.artifacts_dir.parent.resolve()
+    resolved_path = path.resolve()
+    try:
+        return resolved_path.relative_to(experiment_root).as_posix()
+    except ValueError:
+        return resolved_path.as_posix()
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
@@ -388,6 +397,7 @@ def main() -> None:
     for config in configs:
         run_id = _run_id(config)
         run_dir = runs_root / run_id
+        run_dir_for_output = _path_relative_to_experiment_root(run_dir)
         start_time = time.perf_counter()
         generated_at = datetime.now(tz=UTC).isoformat()
 
@@ -398,7 +408,7 @@ def main() -> None:
                 coverage_fraction=config.coverage_fraction,
                 hybrid_quantile=config.hybrid_quantile,
                 status="skipped_exists",
-                run_dir=str(run_dir),
+                run_dir=run_dir_for_output,
                 duration_seconds=0.0,
                 technical_overlap_mean_jaccard=float("nan"),
                 social_overlap_jaccard=float("nan"),
@@ -412,7 +422,7 @@ def main() -> None:
             logger.warning(
                 "Skipping existing run directory (use --overwrite-existing to replace)",
                 run_id=run_id,
-                run_dir=str(run_dir),
+                run_dir=run_dir_for_output,
             )
             continue
 
@@ -465,7 +475,7 @@ def main() -> None:
                 coverage_fraction=config.coverage_fraction,
                 hybrid_quantile=config.hybrid_quantile,
                 status="success",
-                run_dir=str(run_dir),
+                run_dir=run_dir_for_output,
                 duration_seconds=duration_seconds,
                 technical_overlap_mean_jaccard=technical_overlap_mean,
                 social_overlap_jaccard=social_overlap,
@@ -492,7 +502,7 @@ def main() -> None:
                 coverage_fraction=config.coverage_fraction,
                 hybrid_quantile=config.hybrid_quantile,
                 status="failed",
-                run_dir=str(run_dir),
+                run_dir=run_dir_for_output,
                 duration_seconds=duration_seconds,
                 technical_overlap_mean_jaccard=float("nan"),
                 social_overlap_jaccard=float("nan"),
