@@ -7,6 +7,11 @@ from typing import Any
 
 from ease2026.core.constants import COMMIT_WITH_PROJECT_INFO_COLLECTION, FILE_ACTION_COLLECTION
 from ease2026.core.mongo import get_mongo_collection
+from ease2026.identity.canonical import (
+    load_identity_context,
+    resolve_canonical_person_id,
+)
+from ease2026.identity.reverse_identity import ReverseIdentityMap, ReverseIdentityResolver
 
 AuthorId = Hashable
 ProjectContributionMap = dict[str, dict[AuthorId, int]]
@@ -24,7 +29,14 @@ def _sorted_project_contributions(
     return sorted_output
 
 
-def _build_commit_project_author_index() -> CommitProjectAuthorIndex:
+def _build_commit_project_author_index(
+    reverse_identity_map: ReverseIdentityMap | None = None,
+    reverse_identity_resolver: ReverseIdentityResolver | None = None,
+) -> CommitProjectAuthorIndex:
+    reverse_identity_map, reverse_identity_resolver = load_identity_context(
+        reverse_identity_map=reverse_identity_map,
+        reverse_identity_resolver=reverse_identity_resolver,
+    )
     commit_index: CommitProjectAuthorIndex = {}
 
     records = get_mongo_collection(COMMIT_WITH_PROJECT_INFO_COLLECTION).find(
@@ -33,42 +45,72 @@ def _build_commit_project_author_index() -> CommitProjectAuthorIndex:
     )
     for record in records:
         commit_id = record.get("_id")
-        author_id = record.get("author_id")
+        canonical_author_id = resolve_canonical_person_id(
+            person_id=record.get("author_id"),
+            reverse_identity_map=reverse_identity_map,
+            reverse_identity_resolver=reverse_identity_resolver,
+        )
         project_info = record.get("project_name_info", {})
         project_name = project_info.get("name") if isinstance(project_info, dict) else None
 
-        if commit_id is None or author_id is None or not project_name:
+        if commit_id is None or canonical_author_id is None or not project_name:
             continue
 
-        commit_index[commit_id] = (project_name, author_id)
-        commit_index[str(commit_id)] = (project_name, author_id)
+        commit_index[commit_id] = (project_name, canonical_author_id)
+        commit_index[str(commit_id)] = (project_name, canonical_author_id)
 
     return commit_index
 
 
-def compute_commit_count_contributions() -> ProjectContributionMap:
-    project_author_counts: ProjectContributionMap = {}
+def compute_commit_count_contributions(
+    reverse_identity_map: ReverseIdentityMap | None = None,
+    reverse_identity_resolver: ReverseIdentityResolver | None = None,
+) -> ProjectContributionMap:
+    reverse_identity_map, reverse_identity_resolver = load_identity_context(
+        reverse_identity_map=reverse_identity_map,
+        reverse_identity_resolver=reverse_identity_resolver,
+    )
+    project_author_commit_ids: dict[str, dict[AuthorId, set[Any]]] = {}
 
     records = get_mongo_collection(COMMIT_WITH_PROJECT_INFO_COLLECTION).find(
         {},
-        {"author_id": 1, "project_name_info.name": 1},
+        {"_id": 1, "author_id": 1, "project_name_info.name": 1},
     )
     for record in records:
-        author_id = record.get("author_id")
+        commit_id = record.get("_id")
+        canonical_author_id = resolve_canonical_person_id(
+            person_id=record.get("author_id"),
+            reverse_identity_map=reverse_identity_map,
+            reverse_identity_resolver=reverse_identity_resolver,
+        )
         project_info = record.get("project_name_info", {})
         project_name = project_info.get("name") if isinstance(project_info, dict) else None
 
-        if author_id is None or not project_name:
+        if commit_id is None or canonical_author_id is None or not project_name:
             continue
 
-        author_counts = project_author_counts.setdefault(project_name, {})
-        author_counts[author_id] = author_counts.get(author_id, 0) + 1
+        author_commit_ids = project_author_commit_ids.setdefault(project_name, {}).setdefault(
+            canonical_author_id,
+            set(),
+        )
+        author_commit_ids.add(commit_id)
 
+    project_author_counts: ProjectContributionMap = {}
+    for project_name, author_commit_ids in project_author_commit_ids.items():
+        project_author_counts[project_name] = {
+            author_id: len(commit_ids) for author_id, commit_ids in author_commit_ids.items()
+        }
     return _sorted_project_contributions(project_author_counts)
 
 
-def compute_file_touch_contributions() -> ProjectContributionMap:
-    commit_index = _build_commit_project_author_index()
+def compute_file_touch_contributions(
+    reverse_identity_map: ReverseIdentityMap | None = None,
+    reverse_identity_resolver: ReverseIdentityResolver | None = None,
+) -> ProjectContributionMap:
+    commit_index = _build_commit_project_author_index(
+        reverse_identity_map=reverse_identity_map,
+        reverse_identity_resolver=reverse_identity_resolver,
+    )
     project_author_files: dict[str, dict[AuthorId, set[Any]]] = {}
 
     file_actions = get_mongo_collection(FILE_ACTION_COLLECTION).find(
@@ -109,8 +151,14 @@ def _to_int(value: Any) -> int:
         return 0
 
 
-def compute_loc_churn_contributions() -> ProjectContributionMap:
-    commit_index = _build_commit_project_author_index()
+def compute_loc_churn_contributions(
+    reverse_identity_map: ReverseIdentityMap | None = None,
+    reverse_identity_resolver: ReverseIdentityResolver | None = None,
+) -> ProjectContributionMap:
+    commit_index = _build_commit_project_author_index(
+        reverse_identity_map=reverse_identity_map,
+        reverse_identity_resolver=reverse_identity_resolver,
+    )
     project_author_counts: ProjectContributionMap = {}
 
     file_actions = get_mongo_collection(FILE_ACTION_COLLECTION).find(

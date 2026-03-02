@@ -17,6 +17,7 @@ from ease2026.analysis.rq2 import Rq2Analyzer
 from ease2026.analysis.rq3 import Rq3Analyzer
 from ease2026.core.logging import get_logger, setup_logging
 from ease2026.core.settings import settings
+from ease2026.identity.canonical import load_identity_context
 from ease2026.hero.generate import build_hero_flags_and_members, generate_hero_outputs
 from ease2026.hero.hybrid import (
     SOCIOTECHNICAL_SPECS,
@@ -135,6 +136,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Overwrite existing run directories for matching configurations.",
     )
+    parser.add_argument(
+        "--refresh-identity-cache",
+        action="store_true",
+        help="Refresh reverse-identity cache from Mongo before running sweep.",
+    )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging.")
     args = parser.parse_args()
 
@@ -158,13 +164,34 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-def _build_base_contribution_maps() -> dict[str, dict[str, dict[object, int]]]:
+def _build_base_contribution_maps(
+    *,
+    refresh_identity_cache: bool = False,
+) -> dict[str, dict[str, dict[object, int]]]:
+    reverse_identity_map, reverse_identity_resolver = load_identity_context(
+        refresh_cache=refresh_identity_cache
+    )
     return {
-        "T1": compute_commit_count_contributions(),
-        "T2": compute_file_touch_contributions(),
-        "T3": compute_loc_churn_contributions(),
-        "S1": compute_comment_count_contributions(),
-        "S2": compute_issue_participation_contributions(),
+        "T1": compute_commit_count_contributions(
+            reverse_identity_map=reverse_identity_map,
+            reverse_identity_resolver=reverse_identity_resolver,
+        ),
+        "T2": compute_file_touch_contributions(
+            reverse_identity_map=reverse_identity_map,
+            reverse_identity_resolver=reverse_identity_resolver,
+        ),
+        "T3": compute_loc_churn_contributions(
+            reverse_identity_map=reverse_identity_map,
+            reverse_identity_resolver=reverse_identity_resolver,
+        ),
+        "S1": compute_comment_count_contributions(
+            reverse_identity_map=reverse_identity_map,
+            reverse_identity_resolver=reverse_identity_resolver,
+        ),
+        "S2": compute_issue_participation_contributions(
+            reverse_identity_map=reverse_identity_map,
+            reverse_identity_resolver=reverse_identity_resolver,
+        ),
     }
 
 
@@ -350,7 +377,9 @@ def main() -> None:
         configs = configs[: args.limit]
 
     logger.info("Starting threshold sweep", config_count=len(configs))
-    contribution_map_by_code = _build_base_contribution_maps()
+    contribution_map_by_code = _build_base_contribution_maps(
+        refresh_identity_cache=args.refresh_identity_cache
+    )
     summaries: list[SweepRunSummary] = []
 
     runs_root = settings.artifacts_dir / "runs"
@@ -411,7 +440,9 @@ def main() -> None:
                 hybrid_quantile=config.hybrid_quantile,
             )
 
-            IssueOutcomesComputer().compute_and_write(
+            IssueOutcomesComputer(
+                refresh_identity_cache=args.refresh_identity_cache
+            ).compute_and_write(
                 fixer_policy=FixerAttributionPolicy.ASSIGNEE,
             )
             Rq1Analyzer().run()

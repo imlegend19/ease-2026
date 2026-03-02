@@ -10,6 +10,7 @@ from ease2026.core.constants import (
     DEFAULT_TOP_CONTRIBUTOR_FRACTION,
 )
 from ease2026.core.logging import setup_logging
+from ease2026.identity.canonical import load_identity_context
 from ease2026.hero.generate import (
     HeroGenerationResult,
     ProjectContributionMap,
@@ -24,6 +25,7 @@ from ease2026.hero.technical import (
     compute_file_touch_contributions,
     compute_loc_churn_contributions,
 )
+from ease2026.identity.reverse_identity import ReverseIdentityMap, ReverseIdentityResolver
 
 
 def parse_args() -> argparse.Namespace:
@@ -42,6 +44,11 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_HERO_COVERAGE_FRACTION,
         help="Coverage fraction required to classify a project as hero (e.g., 0.8).",
     )
+    parser.add_argument(
+        "--refresh-identity-cache",
+        action="store_true",
+        help="Refresh reverse-identity cache from Mongo before generating metrics.",
+    )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging.")
     args = parser.parse_args()
 
@@ -53,22 +60,61 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-def _base_metric_extractors() -> list[tuple[str, Callable[[], ProjectContributionMap]]]:
+def _base_metric_extractors(
+    reverse_identity_map: ReverseIdentityMap,
+    reverse_identity_resolver: ReverseIdentityResolver,
+) -> list[tuple[str, Callable[[], ProjectContributionMap]]]:
     return [
-        ("T1", compute_commit_count_contributions),
-        ("T2", compute_file_touch_contributions),
-        ("T3", compute_loc_churn_contributions),
-        ("S1", compute_comment_count_contributions),
-        ("S2", compute_issue_participation_contributions),
+        (
+            "T1",
+            lambda: compute_commit_count_contributions(
+                reverse_identity_map=reverse_identity_map,
+                reverse_identity_resolver=reverse_identity_resolver,
+            ),
+        ),
+        (
+            "T2",
+            lambda: compute_file_touch_contributions(
+                reverse_identity_map=reverse_identity_map,
+                reverse_identity_resolver=reverse_identity_resolver,
+            ),
+        ),
+        (
+            "T3",
+            lambda: compute_loc_churn_contributions(
+                reverse_identity_map=reverse_identity_map,
+                reverse_identity_resolver=reverse_identity_resolver,
+            ),
+        ),
+        (
+            "S1",
+            lambda: compute_comment_count_contributions(
+                reverse_identity_map=reverse_identity_map,
+                reverse_identity_resolver=reverse_identity_resolver,
+            ),
+        ),
+        (
+            "S2",
+            lambda: compute_issue_participation_contributions(
+                reverse_identity_map=reverse_identity_map,
+                reverse_identity_resolver=reverse_identity_resolver,
+            ),
+        ),
     ]
 
 
 def main() -> None:
     args = parse_args()
     setup_logging(debug=args.debug)
+    reverse_identity_map, reverse_identity_resolver = load_identity_context(
+        refresh_cache=args.refresh_identity_cache
+    )
 
     results: list[HeroGenerationResult] = []
-    for metric_name, extractor in _base_metric_extractors():
+    for metric_name, extractor in _base_metric_extractors(
+        reverse_identity_map=reverse_identity_map,
+        reverse_identity_resolver=reverse_identity_resolver,
+    ):
         contribution_map = extractor()
         result = generate_hero_outputs(
             contribution_map=contribution_map,

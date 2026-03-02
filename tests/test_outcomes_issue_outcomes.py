@@ -10,6 +10,7 @@ from ease2026.outcomes.issue_outcomes import (
     IssueEvent,
     IssueRecord,
     _build_outcome_row,
+    _extract_assignee_ids,
     _event_outcome_flags,
     _match_issue_ids_for_heroes,
 )
@@ -103,3 +104,24 @@ def test_bug_filter_prefers_verified_issue_type() -> None:
 def test_priority_normalization_accepts_defined_values_only() -> None:
     assert normalize_priority("Critical") == "critical"
     assert normalize_priority("unknown") is None
+
+
+def test_extract_assignee_ids_resolves_canonical_identity() -> None:
+    class DummyResolver:
+        @staticmethod
+        def resolve_person_id(person_id, reverse_identity_map):  # noqa: ANN001,ANN002
+            return reverse_identity_map.get(person_id, person_id)
+
+    issue_doc = {
+        "assignee_id": "raw_1",
+        "assignee_ids": ["raw_2"],
+        "assignee_info": {"person_id": "raw_3"},
+    }
+
+    assignee_ids = _extract_assignee_ids(  # noqa: SLF001
+        issue_doc=issue_doc,
+        reverse_identity_map={"raw_1": "canon_1", "raw_3": "canon_3"},
+        reverse_identity_resolver=DummyResolver(),
+    )
+
+    assert assignee_ids == {"canon_1", "raw_2", "canon_3"}

@@ -9,6 +9,8 @@ from ease2026.core.constants import (
     DEFAULT_TOP_CONTRIBUTOR_FRACTION,
 )
 from ease2026.core.logging import setup_logging
+from ease2026.identity.canonical import load_identity_context
+from ease2026.identity.reverse_identity import ReverseIdentityMap, ReverseIdentityResolver
 from ease2026.hero.generate import build_hero_flags_and_members
 from ease2026.hero.hybrid import (
     SOCIOTECHNICAL_SPECS,
@@ -51,6 +53,11 @@ def parse_args() -> argparse.Namespace:
         default=0.5,
         help="Project-level quantile for hybrid filtering (e.g., 0.5 or 0.75).",
     )
+    parser.add_argument(
+        "--refresh-identity-cache",
+        action="store_true",
+        help="Refresh reverse-identity cache from Mongo before generating metrics.",
+    )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging.")
     args = parser.parse_args()
 
@@ -67,13 +74,33 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     setup_logging(debug=args.debug)
+    reverse_identity_map: ReverseIdentityMap
+    reverse_identity_resolver: ReverseIdentityResolver
+    reverse_identity_map, reverse_identity_resolver = load_identity_context(
+        refresh_cache=args.refresh_identity_cache
+    )
 
     contribution_map_by_code = {
-        "T1": compute_commit_count_contributions(),
-        "T2": compute_file_touch_contributions(),
-        "T3": compute_loc_churn_contributions(),
-        "S1": compute_comment_count_contributions(),
-        "S2": compute_issue_participation_contributions(),
+        "T1": compute_commit_count_contributions(
+            reverse_identity_map=reverse_identity_map,
+            reverse_identity_resolver=reverse_identity_resolver,
+        ),
+        "T2": compute_file_touch_contributions(
+            reverse_identity_map=reverse_identity_map,
+            reverse_identity_resolver=reverse_identity_resolver,
+        ),
+        "T3": compute_loc_churn_contributions(
+            reverse_identity_map=reverse_identity_map,
+            reverse_identity_resolver=reverse_identity_resolver,
+        ),
+        "S1": compute_comment_count_contributions(
+            reverse_identity_map=reverse_identity_map,
+            reverse_identity_resolver=reverse_identity_resolver,
+        ),
+        "S2": compute_issue_participation_contributions(
+            reverse_identity_map=reverse_identity_map,
+            reverse_identity_resolver=reverse_identity_resolver,
+        ),
     }
 
     hero_members_by_code: dict[str, dict[str, dict[object, int]]] = {}

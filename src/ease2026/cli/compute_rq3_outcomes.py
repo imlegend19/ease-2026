@@ -19,6 +19,11 @@ def parse_args() -> argparse.Namespace:
         required=True,
         help="Fixer attribution policy.",
     )
+    parser.add_argument(
+        "--refresh-identity-cache",
+        action="store_true",
+        help="Refresh reverse-identity cache from Mongo before computing outcomes.",
+    )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging.")
     return parser.parse_args()
 
@@ -28,7 +33,9 @@ def main() -> None:
     setup_logging(debug=args.debug)
 
     fixer_policy = FixerAttributionPolicy(args.fixer)
-    output_paths = IssueOutcomesComputer().compute_and_write(fixer_policy=fixer_policy)
+    output_paths = IssueOutcomesComputer(
+        refresh_identity_cache=args.refresh_identity_cache
+    ).compute_and_write(fixer_policy=fixer_policy)
 
     print("Generated RQ3 outcome CSVs:")
     for severity, output_path in sorted(output_paths.items()):

@@ -11,6 +11,11 @@ from typing import Any
 from ease2026.core.logging import get_logger
 from ease2026.core.mongo import get_mongo_collection
 from ease2026.core.settings import settings
+from ease2026.identity.canonical import (
+    load_identity_context,
+    resolve_canonical_person_id,
+)
+from ease2026.identity.reverse_identity import ReverseIdentityMap, ReverseIdentityResolver
 from ease2026.outcomes.definitions import (
     BugFilterPolicy,
     FixerAttributionPolicy,
@@ -104,11 +109,19 @@ class IssueOutcomesComputer:
         severity_policy: SeverityPolicy = SeverityPolicy.PRIORITY,
         reopen_counting_policy: ReopenCountingPolicy = ReopenCountingPolicy.BINARY_REOPENED,
         hero_csv_specs: tuple[HeroCsvSpec, ...] | None = None,
+        reverse_identity_map: ReverseIdentityMap | None = None,
+        reverse_identity_resolver: ReverseIdentityResolver | None = None,
+        refresh_identity_cache: bool = False,
     ) -> None:
         self.bug_filter_policy = bug_filter_policy
         self.severity_policy = severity_policy
         self.reopen_counting_policy = reopen_counting_policy
         self.hero_csv_specs = hero_csv_specs or _default_hero_csv_specs()
+        self.reverse_identity_map, self.reverse_identity_resolver = load_identity_context(
+            reverse_identity_map=reverse_identity_map,
+            reverse_identity_resolver=reverse_identity_resolver,
+            refresh_cache=refresh_identity_cache,
+        )
 
     @property
     def output_root(self) -> Path:
@@ -162,8 +175,7 @@ class IssueOutcomesComputer:
             membership_by_code[spec.code] = self._read_hero_csv(spec.csv_path)
         return membership_by_code
 
-    @staticmethod
-    def _read_hero_csv(csv_path: Path) -> dict[str, set[str]]:
+    def _read_hero_csv(self, csv_path: Path) -> dict[str, set[str]]:
         membership: dict[str, set[str]] = {}
         if not csv_path.exists():
             logger.warning("Hero CSV missing; treating as empty", csv_path=str(csv_path))
@@ -176,7 +188,14 @@ class IssueOutcomesComputer:
                 author_id = row.get("author_id")
                 if not project_name or not author_id:
                     continue
-                membership.setdefault(project_name, set()).add(str(author_id).strip())
+                canonical_author_id = resolve_canonical_person_id(
+                    person_id=author_id,
+                    reverse_identity_map=self.reverse_identity_map,
+                    reverse_identity_resolver=self.reverse_identity_resolver,
+                )
+                if canonical_author_id is None:
+                    continue
+                membership.setdefault(project_name, set()).add(canonical_author_id)
 
         return membership
 
@@ -229,7 +248,11 @@ class IssueOutcomesComputer:
             if project_name is None:
                 continue
 
-            assignee_ids = _extract_assignee_ids(issue_doc)
+            assignee_ids = _extract_assignee_ids(
+                issue_doc=issue_doc,
+                reverse_identity_map=self.reverse_identity_map,
+                reverse_identity_resolver=self.reverse_identity_resolver,
+            )
             issue_resolution_fixed = _is_fixed_value(issue_doc.get("resolution"))
             issue_records[issue_id] = IssueRecord(
                 issue_id=issue_id,
@@ -318,14 +341,17 @@ class IssueOutcomesComputer:
             issue_ids.append(issue_id)
         return index
 
-    @staticmethod
-    def _load_fix_authors_by_issue(issue_ids: frozenset[str]) -> dict[str, set[str]]:
+    def _load_fix_authors_by_issue(self, issue_ids: frozenset[str]) -> dict[str, set[str]]:
         fix_authors_by_issue: dict[str, set[str]] = {issue_id: set() for issue_id in issue_ids}
         projection = {"author_id": 1, "fixed_issue_ids": 1}
         for commit_doc in get_mongo_collection("commit").find(
             {"fixed_issue_ids.0": {"$exists": True}}, projection
         ):
-            author_id = _normalize_identifier(commit_doc.get("author_id"))
+            author_id = resolve_canonical_person_id(
+                person_id=commit_doc.get("author_id"),
+                reverse_identity_map=self.reverse_identity_map,
+                reverse_identity_resolver=self.reverse_identity_resolver,
+            )
             if author_id is None:
                 continue
 
@@ -517,13 +543,21 @@ def _extract_project_name(
     return None
 
 
-def _extract_assignee_ids(issue_doc: dict[str, Any]) -> set[str]:
+def _extract_assignee_ids(
+    issue_doc: dict[str, Any],
+    reverse_identity_map: ReverseIdentityMap,
+    reverse_identity_resolver: ReverseIdentityResolver,
+) -> set[str]:
     assignee_ids: set[str] = set()
     for key in ("assignee_id", "assignee_ids", "assignee", "assignees", "assignee_info"):
         for identifier in _extract_identifier_values(issue_doc.get(key)):
-            normalized_identifier = _normalize_identifier(identifier)
-            if normalized_identifier is not None:
-                assignee_ids.add(normalized_identifier)
+            canonical_assignee_id = resolve_canonical_person_id(
+                person_id=identifier,
+                reverse_identity_map=reverse_identity_map,
+                reverse_identity_resolver=reverse_identity_resolver,
+            )
+            if canonical_assignee_id is not None:
+                assignee_ids.add(canonical_assignee_id)
     return assignee_ids
 
 
