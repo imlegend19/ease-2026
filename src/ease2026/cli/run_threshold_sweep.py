@@ -104,7 +104,7 @@ def _run_id(config: SweepConfig) -> str:
 
 
 def _path_relative_to_experiment_root(path: Path) -> str:
-    experiment_root = settings.artifacts_dir.parent.resolve()
+    experiment_root = settings.experiment_root.resolve()
     resolved_path = path.resolve()
     try:
         return resolved_path.relative_to(experiment_root).as_posix()

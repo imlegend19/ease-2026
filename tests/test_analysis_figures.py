@@ -99,18 +99,24 @@ def test_resolve_run_dir_prefers_experiment_root_relative_paths(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     experiment_root = tmp_path / "ease-2026"
-    runs_dir = experiment_root / "artifacts" / "runs"
+    dataset_name = "smartshark_2_2"
+    runs_dir = experiment_root / "artifacts" / dataset_name / "runs"
     target_run_dir = runs_dir / "top0.20_cov0.80_q0.50"
     target_run_dir.mkdir(parents=True)
 
     monkeypatch.setattr(
         figures_module,
         "settings",
-        SimpleNamespace(artifacts_dir=experiment_root / "artifacts"),
+        SimpleNamespace(
+            experiment_root=experiment_root,
+            artifacts_dir=experiment_root / "artifacts" / dataset_name,
+        ),
     )
 
     generator = FinalFigureGenerator()
-    resolved = generator._resolve_run_dir("artifacts/runs/top0.20_cov0.80_q0.50")
+    resolved = generator._resolve_run_dir(
+        f"artifacts/{dataset_name}/runs/top0.20_cov0.80_q0.50"
+    )
 
     assert resolved == target_run_dir
 

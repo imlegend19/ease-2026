@@ -1,6 +1,7 @@
 """Settings for EASE 2026 scripts loaded from environment variables."""
 
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -25,15 +26,28 @@ if ENV_FILE_PATH.exists():
     load_dotenv(ENV_FILE_PATH, override=False)
 
 
+def _sanitize_dataset_name(raw_name: str) -> str:
+    normalized = re.sub(r"[^A-Za-z0-9._-]+", "_", raw_name.strip())
+    normalized = normalized.strip("._-")
+    return normalized or "smartshark"
+
+
+DEFAULT_SMARTSHARK_DB = os.getenv("SMARTSHARK_MONGO_DB", "smartshark")
+DEFAULT_DATASET_NAME = _sanitize_dataset_name(DEFAULT_SMARTSHARK_DB)
+
+
 @dataclass(frozen=True, slots=True)
 class Settings:
     smartshark_mongo_uri: str = os.getenv(
         "SMARTSHARK_MONGO_URI",
         "mongodb://smartshark:smartshark@localhost:27117/?authSource=admin",
     )
-    smartshark_mongo_db: str = os.getenv("SMARTSHARK_MONGO_DB", "smartshark")
+    smartshark_mongo_db: str = DEFAULT_SMARTSHARK_DB
+    dataset_name: str = DEFAULT_DATASET_NAME
 
-    artifacts_dir: Path = BASE_DIR / "artifacts"
+    experiment_root: Path = BASE_DIR
+    artifacts_root_dir: Path = BASE_DIR / "artifacts"
+    artifacts_dir: Path = artifacts_root_dir / dataset_name
     cache_dir: Path = artifacts_dir / "cache"
     interim_dir: Path = artifacts_dir / "interim"
     outputs_dir: Path = artifacts_dir / "outputs"

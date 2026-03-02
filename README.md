@@ -5,7 +5,7 @@ This repository contains the experiment code and generated outputs for the EASE 
 ## Repository Contents
 
 - `src/ease2026/`: Python package with hero extraction, outcome computation, and analysis pipelines.
-- `artifacts/outputs/`: generated CSV tables and plots used in the paper.
+- `artifacts/<dataset_name>/outputs/`: generated CSV tables and plots used in the paper.
 - `tests/`: unit tests for core analysis logic.
 - `.env.example`: template for SmartSHARK MongoDB connection settings.
 
@@ -81,12 +81,12 @@ uv run python -m ease2026.cli.generate_final_figures --fixer assignee
 
 ## Output Locations
 
-- Hero CSVs: `artifacts/outputs/csv/heroes/`
-- Final analysis tables: `artifacts/outputs/csv/analysis/final_tables/`
-- RQ3 outcomes: `artifacts/outputs/csv/analysis/rq3_outcomes/`
-- RQ3 inferential artifacts: `artifacts/outputs/csv/analysis/rq3_inferential/`
-- Robustness master summary: `artifacts/outputs/csv/analysis/robustness/threshold_sweep_master.csv`
-- Final figures: `artifacts/outputs/plots/analysis/final_figures/`
+- Hero CSVs: `artifacts/<SMARTSHARK_MONGO_DB>/outputs/csv/heroes/`
+- Final analysis tables: `artifacts/<SMARTSHARK_MONGO_DB>/outputs/csv/analysis/final_tables/`
+- RQ3 outcomes: `artifacts/<SMARTSHARK_MONGO_DB>/outputs/csv/analysis/rq3_outcomes/`
+- RQ3 inferential artifacts: `artifacts/<SMARTSHARK_MONGO_DB>/outputs/csv/analysis/rq3_inferential/`
+- Robustness master summary: `artifacts/<SMARTSHARK_MONGO_DB>/outputs/csv/analysis/robustness/threshold_sweep_master.csv`
+- Final figures: `artifacts/<SMARTSHARK_MONGO_DB>/outputs/plots/analysis/final_figures/`
 
 ## Running Tests
 

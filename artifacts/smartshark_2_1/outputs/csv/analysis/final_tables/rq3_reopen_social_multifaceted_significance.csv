@@ -1,0 +1,11 @@
+fixer,severity,comparison,n_projects_social,n_projects_comparison,cliffs_delta_social_minus_comparison,mannwhitney_p_value
+assignee,blocker,social_vs_sociotechnical,59,58,0.04178842781998831,0.689584749966339
+assignee,blocker,social_vs_super,59,57,0.05857865001486768,0.5753479803758035
+assignee,critical,social_vs_sociotechnical,65,64,0.03701923076923077,0.7092845591782078
+assignee,critical,social_vs_super,65,61,0.04438839848675914,0.6577461682068473
+assignee,major,social_vs_sociotechnical,71,70,-0.021327967806841045,0.8285669991977616
+assignee,major,social_vs_super,71,69,0.01388038375178608,0.8889088674940488
+assignee,minor,social_vs_sociotechnical,68,67,-0.01382791922739245,0.8903516533166423
+assignee,minor,social_vs_super,68,67,0.005706760316066725,0.955590356478757
+assignee,trivial,social_vs_sociotechnical,55,52,0.03426573426573427,0.7416155004444789
+assignee,trivial,social_vs_super,55,50,0.0890909090909091,0.38541588695329176

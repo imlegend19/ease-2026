@@ -384,7 +384,7 @@ class FinalFigureGenerator:
             candidates.append(run_dir)
         else:
             # Treat sweep paths as relative to the experiment root when present.
-            candidates.append(settings.artifacts_dir.parent / run_dir)
+            candidates.append(settings.experiment_root / run_dir)
             candidates.append(run_dir)
         candidates.append(settings.artifacts_dir / "runs" / run_dir.name)
 

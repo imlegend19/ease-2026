@@ -158,7 +158,7 @@ class Rq3InferentialAnalyzer:
 
     @property
     def project_root(self) -> Path:
-        return settings.artifacts_dir.parent
+        return settings.experiment_root
 
     @property
     def sk_esd_runner_path(self) -> Path:

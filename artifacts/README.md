@@ -6,34 +6,34 @@ paper results while excluding local execution by-products and redundant snapshot
 
 ## Publish to GitHub
 
-Include:
+Include (under a dataset directory, for example `artifacts/smartshark_2_2/`):
 
-- `artifacts/outputs/csv/heroes/**`
+- `artifacts/<dataset_name>/outputs/csv/heroes/**`
   - Hero classification outputs (technical, social, hybrid categories).
-- `artifacts/outputs/csv/analysis/final_tables/**`
+- `artifacts/<dataset_name>/outputs/csv/analysis/final_tables/**`
   - Final table data reported in the paper.
-- `artifacts/outputs/csv/analysis/rq3_outcomes/**`
+- `artifacts/<dataset_name>/outputs/csv/analysis/rq3_outcomes/**`
   - RQ3 bug-fix/reopen outcome tables by severity and fixer role.
-- `artifacts/outputs/csv/analysis/rq3_inferential/**`
+- `artifacts/<dataset_name>/outputs/csv/analysis/rq3_inferential/**`
   - Inferential statistics artifacts (Kendall tau and Scott-Knott ESD inputs/results).
-- `artifacts/outputs/csv/analysis/robustness/threshold_sweep_master.csv`
+- `artifacts/<dataset_name>/outputs/csv/analysis/robustness/threshold_sweep_master.csv`
   - Master threshold sweep summary used for robustness reporting (sanitized paths only).
-- `artifacts/outputs/csv/analysis/robustness/reviewer_*.csv`
+- `artifacts/<dataset_name>/outputs/csv/analysis/robustness/reviewer_*.csv`
   - Reviewer-requested robustness summaries.
-- `artifacts/outputs/plots/analysis/final_figures/**`
+- `artifacts/<dataset_name>/outputs/plots/analysis/final_figures/**`
   - Paper figures (PNG/SVG).
-- `artifacts/outputs/plots/analysis/reviewer_robustness/**`
+- `artifacts/<dataset_name>/outputs/plots/analysis/reviewer_robustness/**`
   - Reviewer robustness figures.
 
 ## Do Not Publish
 
 Exclude:
 
-- `artifacts/cache/**`
+- `artifacts/<dataset_name>/cache/**`
   - Local cache/state only. Not required for replication.
-- `artifacts/runs/**`
+- `artifacts/<dataset_name>/runs/**`
   - Full parameter-sweep run snapshots. Redundant with `outputs/`.
-- `artifacts/outputs/csv/analysis/robustness/threshold_sweep_master.pre_neighborhood_backup.csv`
+- `artifacts/<dataset_name>/outputs/csv/analysis/robustness/threshold_sweep_master.pre_neighborhood_backup.csv`
   - Backup/intermediate file.
 
 ## Package Hygiene
@@ -45,4 +45,5 @@ Exclude:
 ## Reproduction Note
 
 Researchers can reproduce the experiment by running the project pipelines from source and using
-the published `outputs/` files as expected-result references for tables, figures, and statistical checks.
+the published dataset-scoped `outputs/` files as expected-result references for tables, figures,
+and statistical checks.

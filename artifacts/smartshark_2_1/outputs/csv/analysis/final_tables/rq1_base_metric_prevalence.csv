@@ -1,0 +1,6 @@
+hero_code,hero_type,project_count_total,project_count_hero,project_prevalence_pct,hero_member_rows,unique_hero_authors,unique_project_author_pairs
+T1,technical,77,64,83.11688311688312,1048,918,1048
+T2,technical,77,64,83.11688311688312,1063,934,1063
+T3,technical,77,75,97.40259740259741,1130,997,1130
+S1,social,77,71,92.20779220779221,6019,5049,6019
+S2,social,77,62,80.51948051948052,5713,4737,5713
