@@ -1,7 +1,7 @@
 # Shared baseline copied from repository root .gitignore.base
 # Replication package artifacts
-/experiments/*-replication-package-*.zip
-/experiments/_zip_staging_*/
+*-replication-package-*.zip
+_zip_staging_*/
 
 # Python environments and caches
 .venv/
