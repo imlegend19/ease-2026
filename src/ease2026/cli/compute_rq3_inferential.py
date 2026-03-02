@@ -1,6 +1,5 @@
 """Compute inferential RQ3 outputs (mean rankings, Kendall tau, Scott-Knott ESD)."""
 
-from __future__ import annotations
 
 import argparse
 

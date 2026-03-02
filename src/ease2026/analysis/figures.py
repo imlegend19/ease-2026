@@ -1,6 +1,5 @@
 """Generate publication-ready figures for EASE 2026 RQs."""
 
-from __future__ import annotations
 
 import csv
 import math

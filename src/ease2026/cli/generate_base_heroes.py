@@ -1,6 +1,5 @@
 """Generate the five base hero sets (T1/T2/T3/S1/S2)."""
 
-from __future__ import annotations
 
 import argparse
 from collections.abc import Callable

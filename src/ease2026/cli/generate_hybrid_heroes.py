@@ -1,6 +1,5 @@
 """Generate hybrid hero sets (ST1..ST6, TS1..TS6, SH1..SH6)."""
 
-from __future__ import annotations
 
 import argparse
 

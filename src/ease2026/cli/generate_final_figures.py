@@ -1,6 +1,5 @@
 """Generate final paper figures from analysis outputs."""
 
-from __future__ import annotations
 
 import argparse
 

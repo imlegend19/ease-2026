@@ -1,6 +1,5 @@
 """Canonical person-id helpers backed by SmartSHARK final_identity."""
 
-from __future__ import annotations
 
 from typing import Any
 

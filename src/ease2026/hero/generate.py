@@ -1,6 +1,5 @@
 """Generic hero generation from contribution maps."""
 
-from __future__ import annotations
 
 import csv
 from collections.abc import Hashable

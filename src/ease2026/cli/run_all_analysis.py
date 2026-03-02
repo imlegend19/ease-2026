@@ -1,6 +1,5 @@
 """Run final-table analyses for RQ1/RQ2/RQ3."""
 
-from __future__ import annotations
 
 import argparse
 

@@ -1,6 +1,5 @@
 """RQ2 overlap summary tables for base and type-level hero sets."""
 
-from __future__ import annotations
 
 import csv
 import itertools

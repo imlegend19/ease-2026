@@ -1,6 +1,5 @@
 """Run threshold robustness sweeps across hero/outcome/analysis pipelines."""
 
-from __future__ import annotations
 
 import argparse
 import csv

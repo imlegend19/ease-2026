@@ -1,6 +1,5 @@
 """RQ3 final-table summaries from computed outcome CSVs."""
 
-from __future__ import annotations
 
 import csv
 import math

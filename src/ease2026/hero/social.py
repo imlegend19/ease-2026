@@ -1,6 +1,5 @@
 """Social hero contribution extractors."""
 
-from __future__ import annotations
 
 from collections.abc import Hashable
 from typing import Any

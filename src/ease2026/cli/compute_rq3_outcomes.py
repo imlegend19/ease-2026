@@ -1,6 +1,5 @@
 """Compute RQ3 issue outcomes for hero categories."""
 
-from __future__ import annotations
 
 import argparse
 

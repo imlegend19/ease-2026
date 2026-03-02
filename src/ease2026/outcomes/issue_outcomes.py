@@ -1,6 +1,5 @@
 """Compute RQ3 outcome metrics by project, hero code, and severity."""
 
-from __future__ import annotations
 
 import csv
 from dataclasses import dataclass
