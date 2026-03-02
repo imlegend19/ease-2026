@@ -16,6 +16,7 @@ def parse_args() -> argparse.Namespace:
         "--fixer",
         choices=(
             FixerAttributionPolicy.ASSIGNEE.value,
+            FixerAttributionPolicy.ASSIGNEE_AT_FIX_TIME.value,
             FixerAttributionPolicy.COMMIT_AUTHOR.value,
         ),
         default=FixerAttributionPolicy.ASSIGNEE.value,

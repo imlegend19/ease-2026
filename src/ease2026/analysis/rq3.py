@@ -13,7 +13,7 @@ from ease2026.core.settings import settings
 logger = get_logger(__name__)
 
 SEVERITY_ORDER: tuple[str, ...] = ("blocker", "critical", "major", "minor", "trivial")
-FIXER_ORDER: tuple[str, ...] = ("assignee", "commit_author")
+FIXER_ORDER: tuple[str, ...] = ("assignee", "assignee_at_fix_time", "commit_author")
 
 
 @dataclass(frozen=True, slots=True)

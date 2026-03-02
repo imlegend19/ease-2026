@@ -14,7 +14,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--fixer",
-        choices=(FixerAttributionPolicy.ASSIGNEE.value, FixerAttributionPolicy.COMMIT_AUTHOR.value),
+        choices=(
+            FixerAttributionPolicy.ASSIGNEE.value,
+            FixerAttributionPolicy.ASSIGNEE_AT_FIX_TIME.value,
+            FixerAttributionPolicy.COMMIT_AUTHOR.value,
+        ),
         required=True,
         help="Fixer attribution policy.",
     )

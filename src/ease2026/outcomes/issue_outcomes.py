@@ -38,6 +38,7 @@ class IssueRecord:
     severity: str
     assignee_ids: frozenset[str]
     issue_resolution_fixed: bool
+    current_assignee_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +47,13 @@ class IssueEvent:
     timestamp: datetime | None
     status: str
     new_value: str
+
+
+@dataclass(frozen=True, slots=True)
+class AssigneeChangeEvent:
+    issue_id: str
+    timestamp: datetime | None
+    assignee_id: str | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -133,7 +141,19 @@ class IssueOutcomesComputer:
         hero_membership_by_code = self._load_hero_membership_by_code()
         issue_records = self._load_bug_issue_records()
         issue_ids = frozenset(issue_records)
-        issue_outcomes = self._load_issue_outcomes(issue_records=issue_records)
+        outcome_events_by_issue, assignee_events_by_issue = self._load_issue_events(issue_ids)
+        issue_outcomes = self._load_issue_outcomes(
+            issue_records=issue_records,
+            outcome_events_by_issue=outcome_events_by_issue,
+        )
+
+        fix_time_assignee_by_issue: dict[str, str | None] = {}
+        if fixer_policy is FixerAttributionPolicy.ASSIGNEE_AT_FIX_TIME:
+            fix_time_assignee_by_issue = self._resolve_fix_time_assignee_by_issue(
+                issue_records=issue_records,
+                outcome_events_by_issue=outcome_events_by_issue,
+                assignee_events_by_issue=assignee_events_by_issue,
+            )
 
         issue_ids_by_project_and_severity = self._index_issue_ids_by_project_and_severity(
             issue_records=issue_records,
@@ -149,6 +169,7 @@ class IssueOutcomesComputer:
             issue_outcomes=issue_outcomes,
             issue_records=issue_records,
             issue_ids_by_project_and_severity=issue_ids_by_project_and_severity,
+            fix_time_assignee_by_issue=fix_time_assignee_by_issue,
             fix_authors_by_issue=fix_authors_by_issue,
         )
         output_paths = self._write_rows_by_severity(
@@ -252,6 +273,11 @@ class IssueOutcomesComputer:
                 reverse_identity_map=self.reverse_identity_map,
                 reverse_identity_resolver=self.reverse_identity_resolver,
             )
+            current_assignee_id = _extract_current_assignee_id(
+                issue_doc=issue_doc,
+                reverse_identity_map=self.reverse_identity_map,
+                reverse_identity_resolver=self.reverse_identity_resolver,
+            )
             issue_resolution_fixed = _is_fixed_value(issue_doc.get("resolution"))
             issue_records[issue_id] = IssueRecord(
                 issue_id=issue_id,
@@ -259,6 +285,7 @@ class IssueOutcomesComputer:
                 severity=severity,
                 assignee_ids=frozenset(assignee_ids),
                 issue_resolution_fixed=issue_resolution_fixed,
+                current_assignee_id=current_assignee_id,
             )
 
         return issue_records
@@ -289,35 +316,60 @@ class IssueOutcomesComputer:
             mapping[issue_system_id] = project_name
         return mapping
 
-    def _load_issue_outcomes(
-        self, issue_records: dict[str, IssueRecord]
-    ) -> dict[str, IssueOutcome]:
-        relevant_issue_ids = frozenset(issue_records)
-        events_by_issue: dict[str, list[IssueEvent]] = {}
+    def _load_issue_events(
+        self, issue_ids: frozenset[str]
+    ) -> tuple[dict[str, list[IssueEvent]], dict[str, list[AssigneeChangeEvent]]]:
+        outcome_events_by_issue: dict[str, list[IssueEvent]] = {}
+        assignee_events_by_issue: dict[str, list[AssigneeChangeEvent]] = {}
         projection = {"issue_id": 1, "status": 1, "new_value": 1, "created_at": 1}
+
         for event_doc in get_mongo_collection("event").find({}, projection):
             issue_id = _normalize_identifier(event_doc.get("issue_id"))
-            if issue_id is None or issue_id not in relevant_issue_ids:
+            if issue_id is None or issue_id not in issue_ids:
                 continue
 
             status = normalize_text(event_doc.get("status"))
-            new_value = normalize_text(event_doc.get("new_value"))
-            if status is None or new_value is None:
-                continue
-            if not _is_relevant_outcome_event(status=status, new_value=new_value):
+            if status is None:
                 continue
 
-            event = IssueEvent(
-                issue_id=issue_id,
-                timestamp=_normalize_datetime(event_doc.get("created_at")),
-                status=status,
-                new_value=new_value,
+            timestamp = _normalize_datetime(event_doc.get("created_at"))
+            raw_new_value = event_doc.get("new_value")
+            if _is_assignee_change_status(status):
+                assignee_id = _resolve_single_canonical_assignee_from_value(
+                    value=raw_new_value,
+                    reverse_identity_map=self.reverse_identity_map,
+                    reverse_identity_resolver=self.reverse_identity_resolver,
+                )
+                assignee_events_by_issue.setdefault(issue_id, []).append(
+                    AssigneeChangeEvent(
+                        issue_id=issue_id,
+                        timestamp=timestamp,
+                        assignee_id=assignee_id,
+                    )
+                )
+
+            new_value = normalize_text(raw_new_value)
+            if new_value is None or not _is_relevant_outcome_event(status=status, new_value=new_value):
+                continue
+            outcome_events_by_issue.setdefault(issue_id, []).append(
+                IssueEvent(
+                    issue_id=issue_id,
+                    timestamp=timestamp,
+                    status=status,
+                    new_value=new_value,
+                )
             )
-            events_by_issue.setdefault(issue_id, []).append(event)
 
+        return outcome_events_by_issue, assignee_events_by_issue
+
+    def _load_issue_outcomes(
+        self,
+        issue_records: dict[str, IssueRecord],
+        outcome_events_by_issue: dict[str, list[IssueEvent]],
+    ) -> dict[str, IssueOutcome]:
         outcomes: dict[str, IssueOutcome] = {}
         for issue_id, record in issue_records.items():
-            events = events_by_issue.get(issue_id, [])
+            events = outcome_events_by_issue.get(issue_id, [])
             event_fixed, reopened_after_fixed = _event_outcome_flags(events)
             is_fixed = event_fixed or record.issue_resolution_fixed
             if self.reopen_counting_policy is not ReopenCountingPolicy.BINARY_REOPENED:
@@ -328,6 +380,41 @@ class IssueOutcomesComputer:
             )
 
         return outcomes
+
+    def _resolve_fix_time_assignee_by_issue(
+        self,
+        issue_records: dict[str, IssueRecord],
+        outcome_events_by_issue: dict[str, list[IssueEvent]],
+        assignee_events_by_issue: dict[str, list[AssigneeChangeEvent]],
+    ) -> dict[str, str | None]:
+        assignee_by_issue: dict[str, str | None] = {}
+        assigned_from_events = 0
+        fallback_to_current_assignee = 0
+
+        for issue_id, record in issue_records.items():
+            first_fixed_timestamp = _first_fixed_timestamp(outcome_events_by_issue.get(issue_id, []))
+            assignee_id = _assignee_id_at_timestamp(
+                assignee_events=assignee_events_by_issue.get(issue_id, []),
+                cutoff_timestamp=first_fixed_timestamp,
+            )
+            if assignee_id is not None:
+                assigned_from_events += 1
+            else:
+                assignee_id = record.current_assignee_id
+                if assignee_id is None and record.assignee_ids:
+                    assignee_id = sorted(record.assignee_ids)[0]
+                if assignee_id is not None:
+                    fallback_to_current_assignee += 1
+
+            assignee_by_issue[issue_id] = assignee_id
+
+        logger.info(
+            "Resolved assignee_at_fix_time attribution with fallback to current assignee fields",
+            issue_count=len(issue_records),
+            assigned_from_events=assigned_from_events,
+            fallback_to_current_assignee=fallback_to_current_assignee,
+        )
+        return assignee_by_issue
 
     @staticmethod
     def _index_issue_ids_by_project_and_severity(
@@ -373,6 +460,7 @@ class IssueOutcomesComputer:
         issue_outcomes: dict[str, IssueOutcome],
         issue_records: dict[str, IssueRecord],
         issue_ids_by_project_and_severity: dict[str, dict[str, list[str]]],
+        fix_time_assignee_by_issue: dict[str, str | None],
         fix_authors_by_issue: dict[str, set[str]],
     ) -> dict[str, list[OutcomeRow]]:
         rows_by_severity: dict[str, list[OutcomeRow]] = {
@@ -394,6 +482,7 @@ class IssueOutcomesComputer:
                         hero_authors=hero_authors,
                         issue_records=issue_records,
                         fixer_policy=fixer_policy,
+                        fix_time_assignee_by_issue=fix_time_assignee_by_issue,
                         fix_authors_by_issue=fix_authors_by_issue,
                     )
                     row = _build_outcome_row(
@@ -486,6 +575,7 @@ def _match_issue_ids_for_heroes(
     hero_authors: set[str],
     issue_records: dict[str, IssueRecord],
     fixer_policy: FixerAttributionPolicy,
+    fix_time_assignee_by_issue: dict[str, str | None],
     fix_authors_by_issue: dict[str, set[str]],
 ) -> list[str]:
     matched: list[str] = []
@@ -493,6 +583,15 @@ def _match_issue_ids_for_heroes(
         for issue_id in issue_ids:
             assignee_ids = issue_records[issue_id].assignee_ids
             if assignee_ids.intersection(hero_authors):
+                matched.append(issue_id)
+        return matched
+
+    if fixer_policy is FixerAttributionPolicy.ASSIGNEE_AT_FIX_TIME:
+        for issue_id in issue_ids:
+            assignee_id = fix_time_assignee_by_issue.get(issue_id)
+            if assignee_id is None:
+                continue
+            if assignee_id in hero_authors:
                 matched.append(issue_id)
         return matched
 
@@ -550,7 +649,7 @@ def _extract_assignee_ids(
     assignee_ids: set[str] = set()
     for key in ("assignee_id", "assignee_ids", "assignee", "assignees", "assignee_info"):
         for identifier in _extract_identifier_values(issue_doc.get(key)):
-            canonical_assignee_id = resolve_canonical_person_id(
+            canonical_assignee_id = _resolve_canonical_assignee_id(
                 person_id=identifier,
                 reverse_identity_map=reverse_identity_map,
                 reverse_identity_resolver=reverse_identity_resolver,
@@ -558,6 +657,64 @@ def _extract_assignee_ids(
             if canonical_assignee_id is not None:
                 assignee_ids.add(canonical_assignee_id)
     return assignee_ids
+
+
+def _extract_current_assignee_id(
+    issue_doc: dict[str, Any],
+    reverse_identity_map: ReverseIdentityMap,
+    reverse_identity_resolver: ReverseIdentityResolver,
+) -> str | None:
+    for key in ("assignee_id", "assignee", "assignee_info", "assignee_ids", "assignees"):
+        canonical_ids: set[str] = set()
+        for identifier in _extract_identifier_values(issue_doc.get(key)):
+            canonical_assignee_id = _resolve_canonical_assignee_id(
+                person_id=identifier,
+                reverse_identity_map=reverse_identity_map,
+                reverse_identity_resolver=reverse_identity_resolver,
+            )
+            if canonical_assignee_id is not None:
+                canonical_ids.add(canonical_assignee_id)
+
+        if canonical_ids:
+            return sorted(canonical_ids)[0]
+    return None
+
+
+def _resolve_single_canonical_assignee_from_value(
+    value: Any,
+    reverse_identity_map: ReverseIdentityMap,
+    reverse_identity_resolver: ReverseIdentityResolver,
+) -> str | None:
+    canonical_ids: set[str] = set()
+    for identifier in _extract_identifier_values(value):
+        canonical_assignee_id = _resolve_canonical_assignee_id(
+            person_id=identifier,
+            reverse_identity_map=reverse_identity_map,
+            reverse_identity_resolver=reverse_identity_resolver,
+        )
+        if canonical_assignee_id is not None:
+            canonical_ids.add(canonical_assignee_id)
+    if not canonical_ids:
+        return None
+    return sorted(canonical_ids)[0]
+
+
+def _resolve_canonical_assignee_id(
+    person_id: Any,
+    reverse_identity_map: ReverseIdentityMap,
+    reverse_identity_resolver: ReverseIdentityResolver,
+) -> str | None:
+    if _is_non_person_identifier(person_id):
+        return None
+
+    canonical_assignee_id = resolve_canonical_person_id(
+        person_id=person_id,
+        reverse_identity_map=reverse_identity_map,
+        reverse_identity_resolver=reverse_identity_resolver,
+    )
+    if canonical_assignee_id is None or _is_non_person_identifier(canonical_assignee_id):
+        return None
+    return canonical_assignee_id
 
 
 def _extract_identifier_values(value: Any) -> set[Any]:
@@ -615,14 +772,59 @@ def _is_relevant_outcome_event(status: str, new_value: str) -> bool:
     )
 
 
-def _event_sort_key(event: IssueEvent) -> float:
-    if event.timestamp is None:
+def _is_assignee_change_status(status: str) -> bool:
+    compact = _normalize_status_token(status)
+    return "assignee" in compact or compact in {"assignedto", "assigned"}
+
+
+def _normalize_status_token(status: str) -> str:
+    return "".join(character for character in status.lower() if character.isalnum())
+
+
+def _is_non_person_identifier(value: Any) -> bool:
+    normalized = normalize_text(value)
+    return normalized in {"none", "null", "nan", "n/a", "na", "unassigned"}
+
+
+def _timestamp_sort_key(timestamp: datetime | None) -> float:
+    if timestamp is None:
         return float("-inf")
 
-    timestamp = event.timestamp
-    if timestamp.tzinfo is None:
-        timestamp = timestamp.replace(tzinfo=UTC)
-    return timestamp.timestamp()
+    value = timestamp
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=UTC)
+    return value.timestamp()
+
+
+def _event_sort_key(event: IssueEvent) -> float:
+    return _timestamp_sort_key(event.timestamp)
+
+
+def _assignee_event_sort_key(event: AssigneeChangeEvent) -> float:
+    return _timestamp_sort_key(event.timestamp)
+
+
+def _first_fixed_timestamp(events: list[IssueEvent]) -> datetime | None:
+    for event in sorted(events, key=_event_sort_key):
+        if event.status == "resolution" and event.new_value == "fixed":
+            return event.timestamp
+    return None
+
+
+def _assignee_id_at_timestamp(
+    assignee_events: list[AssigneeChangeEvent],
+    cutoff_timestamp: datetime | None,
+) -> str | None:
+    if cutoff_timestamp is None:
+        return None
+
+    active_assignee: str | None = None
+    cutoff_key = _timestamp_sort_key(cutoff_timestamp)
+    for assignee_event in sorted(assignee_events, key=_assignee_event_sort_key):
+        if _timestamp_sort_key(assignee_event.timestamp) > cutoff_key:
+            break
+        active_assignee = assignee_event.assignee_id
+    return active_assignee
 
 
 def _event_outcome_flags(events: list[IssueEvent]) -> tuple[bool, bool]:
