@@ -71,6 +71,33 @@ build_mean_fallback <- function(raw_df, metric, severity) {
   )
 }
 
+stabilize_for_sk_esd <- function(matrix_df) {
+  if (nrow(matrix_df) < 2 || ncol(matrix_df) == 0) {
+    return(matrix_df)
+  }
+
+  unique_counts <- vapply(
+    matrix_df,
+    function(column_values) length(unique(column_values)),
+    integer(1)
+  )
+  zero_variance_cols <- names(unique_counts[unique_counts <= 1])
+  if (length(zero_variance_cols) == 0) {
+    return(matrix_df)
+  }
+
+  # ScottKnottESD can emit NA internal decisions on zero-variance treatments.
+  # Add a tiny deterministic row-wise jitter only for those columns.
+  row_offsets <- seq_len(nrow(matrix_df)) - mean(seq_len(nrow(matrix_df)))
+  for (index in seq_along(zero_variance_cols)) {
+    column_name <- zero_variance_cols[[index]]
+    matrix_df[[column_name]] <- matrix_df[[column_name]] +
+      row_offsets * 1e-9 * (1 + index / 1000)
+  }
+
+  matrix_df
+}
+
 for (input_path in input_files) {
   file_name <- basename(input_path)
   matches <- regexec(pattern, file_name)
@@ -95,10 +122,15 @@ for (input_path in input_files) {
   if (ncol(complete_df) >= 2 && nrow(complete_df) >= 2) {
     ranking_df <- tryCatch(
       {
-        sk_result <- sk_esd(complete_df)
+        sk_df <- complete_df
+        if (metric == "reopen_rate") {
+          sk_df <- -sk_df
+        }
+        sk_df <- stabilize_for_sk_esd(sk_df)
+        sk_result <- sk_esd(sk_df)
         rank_values <- as.integer(unlist(sk_result[[2]]))
         column_order <- as.integer(unlist(sk_result[[4]]))
-        hero_codes <- colnames(complete_df)[column_order]
+        hero_codes <- colnames(sk_df)[column_order]
 
         if (length(rank_values) != length(hero_codes)) {
           stop(

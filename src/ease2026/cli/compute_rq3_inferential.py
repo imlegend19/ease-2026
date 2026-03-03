@@ -1,4 +1,4 @@
-"""Compute inferential RQ3 outputs (mean rankings, rank correlations, Scott-Knott ESD)."""
+"""Compute inferential RQ3 outputs (mean rankings, rank similarities, Scott-Knott ESD)."""
 
 from __future__ import annotations
 
@@ -13,8 +13,8 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Generate inferential RQ3 artifacts from rq3_outcomes CSVs, including "
-            "mean rankings, Kendall tau + Spearman rho matrices, and optional Scott-Knott ESD "
-            "rankings via Docker+R."
+            "mean rankings, Kendall tau + Spearman rho + RBO matrices, and optional "
+            "Scott-Knott ESD rankings via Docker+R."
         ),
     )
     parser.add_argument(
