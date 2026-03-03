@@ -1,45 +1,45 @@
 fixer,severity,hero_type,outcome_metric,reference_code,n_codes_with_data,direction_consistent_vs_reference,code_medians
-assignee,blocker,social,fix_rate,S1,2,True,S1:91.287879; S2:92.330383
-assignee,blocker,social,reopen_rate,S1,2,True,S1:5.714286; S2:6.603774
-assignee,blocker,sociotechnical,fix_rate,ST1,6,True,ST1:95.833333; ST2:95.833333; ST3:96.689723; ST4:96.689723; ST5:96.663296; ST6:96.663296
-assignee,blocker,sociotechnical,reopen_rate,ST1,6,True,ST1:4.477612; ST2:4.477612; ST3:4.528366; ST4:4.528366; ST5:4.554096; ST6:4.554096
-assignee,blocker,super,fix_rate,SH1,6,True,SH1:95.833333; SH2:95.833333; SH3:96.689723; SH4:96.689723; SH5:96.663296; SH6:96.663296
-assignee,blocker,super,reopen_rate,SH1,6,True,SH1:4.477612; SH2:4.477612; SH3:4.528366; SH4:4.528366; SH5:4.554096; SH6:4.554096
-assignee,blocker,technical,fix_rate,T1,3,True,T1:95.833333; T2:96.689723; T3:96.663296
-assignee,blocker,technical,reopen_rate,T1,3,True,T1:4.477612; T2:4.528366; T3:4.554096
-assignee,blocker,technosocial,fix_rate,TS1,6,True,TS1:95.833333; TS2:95.833333; TS3:96.689723; TS4:96.689723; TS5:96.663296; TS6:96.663296
-assignee,blocker,technosocial,reopen_rate,TS1,6,True,TS1:4.477612; TS2:4.477612; TS3:4.528366; TS4:4.528366; TS5:4.554096; TS6:4.554096
-assignee,critical,social,fix_rate,S1,2,True,S1:83.666667; S2:83.333333
-assignee,critical,social,reopen_rate,S1,2,True,S1:4.400387; S2:4.838710
-assignee,critical,sociotechnical,fix_rate,ST1,6,True,ST1:86.666667; ST2:86.666667; ST3:86.666667; ST4:86.666667; ST5:86.206897; ST6:86.206897
-assignee,critical,sociotechnical,reopen_rate,ST1,6,True,ST1:2.970297; ST2:2.970297; ST3:2.941176; ST4:2.941176; ST5:2.970297; ST6:2.970297
-assignee,critical,super,fix_rate,SH1,6,True,SH1:86.666667; SH2:86.666667; SH3:86.666667; SH4:86.666667; SH5:86.206897; SH6:86.206897
-assignee,critical,super,reopen_rate,SH1,6,True,SH1:2.970297; SH2:2.970297; SH3:2.941176; SH4:2.941176; SH5:2.970297; SH6:2.970297
-assignee,critical,technical,fix_rate,T1,3,True,T1:86.666667; T2:86.666667; T3:86.206897
-assignee,critical,technical,reopen_rate,T1,3,True,T1:2.941176; T2:2.941176; T3:2.941176
-assignee,critical,technosocial,fix_rate,TS1,6,True,TS1:86.666667; TS2:86.666667; TS3:86.666667; TS4:86.666667; TS5:86.206897; TS6:86.206897
-assignee,critical,technosocial,reopen_rate,TS1,6,True,TS1:2.970297; TS2:2.970297; TS3:2.941176; TS4:2.941176; TS5:2.970297; TS6:2.970297
-assignee,major,social,fix_rate,S1,2,True,S1:83.333333; S2:83.783784
-assignee,major,social,reopen_rate,S1,2,True,S1:5.084746; S2:5.542986
-assignee,major,sociotechnical,fix_rate,ST1,6,False,ST1:85.714286; ST2:85.511782; ST3:86.104871; ST4:86.124766; ST5:86.579431; ST6:86.599437
-assignee,major,sociotechnical,reopen_rate,ST1,6,False,ST1:1.818182; ST2:1.816809; ST3:3.318613; ST4:3.373093; ST5:3.331262; ST6:3.384068
-assignee,major,super,fix_rate,SH1,6,True,SH1:85.714286; SH2:85.732791; SH3:86.104871; SH4:86.124766; SH5:86.559313; SH6:86.579431
-assignee,major,super,reopen_rate,SH1,6,False,SH1:1.818182; SH2:1.816809; SH3:3.320932; SH4:3.375471; SH5:3.331262; SH6:3.384068
-assignee,major,technical,fix_rate,T1,3,True,T1:86.050212; T2:86.355215; T3:86.868320
-assignee,major,technical,reopen_rate,T1,3,True,T1:1.936702; T2:3.373093; T3:3.381721
-assignee,major,technosocial,fix_rate,TS1,6,True,TS1:85.732791; TS2:85.732791; TS3:86.124766; TS4:86.124766; TS5:86.579431; TS6:86.579431
-assignee,major,technosocial,reopen_rate,TS1,6,True,TS1:1.816809; TS2:1.816809; TS3:3.320932; TS4:3.375471; TS5:3.331262; TS6:3.384068
-assignee,minor,social,fix_rate,S1,2,True,S1:83.333333; S2:83.263598
-assignee,minor,social,reopen_rate,S1,2,True,S1:5.509529; S2:5.507246
-assignee,minor,sociotechnical,fix_rate,ST1,6,False,ST1:84.649123; ST2:84.887006; ST3:82.727273; ST4:82.982456; ST5:85.584416; ST6:85.714286
-assignee,minor,sociotechnical,reopen_rate,ST1,6,False,ST1:1.020408; ST2:0.980392; ST3:1.063830; ST4:1.020408; ST5:1.063830; ST6:1.041667
-assignee,minor,super,fix_rate,SH1,6,False,SH1:84.649123; SH2:84.887006; SH3:82.727273; SH4:82.982456; SH5:85.584416; SH6:85.714286
-assignee,minor,super,reopen_rate,SH1,6,False,SH1:1.020408; SH2:0.980392; SH3:1.063830; SH4:1.020408; SH5:1.063830; SH6:1.041667
-assignee,minor,technical,fix_rate,T1,3,False,T1:85.869565; T2:83.442623; T3:86.299766
-assignee,minor,technical,reopen_rate,T1,3,True,T1:1.639344; T2:0.943396; T3:0.943396
-assignee,minor,technosocial,fix_rate,TS1,6,False,TS1:84.887006; TS2:84.887006; TS3:82.982456; TS4:82.982456; TS5:85.714286; TS6:85.714286
-assignee,minor,technosocial,reopen_rate,TS1,6,True,TS1:0.980392; TS2:0.980392; TS3:1.020408; TS4:1.020408; TS5:1.041667; TS6:1.041667
-assignee,trivial,social,fix_rate,S1,2,True,S1:91.666667; S2:91.666667
+assignee,blocker,social,fix_rate,S1,2,True,S1:90.909091; S2:90.909091
+assignee,blocker,social,reopen_rate,S1,2,True,S1:5.714286; S2:5.714286
+assignee,blocker,sociotechnical,fix_rate,ST1,6,True,ST1:95.833333; ST2:95.833333; ST3:97.916667; ST4:97.916667; ST5:97.727273; ST6:97.727273
+assignee,blocker,sociotechnical,reopen_rate,ST1,6,True,ST1:4.347826; ST2:4.347826; ST3:4.347826; ST4:4.347826; ST5:4.347826; ST6:4.347826
+assignee,blocker,super,fix_rate,SH1,6,True,SH1:97.727273; SH2:97.727273; SH3:96.780303; SH4:96.780303; SH5:96.689723; SH6:96.689723
+assignee,blocker,super,reopen_rate,SH1,6,True,SH1:4.347826; SH2:4.347826; SH3:4.429552; SH4:4.429552; SH5:4.554096; SH6:4.554096
+assignee,blocker,technical,fix_rate,T1,3,True,T1:97.727273; T2:96.780303; T3:96.689723
+assignee,blocker,technical,reopen_rate,T1,3,True,T1:4.347826; T2:4.429552; T3:4.554096
+assignee,blocker,technosocial,fix_rate,TS1,6,True,TS1:97.727273; TS2:97.727273; TS3:96.780303; TS4:96.780303; TS5:96.689723; TS6:96.689723
+assignee,blocker,technosocial,reopen_rate,TS1,6,True,TS1:4.347826; TS2:4.347826; TS3:4.429552; TS4:4.429552; TS5:4.554096; TS6:4.554096
+assignee,critical,social,fix_rate,S1,2,True,S1:83.333333; S2:83.333333
+assignee,critical,social,reopen_rate,S1,2,True,S1:4.545455; S2:4.692082
+assignee,critical,sociotechnical,fix_rate,ST1,6,True,ST1:90.152439; ST2:90.152439; ST3:88.141892; ST4:88.141892; ST5:89.674797; ST6:89.674797
+assignee,critical,sociotechnical,reopen_rate,ST1,6,True,ST1:1.415094; ST2:1.415094; ST3:1.428571; ST4:1.428571; ST5:1.470588; ST6:1.470588
+assignee,critical,super,fix_rate,SH1,6,True,SH1:89.583333; SH2:89.583333; SH3:86.666667; SH4:86.666667; SH5:86.666667; SH6:86.666667
+assignee,critical,super,reopen_rate,SH1,6,True,SH1:1.456311; SH2:1.456311; SH3:2.941176; SH4:2.941176; SH5:2.941176; SH6:2.941176
+assignee,critical,technical,fix_rate,T1,3,True,T1:89.674797; T2:86.666667; T3:86.666667
+assignee,critical,technical,reopen_rate,T1,3,True,T1:1.442308; T2:2.941176; T3:2.912621
+assignee,critical,technosocial,fix_rate,TS1,6,True,TS1:89.583333; TS2:89.583333; TS3:86.666667; TS4:86.666667; TS5:86.666667; TS6:86.666667
+assignee,critical,technosocial,reopen_rate,TS1,6,True,TS1:1.442308; TS2:1.442308; TS3:2.941176; TS4:2.941176; TS5:2.912621; TS6:2.912621
+assignee,major,social,fix_rate,S1,2,True,S1:83.333333; S2:83.333333
+assignee,major,social,reopen_rate,S1,2,True,S1:5.088283; S2:5.042373
+assignee,major,sociotechnical,fix_rate,ST1,6,True,ST1:87.500000; ST2:87.500000; ST3:85.714286; ST4:85.714286; ST5:86.718750; ST6:86.718750
+assignee,major,sociotechnical,reopen_rate,ST1,6,False,ST1:3.894616; ST2:3.990878; ST3:3.448276; ST4:3.448276; ST5:3.030303; ST6:3.030303
+assignee,major,super,fix_rate,SH1,6,True,SH1:86.718750; SH2:86.718750; SH3:86.034359; SH4:86.034359; SH5:86.144552; SH6:86.144552
+assignee,major,super,reopen_rate,SH1,6,True,SH1:3.448276; SH2:3.448276; SH3:3.365992; SH4:3.420041; SH5:3.250429; SH6:3.307099
+assignee,major,technical,fix_rate,T1,3,True,T1:86.718750; T2:86.307087; T3:86.369914
+assignee,major,technical,reopen_rate,T1,3,True,T1:3.448276; T2:3.417627; T3:3.300256
+assignee,major,technosocial,fix_rate,TS1,6,True,TS1:86.718750; TS2:86.718750; TS3:86.034359; TS4:86.034359; TS5:86.144552; TS6:86.086378
+assignee,major,technosocial,reopen_rate,TS1,6,True,TS1:3.448276; TS2:3.448276; TS3:3.417627; TS4:3.417627; TS5:3.300256; TS6:3.300256
+assignee,minor,social,fix_rate,S1,2,True,S1:83.333333; S2:83.298466
+assignee,minor,social,reopen_rate,S1,2,True,S1:5.426357; S2:5.343511
+assignee,minor,sociotechnical,fix_rate,ST1,6,True,ST1:85.937500; ST2:85.937500; ST3:85.714286; ST4:85.714286; ST5:85.937500; ST6:85.937500
+assignee,minor,sociotechnical,reopen_rate,ST1,6,True,ST1:0.000000; ST2:0.000000; ST3:0.000000; ST4:0.000000; ST5:0.000000; ST6:0.000000
+assignee,minor,super,fix_rate,SH1,6,True,SH1:85.714286; SH2:85.714286; SH3:86.190476; SH4:86.190476; SH5:85.839599; SH6:85.839599
+assignee,minor,super,reopen_rate,SH1,6,True,SH1:0.000000; SH2:0.000000; SH3:0.961538; SH4:0.961538; SH5:1.020408; SH6:1.020408
+assignee,minor,technical,fix_rate,T1,3,True,T1:87.323944; T2:86.974790; T3:86.703297
+assignee,minor,technical,reopen_rate,T1,3,True,T1:0.000000; T2:0.833333; T3:1.595745
+assignee,minor,technosocial,fix_rate,TS1,6,True,TS1:85.714286; TS2:86.363636; TS3:86.190476; TS4:86.507937; TS5:85.839599; TS6:86.190476
+assignee,minor,technosocial,reopen_rate,TS1,6,True,TS1:0.000000; TS2:0.000000; TS3:0.961538; TS4:0.909091; TS5:1.020408; TS6:1.595745
+assignee,trivial,social,fix_rate,S1,2,True,S1:92.059748; S2:92.059748
 assignee,trivial,social,reopen_rate,S1,2,True,S1:0.000000; S2:0.000000
 assignee,trivial,sociotechnical,fix_rate,ST1,6,True,ST1:100.000000; ST2:100.000000; ST3:100.000000; ST4:100.000000; ST5:100.000000; ST6:100.000000
 assignee,trivial,sociotechnical,reopen_rate,ST1,6,True,ST1:0.000000; ST2:0.000000; ST3:0.000000; ST4:0.000000; ST5:0.000000; ST6:0.000000

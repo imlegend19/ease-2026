@@ -3,6 +3,7 @@ commons-math,58bfd79d3cff546cc9b42a28,2935
 commons-math,58bfd79e3cff546cd4b42a2e,551
 commons-math,58bfd7ac3cff546cd3b4315f,394
 commons-math,58bfd7b73cff546ccdb43d31,341
+commons-math,58bfd7aa3cff546cd9b42fc7,249
 kafka,58bfca5b02ca40f8bf1479d4,1957
 kafka,5b0fc400065f39020b8de36a,859
 kafka,5b0fc400065f3902048de36a,823
@@ -74,6 +75,16 @@ kafka,59b64ed8f2a4565fe934c816,14
 kafka,5b0fc418065f39020b8df897,14
 kafka,5b0fc418065f3902128df9d4,14
 kafka,5b0fc415065f3902058df762,13
+kafka,5b0fc42b065f39020e8e133c,13
+kafka,58b938acf04620b371fccf94,11
+kafka,5b0fc42b065f3902098e14fb,11
+kafka,58bfd08f02ca40f8bf148267,10
+kafka,5a0310d6efa7b46cc624bcd4,10
+kafka,5b0fc402065f3902088de4a5,10
+kafka,5b0fc41f065f39020b8e025b,10
+kafka,5a03121aefa7b46cc6261b10,9
+kafka,5b0fc415065f39020f8df6af,9
+kafka,5b0fc41b065f39020d8dfc1a,9
 zeppelin,5b110f4fe5cffa468ef4bb64,915
 zeppelin,5b110f44e5cffa4688f4b7d1,782
 zeppelin,59e4f10cf2a4565fe9c550f2,655
@@ -101,6 +112,10 @@ zeppelin,5b110f70e5cffa4684f4c466,15
 zeppelin,5b10ef2a328aa9d531c9e926,14
 zeppelin,5b110f44e5cffa4687f4b7d7,13
 zeppelin,5b110f64e5cffa468cf4c15d,13
+zeppelin,5b110f64e5cffa4688f4c411,11
+zeppelin,5b110f70e5cffa4693f4c6ff,11
+zeppelin,5b110f78e5cffa4699f4c8b6,11
+zeppelin,5b110f47e5cffa4694f4b8a1,10
 zookeeper,58b938adf04620b395fccf94,21361
 zookeeper,58b938adf04620b39bfccf95,767
 zookeeper,58b938acf04620b379fccf94,153
