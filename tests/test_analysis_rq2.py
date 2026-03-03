@@ -68,11 +68,11 @@ def test_write_pairwise_overlap_table_includes_per_project_summary(
     row = rows[0]
     assert float(row["pair_jaccard"]) == pytest.approx(2.0 / 7.0)
     assert float(row["project_jaccard"]) == pytest.approx(0.5)
-    assert int(row["per_project_n"]) == 2
-    assert float(row["per_project_mean_jaccard"]) == pytest.approx(5.0 / 12.0)
-    assert float(row["per_project_median_jaccard"]) == pytest.approx(5.0 / 12.0)
-    assert float(row["per_project_std_jaccard"]) == pytest.approx(1.0 / 12.0)
-    assert float(row["per_project_iqr_jaccard"]) == pytest.approx(1.0 / 12.0)
+    assert int(row["per_project_n"]) == 4
+    assert float(row["per_project_mean_jaccard"]) == pytest.approx(5.0 / 24.0)
+    assert float(row["per_project_median_jaccard"]) == pytest.approx(1.0 / 6.0)
+    assert float(row["per_project_std_jaccard"]) == pytest.approx(0.2165063509)
+    assert float(row["per_project_iqr_jaccard"]) == pytest.approx(3.0 / 8.0)
 
 
 def test_rq2_run_writes_new_per_project_outputs(

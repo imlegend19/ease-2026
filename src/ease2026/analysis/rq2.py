@@ -210,12 +210,10 @@ def _is_nan(value: float) -> bool:
 
 def _per_project_jaccard_values(set_a: MembershipSet, set_b: MembershipSet) -> list[float]:
     jaccards: list[float] = []
-    projects_with_both = sorted(set(set_a.project_authors).intersection(set_b.project_authors))
-    for project_name in projects_with_both:
+    projects_with_any = sorted(set(set_a.project_authors).union(set_b.project_authors))
+    for project_name in projects_with_any:
         authors_a = set(set_a.project_authors.get(project_name, frozenset()))
         authors_b = set(set_b.project_authors.get(project_name, frozenset()))
-        if not authors_a or not authors_b:
-            continue
         _intersection, union, jaccard_value = _jaccard_size(authors_a, authors_b)
         if union == 0:
             continue
