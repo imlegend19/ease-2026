@@ -10,6 +10,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 from matplotlib.patches import Patch
 
 from ease2026.analysis.rq1 import HERO_TYPE_ORDER
@@ -213,6 +214,32 @@ def build_type_overlap_matrix(
     return matrix
 
 
+def build_rq3_rbo_matrix(
+    rows: list[dict[str, str]],
+    severity_order: tuple[str, ...] = SEVERITY_ORDER,
+) -> np.ndarray:
+    """Build a severity x severity RBO matrix from inferential CSV rows."""
+    index_by_severity = {severity: index for index, severity in enumerate(severity_order)}
+    matrix = np.full((len(severity_order), len(severity_order)), np.nan, dtype=float)
+
+    for row in rows:
+        row_severity = row.get("severity", "").strip()
+        row_index = index_by_severity.get(row_severity)
+        if row_index is None:
+            continue
+
+        for col_severity, col_index in index_by_severity.items():
+            raw_value = row.get(col_severity, "").strip()
+            if not raw_value:
+                continue
+            try:
+                matrix[row_index, col_index] = float(raw_value)
+            except ValueError:
+                continue
+
+    return matrix
+
+
 def build_rq3_effect_grids(
     rows: list[dict[str, str]],
     fixer: str = "assignee",
@@ -348,6 +375,12 @@ class FinalFigureGenerator:
                 path=str(self.robustness_csv_path),
             )
         outputs["figure_2_overlap"] = self._plot_figure_2_overlap(dpi=dpi, save_svg=save_svg)
+        outputs["figure_2_rbo_reopen"] = self._plot_rq3_rbo_heatmap(
+            fixer=fixer_for_rq3,
+            metric_name="reopen_rate",
+            dpi=dpi,
+            save_svg=save_svg,
+        )
         outputs["figure_3_bug_performance"] = self._plot_figure_3_bug_performance(
             fixer=fixer_for_rq3,
             dpi=dpi,
@@ -1400,43 +1433,95 @@ class FinalFigureGenerator:
     def _plot_figure_2_overlap(self, dpi: int, save_svg: bool) -> Path:
         rows = self._read_csv(self.final_tables_dir / "rq2_overlap_type_groups.csv")
         matrix = build_type_overlap_matrix(rows)
-
-        figure, axis = plt.subplots(figsize=(7.8, 6.6))
-        image = axis.imshow(matrix, cmap="YlGnBu", vmin=0.0, vmax=1.0)
-        axis.set_title(
-            "Figure 2. Hero-Type Overlap Stability (Jaccard)",
-            loc="left",
-            fontsize=13,
-            fontweight="bold",
-        )
         labels = [HERO_TYPE_LABELS[hero_type] for hero_type in HERO_TYPE_ORDER]
-        axis.set_xticks(np.arange(len(labels)))
-        axis.set_yticks(np.arange(len(labels)))
-        axis.set_xticklabels(labels, rotation=25, ha="right")
-        axis.set_yticklabels(labels)
 
-        for row_index in range(matrix.shape[0]):
-            for col_index in range(matrix.shape[1]):
-                value = matrix[row_index, col_index]
-                if np.isnan(value):
-                    text = "NA"
-                    text_color = "#111111"
-                else:
-                    text = f"{value:.2f}"
-                    text_color = "white" if value > 0.55 else "#111111"
-                axis.text(
-                    col_index,
-                    row_index,
-                    text,
-                    ha="center",
-                    va="center",
-                    fontsize=9,
-                    color=text_color,
-                )
+        figure, axis = plt.subplots(figsize=(7.1, 6.3), constrained_layout=True)
+        heatmap_axis = sns.heatmap(
+            matrix,
+            ax=axis,
+            cmap=sns.color_palette("viridis", as_cmap=True),
+            vmin=0.0,
+            vmax=1.0,
+            annot=True,
+            fmt=".2f",
+            linewidths=0.7,
+            linecolor="#FFFFFF",
+            square=True,
+            cbar_kws={"label": "Jaccard overlap", "ticks": np.linspace(0.0, 1.0, 6)},
+            annot_kws={"fontsize": 11, "fontweight": "semibold"},
+        )
+        axis.set_xticklabels(labels, rotation=35, ha="right", fontsize=11)
+        axis.set_yticklabels(labels, rotation=0, fontsize=11)
+        axis.tick_params(axis="both", length=0)
+        axis.set_xlabel("")
+        axis.set_ylabel("")
 
-        colorbar = figure.colorbar(image, ax=axis, fraction=0.046, pad=0.04)
-        colorbar.set_label("Project-author pair Jaccard overlap")
+        for text, value in zip(heatmap_axis.texts, matrix.flatten(), strict=False):
+            if np.isnan(value):
+                text.set_text("NA")
+                text.set_color("#111111")
+                continue
+            text.set_color("white" if value <= 0.45 else "#111111")
+
+        colorbar = heatmap_axis.collections[0].colorbar
+        colorbar.ax.tick_params(labelsize=10)
+        colorbar.set_label("Jaccard overlap", size=11)
         return self._save_figure(figure, "figure_2_hero_type_overlap_matrix", dpi, save_svg)
+
+    def _plot_rq3_rbo_heatmap(
+        self,
+        fixer: str,
+        metric_name: str,
+        dpi: int,
+        save_svg: bool,
+    ) -> Path:
+        rbo_csv_path = (
+            settings.outputs_csv_dir
+            / "analysis"
+            / "rq3_inferential"
+            / fixer
+            / f"rbo_{metric_name}.csv"
+        )
+        rows = self._read_csv(rbo_csv_path)
+        if not rows:
+            raise ValueError(f"Missing RBO CSV rows at: {rbo_csv_path}")
+
+        matrix = build_rq3_rbo_matrix(rows)
+        severity_labels = [severity.capitalize() for severity in SEVERITY_ORDER]
+
+        figure, axis = plt.subplots(figsize=(7.1, 6.3), constrained_layout=True)
+        heatmap_axis = sns.heatmap(
+            matrix,
+            ax=axis,
+            cmap=sns.color_palette("viridis", as_cmap=True),
+            vmin=0.0,
+            vmax=1.0,
+            annot=True,
+            fmt=".2f",
+            linewidths=0.7,
+            linecolor="#FFFFFF",
+            square=True,
+            cbar_kws={"label": "RBO", "ticks": np.linspace(0.0, 1.0, 6)},
+            annot_kws={"fontsize": 11, "fontweight": "semibold"},
+        )
+        axis.set_xticklabels(severity_labels, rotation=35, ha="right", fontsize=11)
+        axis.set_yticklabels(severity_labels, rotation=0, fontsize=11)
+        axis.tick_params(axis="both", length=0)
+        axis.set_xlabel("")
+        axis.set_ylabel("")
+
+        for text, value in zip(heatmap_axis.texts, matrix.flatten(), strict=False):
+            if np.isnan(value):
+                text.set_text("NA")
+                text.set_color("#111111")
+                continue
+            text.set_color("white" if value <= 0.45 else "#111111")
+
+        colorbar = heatmap_axis.collections[0].colorbar
+        colorbar.ax.tick_params(labelsize=10)
+        colorbar.set_label("RBO", size=11)
+
+        return self._save_figure(figure, f"figure_2_rbo_{metric_name}_{fixer}", dpi, save_svg)
 
     def _plot_figure_3_bug_performance(self, fixer: str, dpi: int, save_svg: bool) -> Path:
         rows = self._read_csv(self.final_tables_dir / "rq3_type_summary.csv")
