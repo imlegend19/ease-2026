@@ -67,7 +67,9 @@ def test_rq3_analyzer_writes_combined_type_summary(tmp_path: Path, monkeypatch) 
 
     outputs = Rq3Analyzer().run()
     combined_path = outputs["rq3_type_summary_combined"]
+    aggregated_path = outputs["rq3_aggregated_leaders_assignee"]
     assert combined_path.exists()
+    assert aggregated_path.exists()
 
     with combined_path.open("r", newline="", encoding="utf-8") as file:
         rows = list(csv.DictReader(file))
@@ -75,6 +77,95 @@ def test_rq3_analyzer_writes_combined_type_summary(tmp_path: Path, monkeypatch) 
     assert rows
     assert {row["fixer"] for row in rows} == {"combined"}
     assert {row["severity"] for row in rows} == {"major"}
+
+
+def test_rq3_analyzer_writes_aggregated_assignee_leaders_with_ties(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    outcomes_root = tmp_path / "analysis" / "rq3_outcomes" / "assignee"
+    _write_outcome_csv(
+        outcomes_root / "major.csv",
+        [
+            {
+                "project_name": "proj_a",
+                "hero_code": "T1",
+                "severity": "major",
+                "n_assigned": "10",
+                "n_fixed": "8",
+                "n_reopened": "1",
+                "fix_rate": "80",
+                "reopen_rate": "5",
+            },
+            {
+                "project_name": "proj_a",
+                "hero_code": "S1",
+                "severity": "major",
+                "n_assigned": "10",
+                "n_fixed": "8",
+                "n_reopened": "1",
+                "fix_rate": "85",
+                "reopen_rate": "6",
+            },
+            {
+                "project_name": "proj_a",
+                "hero_code": "ST1",
+                "severity": "major",
+                "n_assigned": "10",
+                "n_fixed": "8",
+                "n_reopened": "1",
+                "fix_rate": "82",
+                "reopen_rate": "4",
+            },
+            {
+                "project_name": "proj_a",
+                "hero_code": "TS1",
+                "severity": "major",
+                "n_assigned": "10",
+                "n_fixed": "8",
+                "n_reopened": "1",
+                "fix_rate": "80",
+                "reopen_rate": "4",
+            },
+            {
+                "project_name": "proj_a",
+                "hero_code": "SH1",
+                "severity": "major",
+                "n_assigned": "10",
+                "n_fixed": "9",
+                "n_reopened": "1",
+                "fix_rate": "90",
+                "reopen_rate": "7",
+            },
+        ],
+    )
+
+    monkeypatch.setattr(
+        rq3_module,
+        "settings",
+        SimpleNamespace(outputs_csv_dir=tmp_path),
+    )
+
+    outputs = Rq3Analyzer().run()
+    aggregated_path = outputs["rq3_aggregated_leaders_assignee"]
+    assert aggregated_path.exists()
+
+    with aggregated_path.open("r", newline="", encoding="utf-8") as file:
+        rows = list(csv.DictReader(file))
+
+    assert len(rows) == 2
+    major_reopen = next(row for row in rows if row["severity"] == "major" and row["outcome_metric"] == "reopen_rate")
+    major_fix = next(row for row in rows if row["severity"] == "major" and row["outcome_metric"] == "fix_rate")
+
+    assert major_reopen["winner_hero_type"] == "sociotechnical"
+    assert major_reopen["tied_hero_types"] == "sociotechnical,technosocial"
+    assert float(major_reopen["winner_median"]) == pytest.approx(4.0)
+    assert int(major_reopen["winner_n_projects_with_data"]) == 1
+
+    assert major_fix["winner_hero_type"] == "super"
+    assert major_fix["tied_hero_types"] == "super"
+    assert float(major_fix["winner_median"]) == pytest.approx(90.0)
+    assert int(major_fix["winner_n_projects_with_data"]) == 1
 
 
 def test_rq3_reopen_social_multifaceted_significance_table(tmp_path: Path, monkeypatch) -> None:

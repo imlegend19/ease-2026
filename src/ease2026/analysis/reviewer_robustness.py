@@ -1,4 +1,4 @@
-"""Reviewer-facing robustness summary for Pareto/quantile neighborhood checks."""
+"""Reviewer-facing robustness summary for threshold-grid sensitivity checks."""
 
 from __future__ import annotations
 
@@ -19,12 +19,8 @@ from ease2026.core.settings import settings
 
 logger = get_logger(__name__)
 
-PARETO_PAIRS: tuple[tuple[float, float], ...] = (
-    (0.15, 0.85),
-    (0.20, 0.80),
-    (0.25, 0.75),
-    (0.30, 0.70),
-)
+TOP_FRACTIONS: tuple[float, ...] = (0.15, 0.20, 0.25, 0.30)
+COVERAGE_FRACTIONS: tuple[float, ...] = (0.70, 0.80, 0.85)
 HYBRID_QUANTILES: tuple[float, ...] = (0.50, 0.75)
 DEFAULT_CONFIG = (0.20, 0.80, 0.50)
 MULTIFACETED_TYPES: tuple[str, ...] = ("sociotechnical", "technosocial", "super")
@@ -74,6 +70,8 @@ class NeighborhoodConfig:
 class RunObservation:
     config: NeighborhoodConfig
     prevalence_by_type: dict[str, float]
+    hero_member_rows_by_type: dict[str, int]
+    assignee_reference_codes: dict[tuple[str, str, str], str]
     type_pair_jaccard: dict[tuple[str, str], float]
     assignee_reopen_median: dict[tuple[str, str], float]
 
@@ -90,15 +88,16 @@ class SummaryRow:
 
 def build_neighborhood_configs() -> tuple[NeighborhoodConfig, ...]:
     configs: list[NeighborhoodConfig] = []
-    for top_fraction, coverage_fraction in PARETO_PAIRS:
-        for quantile in HYBRID_QUANTILES:
-            configs.append(
-                NeighborhoodConfig(
-                    top_fraction=top_fraction,
-                    coverage_fraction=coverage_fraction,
-                    hybrid_quantile=quantile,
+    for top_fraction in TOP_FRACTIONS:
+        for coverage_fraction in COVERAGE_FRACTIONS:
+            for quantile in HYBRID_QUANTILES:
+                configs.append(
+                    NeighborhoodConfig(
+                        top_fraction=top_fraction,
+                        coverage_fraction=coverage_fraction,
+                        hybrid_quantile=quantile,
+                    )
                 )
-            )
     return tuple(configs)
 
 
@@ -158,6 +157,7 @@ class ReviewerRobustnessGenerator:
         observations = [self._load_observation(config) for config in build_neighborhood_configs()]
 
         prevalence_long_path = self._write_prevalence_long(observations)
+        q_sensitivity_match_path = self._write_q_sensitivity_match_summary(observations)
         summary_path = self._write_summary_table(observations)
         range_figure_path = self._plot_prevalence_range(observations, dpi=dpi, save_svg=save_svg)
         heatmap_figure_path = self._plot_multifaceted_heatmap(
@@ -171,12 +171,14 @@ class ReviewerRobustnessGenerator:
             config_count=len(observations),
             summary_csv=str(summary_path),
             prevalence_long_csv=str(prevalence_long_path),
+            q_sensitivity_match_csv=str(q_sensitivity_match_path),
             range_figure=str(range_figure_path),
             heatmap_figure=str(heatmap_figure_path),
         )
         return {
             "reviewer_robustness_summary_csv": summary_path,
             "reviewer_rq1_prevalence_long_csv": prevalence_long_path,
+            "q_sensitivity_match_summary_csv": q_sensitivity_match_path,
             "reviewer_rq1_prevalence_range_figure": range_figure_path,
             "reviewer_rq1_multifaceted_heatmap_figure": heatmap_figure_path,
         }
@@ -189,8 +191,14 @@ class ReviewerRobustnessGenerator:
         prevalence_by_type = self._load_prevalence_by_type(
             final_tables_dir / "rq1_hero_type_prevalence.csv"
         )
+        hero_member_rows_by_type = self._load_hero_member_rows_by_type(
+            final_tables_dir / "rq1_hero_type_prevalence.csv"
+        )
         type_pair_jaccard = self._load_type_pair_jaccard(
             final_tables_dir / "rq2_overlap_type_groups.csv"
+        )
+        assignee_reference_codes = self._load_assignee_reference_codes(
+            final_tables_dir / "rq3_operationalization_robustness.csv"
         )
         assignee_reopen_median = self._load_assignee_reopen_median(
             final_tables_dir / "rq3_type_summary.csv"
@@ -198,6 +206,8 @@ class ReviewerRobustnessGenerator:
         return RunObservation(
             config=config,
             prevalence_by_type=prevalence_by_type,
+            hero_member_rows_by_type=hero_member_rows_by_type,
+            assignee_reference_codes=assignee_reference_codes,
             type_pair_jaccard=type_pair_jaccard,
             assignee_reopen_median=assignee_reopen_median,
         )
@@ -214,6 +224,34 @@ class ReviewerRobustnessGenerator:
         if missing:
             raise ValueError(f"Missing prevalence rows for hero types {missing} in {csv_path}")
         return prevalence
+
+    def _load_hero_member_rows_by_type(self, csv_path: Path) -> dict[str, int]:
+        rows = self._read_csv(csv_path)
+        member_rows: dict[str, int] = {}
+        for row in rows:
+            hero_type = str(row.get("hero_type", "")).strip()
+            if hero_type not in PLOT_HERO_TYPE_ORDER:
+                continue
+            member_rows[hero_type] = int(row["hero_member_rows_total"])
+        missing = [hero_type for hero_type in PLOT_HERO_TYPE_ORDER if hero_type not in member_rows]
+        if missing:
+            raise ValueError(f"Missing hero-member rows for hero types {missing} in {csv_path}")
+        return member_rows
+
+    def _load_assignee_reference_codes(self, csv_path: Path) -> dict[tuple[str, str, str], str]:
+        rows = self._read_csv(csv_path)
+        values: dict[tuple[str, str, str], str] = {}
+        for row in rows:
+            if str(row.get("fixer", "")).strip() != "assignee":
+                continue
+            severity = str(row.get("severity", "")).strip()
+            hero_type = str(row.get("hero_type", "")).strip()
+            outcome_metric = str(row.get("outcome_metric", "")).strip()
+            reference_code = str(row.get("reference_code", "")).strip()
+            if not severity or not hero_type or not outcome_metric or not reference_code:
+                continue
+            values[(severity, hero_type, outcome_metric)] = reference_code
+        return values
 
     def _load_type_pair_jaccard(self, csv_path: Path) -> dict[tuple[str, str], float]:
         rows = self._read_csv(csv_path)
@@ -267,6 +305,131 @@ class ReviewerRobustnessGenerator:
                             observation.prevalence_by_type[hero_type],
                         ]
                     )
+        return output_path
+
+    def _write_q_sensitivity_match_summary(self, observations: list[RunObservation]) -> Path:
+        by_key = {
+            (
+                observation.config.top_fraction,
+                observation.config.coverage_fraction,
+                observation.config.hybrid_quantile,
+            ): observation
+            for observation in observations
+        }
+        output_path = self.output_csv_dir / "q_sensitivity_match_summary.csv"
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        rows: list[list[object]] = []
+        for top_fraction in TOP_FRACTIONS:
+            for coverage_fraction in COVERAGE_FRACTIONS:
+                q50_key = (top_fraction, coverage_fraction, 0.50)
+                q75_key = (top_fraction, coverage_fraction, 0.75)
+                if q50_key not in by_key or q75_key not in by_key:
+                    raise ValueError(
+                        "Missing q-paired observations for "
+                        f"top={top_fraction}, coverage={coverage_fraction}."
+                    )
+                q50 = by_key[q50_key]
+                q75 = by_key[q75_key]
+
+                prevalence_total = len(PLOT_HERO_TYPE_ORDER)
+                prevalence_match_count = sum(
+                    1
+                    for hero_type in PLOT_HERO_TYPE_ORDER
+                    if math.isclose(
+                        q50.prevalence_by_type[hero_type],
+                        q75.prevalence_by_type[hero_type],
+                        rel_tol=1e-9,
+                        abs_tol=1e-12,
+                    )
+                )
+
+                shared_code_keys = sorted(
+                    set(q50.assignee_reference_codes).intersection(q75.assignee_reference_codes)
+                )
+                top_code_total = len(shared_code_keys)
+                top_code_match_count = sum(
+                    1
+                    for key in shared_code_keys
+                    if q50.assignee_reference_codes[key] == q75.assignee_reference_codes[key]
+                )
+
+                st_baseline = q50.hero_member_rows_by_type["sociotechnical"]
+                ts_baseline = q50.hero_member_rows_by_type["technosocial"]
+                st_reduction = float("nan")
+                ts_reduction = float("nan")
+                if st_baseline > 0:
+                    st_reduction = (
+                        (st_baseline - q75.hero_member_rows_by_type["sociotechnical"])
+                        / st_baseline
+                        * 100.0
+                    )
+                if ts_baseline > 0:
+                    ts_reduction = (
+                        (ts_baseline - q75.hero_member_rows_by_type["technosocial"])
+                        / ts_baseline
+                        * 100.0
+                    )
+
+                rows.append(
+                    [
+                        f"{top_fraction:.2f}",
+                        f"{coverage_fraction:.2f}",
+                        prevalence_match_count,
+                        prevalence_total,
+                        top_code_match_count,
+                        top_code_total,
+                        st_reduction,
+                        ts_reduction,
+                    ]
+                )
+
+        prevalence_match_total = sum(int(row[2]) for row in rows)
+        prevalence_total_total = sum(int(row[3]) for row in rows)
+        top_code_match_total = sum(int(row[4]) for row in rows)
+        top_code_total_total = sum(int(row[5]) for row in rows)
+        st_reductions = [float(row[6]) for row in rows if not _is_nan(float(row[6]))]
+        ts_reductions = [float(row[7]) for row in rows if not _is_nan(float(row[7]))]
+        st_reduction_mean = (
+            float("nan")
+            if not st_reductions
+            else float(np.mean(np.array(st_reductions, dtype=float)))
+        )
+        ts_reduction_mean = (
+            float("nan")
+            if not ts_reductions
+            else float(np.mean(np.array(ts_reductions, dtype=float)))
+        )
+
+        with output_path.open("w", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerow(
+                [
+                    "top_fraction",
+                    "coverage_fraction",
+                    "prevalence_match_count",
+                    "prevalence_total_count",
+                    "top_code_match_count",
+                    "top_code_total_count",
+                    "st_member_row_reduction_pct",
+                    "ts_member_row_reduction_pct",
+                ]
+            )
+            for row in rows:
+                writer.writerow(row)
+            writer.writerow(
+                [
+                    "ALL",
+                    "ALL",
+                    prevalence_match_total,
+                    prevalence_total_total,
+                    top_code_match_total,
+                    top_code_total_total,
+                    st_reduction_mean,
+                    ts_reduction_mean,
+                ]
+            )
+
         return output_path
 
     def _write_summary_table(self, observations: list[RunObservation]) -> Path:
@@ -508,14 +671,14 @@ class ReviewerRobustnessGenerator:
         axis.grid(axis="y", alpha=0.22)
         axis.set_axisbelow(True)
         axis.set_title(
-            "Robustness Figure A. Hero-Type Prevalence Across Pareto/Quantile Neighborhood",
+            "Robustness Figure A. Hero-Type Prevalence Across Threshold Grid",
             loc="left",
             fontsize=12.5,
             fontweight="bold",
         )
 
         legend_handles = [
-            Line2D([0], [0], color="#4A5568", linewidth=4.0, label="Min-max across 8 configs"),
+            Line2D([0], [0], color="#4A5568", linewidth=4.0, label="Min-max across 24 configs"),
             Line2D(
                 [0],
                 [0],
@@ -541,7 +704,7 @@ class ReviewerRobustnessGenerator:
         axis.text(
             0.01,
             -0.21,
-            "Neighborhood: Pareto pairs {15/85, 20/80, 25/75, 30/70} x hybrid quantile {0.50, 0.75}.",
+            "Grid: alpha {0.15,0.20,0.25,0.30} x beta {0.70,0.80,0.85} x q {0.50,0.75}.",
             transform=axis.transAxes,
             fontsize=8.8,
             color="#2D3748",
@@ -564,14 +727,19 @@ class ReviewerRobustnessGenerator:
             (obs.config.top_fraction, obs.config.coverage_fraction, obs.config.hybrid_quantile): obs
             for obs in observations
         }
-        row_labels = [f"{int(top * 100)}/{int(cov * 100)}" for top, cov in PARETO_PAIRS]
+        alpha_beta_pairs = [
+            (top_fraction, coverage_fraction)
+            for top_fraction in TOP_FRACTIONS
+            for coverage_fraction in COVERAGE_FRACTIONS
+        ]
+        row_labels = [f"a={top:.2f}, b={cov:.2f}" for top, cov in alpha_beta_pairs]
         col_labels = [f"q={quantile:.2f}" for quantile in HYBRID_QUANTILES]
 
         grid_by_type: dict[str, np.ndarray] = {}
         all_values: list[float] = []
         for hero_type in MULTIFACETED_TYPES:
-            grid = np.full((len(PARETO_PAIRS), len(HYBRID_QUANTILES)), np.nan, dtype=float)
-            for row_index, (top_fraction, coverage_fraction) in enumerate(PARETO_PAIRS):
+            grid = np.full((len(alpha_beta_pairs), len(HYBRID_QUANTILES)), np.nan, dtype=float)
+            for row_index, (top_fraction, coverage_fraction) in enumerate(alpha_beta_pairs):
                 for col_index, quantile in enumerate(HYBRID_QUANTILES):
                     observation = index_lookup.get((top_fraction, coverage_fraction, quantile))
                     if observation is None:
@@ -589,7 +757,7 @@ class ReviewerRobustnessGenerator:
         figure, axes = plt.subplots(
             nrows=1,
             ncols=len(MULTIFACETED_TYPES),
-            figsize=(12.8, 4.6),
+            figsize=(13.8, 8.4),
             constrained_layout=True,
         )
         axes_array = np.atleast_1d(axes)
@@ -602,7 +770,7 @@ class ReviewerRobustnessGenerator:
             axis.set_yticks(np.arange(len(row_labels)))
             axis.set_yticklabels(row_labels)
             axis.set_xlabel("Hybrid threshold")
-            axis.set_ylabel("Pareto cutoff (top/coverage)")
+            axis.set_ylabel("Alpha/Beta pair")
             axis.set_title(HERO_TYPE_LABELS[hero_type], fontsize=11.5, fontweight="bold")
 
             for row_index in range(grid.shape[0]):
@@ -625,7 +793,7 @@ class ReviewerRobustnessGenerator:
             colorbar.ax.tick_params(labelsize=8)
 
         figure.suptitle(
-            "Robustness Figure B. Multifaceted Prevalence Heatmap Across Neighborhood",
+            "Robustness Figure B. Multifaceted Prevalence Heatmap Across Threshold Grid",
             fontsize=12.8,
             fontweight="bold",
             x=0.02,

@@ -23,6 +23,13 @@ FIXER_ORDER: tuple[str, ...] = (
     FixerAttributionPolicy.COMMIT_AUTHOR.value,
     FixerAttributionPolicy.COMBINED.value,
 )
+AGGREGATED_HERO_TYPE_ORDER: tuple[str, ...] = (
+    "technical",
+    "social",
+    "sociotechnical",
+    "technosocial",
+    "super",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -120,6 +127,7 @@ class Rq3Analyzer:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         records = self._load_records()
         summary_path = self._write_type_summary(records)
+        aggregated_leaders_path = self._write_aggregated_leaders_assignee(records)
         combined_summary_path = self._write_type_summary(
             records,
             output_filename="rq3_type_summary_combined.csv",
@@ -132,12 +140,14 @@ class Rq3Analyzer:
             "Generated RQ3 final tables",
             record_count=len(records),
             summary_table=str(summary_path),
+            aggregated_leaders_table=str(aggregated_leaders_path),
             combined_summary_table=str(combined_summary_path),
             robustness_table=str(robustness_path),
             reopen_significance_table=str(reopen_significance_path),
         )
         return {
             "rq3_type_summary": summary_path,
+            "rq3_aggregated_leaders_assignee": aggregated_leaders_path,
             "rq3_type_summary_combined": combined_summary_path,
             "rq3_operationalization_robustness": robustness_path,
             "rq3_reopen_social_multifaceted_significance": reopen_significance_path,
@@ -267,6 +277,77 @@ class Rq3Analyzer:
                                 _iqr(reopen_rates),
                             ]
                         )
+        return output_path
+
+    def _write_aggregated_leaders_assignee(self, records: list[OutcomeRecord]) -> Path:
+        output_path = self.output_dir / "rq3_aggregated_leaders_assignee.csv"
+        assignee_records = [
+            record
+            for record in records
+            if record.fixer == FixerAttributionPolicy.ASSIGNEE.value
+            and record.hero_type in AGGREGATED_HERO_TYPE_ORDER
+        ]
+
+        with output_path.open("w", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerow(
+                [
+                    "severity",
+                    "outcome_metric",
+                    "winner_hero_type",
+                    "winner_median",
+                    "winner_n_projects_with_data",
+                    "tied_hero_types",
+                ]
+            )
+
+            for severity in SEVERITY_ORDER:
+                severity_records = [record for record in assignee_records if record.severity == severity]
+                for outcome_metric in ("reopen_rate", "fix_rate"):
+                    values_by_type: dict[str, list[float]] = {}
+                    projects_by_type: dict[str, set[str]] = {}
+                    for hero_type in AGGREGATED_HERO_TYPE_ORDER:
+                        values_by_type[hero_type] = []
+                        projects_by_type[hero_type] = set()
+
+                    for record in severity_records:
+                        value = record.reopen_rate if outcome_metric == "reopen_rate" else record.fix_rate
+                        if record.n_assigned == 0 or _is_nan(value):
+                            continue
+                        values_by_type[record.hero_type].append(value)
+                        projects_by_type[record.hero_type].add(record.project_name)
+
+                    medians_by_type = {
+                        hero_type: _median(values)
+                        for hero_type, values in values_by_type.items()
+                        if values
+                    }
+                    if not medians_by_type:
+                        continue
+
+                    if outcome_metric == "reopen_rate":
+                        best_value = min(medians_by_type.values())
+                    else:
+                        best_value = max(medians_by_type.values())
+
+                    tied_types = [
+                        hero_type
+                        for hero_type in AGGREGATED_HERO_TYPE_ORDER
+                        if hero_type in medians_by_type
+                        and math.isclose(medians_by_type[hero_type], best_value, rel_tol=1e-12, abs_tol=1e-12)
+                    ]
+                    winner_hero_type = tied_types[0]
+                    writer.writerow(
+                        [
+                            severity,
+                            outcome_metric,
+                            winner_hero_type,
+                            medians_by_type[winner_hero_type],
+                            len(projects_by_type[winner_hero_type]),
+                            ",".join(tied_types),
+                        ]
+                    )
+
         return output_path
 
     def _write_operationalization_robustness(
