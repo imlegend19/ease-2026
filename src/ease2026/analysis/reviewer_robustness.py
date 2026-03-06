@@ -184,7 +184,9 @@ class ReviewerRobustnessGenerator:
         }
 
     def _load_observation(self, config: NeighborhoodConfig) -> RunObservation:
-        final_tables_dir = self.run_root / config.run_id / "outputs" / "csv" / "analysis" / "final_tables"
+        final_tables_dir = (
+            self.run_root / config.run_id / "outputs" / "csv" / "analysis" / "final_tables"
+        )
         if not final_tables_dir.exists():
             raise FileNotFoundError(f"Missing run outputs for {config.run_id}: {final_tables_dir}")
 
@@ -446,11 +448,15 @@ class ReviewerRobustnessGenerator:
             1 for obs in observations if ts_sh_is_strongest_pair(obs.type_pair_jaccard)
         )
 
-        reopen_advantages = [multifaceted_reopen_advantage_share(obs.assignee_reopen_median) for obs in observations]
+        reopen_advantages = [
+            multifaceted_reopen_advantage_share(obs.assignee_reopen_median) for obs in observations
+        ]
         reopen_share_values = [share for share, _favorable, _total in reopen_advantages]
-        reopen_all_count = sum(1 for share, favorable, total in reopen_advantages if total > 0 and favorable == total)
-        default_reopen_share, default_favorable, default_total = multifaceted_reopen_advantage_share(
-            default_observation.assignee_reopen_median
+        reopen_all_count = sum(
+            1 for share, favorable, total in reopen_advantages if total > 0 and favorable == total
+        )
+        default_reopen_share, default_favorable, default_total = (
+            multifaceted_reopen_advantage_share(default_observation.assignee_reopen_median)
         )
 
         st_less_social_count = sum(
@@ -471,7 +477,8 @@ class ReviewerRobustnessGenerator:
         high_prevalence_count = sum(
             1
             for obs in observations
-            if obs.prevalence_by_type["technical"] > 50.0 and obs.prevalence_by_type["social"] > 50.0
+            if obs.prevalence_by_type["technical"] > 50.0
+            and obs.prevalence_by_type["social"] > 50.0
         )
 
         rows = [
@@ -613,14 +620,21 @@ class ReviewerRobustnessGenerator:
         }
 
         x_positions = np.arange(len(PLOT_HERO_TYPE_ORDER))
-        minima = np.array([min(values_by_type[hero_type]) for hero_type in PLOT_HERO_TYPE_ORDER], dtype=float)
-        maxima = np.array([max(values_by_type[hero_type]) for hero_type in PLOT_HERO_TYPE_ORDER], dtype=float)
+        minima = np.array(
+            [min(values_by_type[hero_type]) for hero_type in PLOT_HERO_TYPE_ORDER], dtype=float
+        )
+        maxima = np.array(
+            [max(values_by_type[hero_type]) for hero_type in PLOT_HERO_TYPE_ORDER], dtype=float
+        )
         medians = np.array(
             [float(np.median(values_by_type[hero_type])) for hero_type in PLOT_HERO_TYPE_ORDER],
             dtype=float,
         )
         defaults = np.array(
-            [default_observation.prevalence_by_type[hero_type] for hero_type in PLOT_HERO_TYPE_ORDER],
+            [
+                default_observation.prevalence_by_type[hero_type]
+                for hero_type in PLOT_HERO_TYPE_ORDER
+            ],
             dtype=float,
         )
 
@@ -628,7 +642,14 @@ class ReviewerRobustnessGenerator:
 
         for index, hero_type in enumerate(PLOT_HERO_TYPE_ORDER):
             color = HERO_TYPE_COLORS.get(hero_type, "#4A5568")
-            axis.vlines(x_positions[index], minima[index], maxima[index], color=color, linewidth=4.0, alpha=0.7)
+            axis.vlines(
+                x_positions[index],
+                minima[index],
+                maxima[index],
+                color=color,
+                linewidth=4.0,
+                alpha=0.7,
+            )
             axis.hlines(
                 minima[index],
                 x_positions[index] - 0.16,
@@ -777,7 +798,11 @@ class ReviewerRobustnessGenerator:
                 for col_index in range(grid.shape[1]):
                     value = grid[row_index, col_index]
                     text = "NA" if np.isnan(value) else f"{value:.1f}"
-                    color = "white" if (not np.isnan(value) and value > (vmin + vmax) / 2.0) else "#111111"
+                    color = (
+                        "white"
+                        if (not np.isnan(value) and value > (vmin + vmax) / 2.0)
+                        else "#111111"
+                    )
                     axis.text(
                         col_index,
                         row_index,

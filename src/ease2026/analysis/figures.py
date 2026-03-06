@@ -648,11 +648,7 @@ class FinalFigureGenerator:
 
         for condition_id in RQ1_SUPERHERO_CONDITIONAL_ORDER:
             condition_rows = sorted(
-                (
-                    row
-                    for row in superhero_rows
-                    if str(row["condition_id"]) == condition_id
-                ),
+                (row for row in superhero_rows if str(row["condition_id"]) == condition_id),
                 key=lambda row: str(row["project_name"]),
             )
             project_path = self._write_csv_rows(
@@ -789,9 +785,7 @@ class FinalFigureGenerator:
         if conditional_rows is None:
             conditional_rows = self._load_rq1_conditional_rows()
         conditional_rows = [
-            row
-            for row in conditional_rows
-            if str(row["condition_id"]) in RQ1_CONDITIONAL_ORDER
+            row for row in conditional_rows if str(row["condition_id"]) in RQ1_CONDITIONAL_ORDER
         ]
         if not conditional_rows:
             raise ValueError("No conditional rows available for RQ1 multifaceted prevalence.")

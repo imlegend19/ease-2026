@@ -1,0 +1,15 @@
+\begin{table*}[htbp]
+    \centering
+    \scriptsize
+    \caption{Ranking of hero categories by Scott-Knott ESD (RQ3, commit-author policy, smartshark\_2\_2)}
+    \label{tab:rq3-herorank-commit-author}
+    \begin{adjustbox}{max width=\textwidth}
+        \begin{tabular}{|c|cc|cc|cc|cc|cc|}
+            \hline
+            \multirow{2}{*}{\textit{\textbf{Ranks}}} & \multicolumn{2}{c|}{\textit{\textbf{Trivial}}} & \multicolumn{2}{c|}{\textit{\textbf{Minor}}} & \multicolumn{2}{c|}{\textit{\textbf{Major}}} & \multicolumn{2}{c|}{\textit{\textbf{Critical}}} & \multicolumn{2}{c|}{\textit{\textbf{Blocker}}} \\ \cline{2-11}
+            & \multicolumn{1}{c|}{\textit{\textbf{Fixed}}} & \textit{\textbf{Reopened}} & \multicolumn{1}{c|}{\textit{\textbf{Fixed}}} & \textit{\textbf{Reopened}} & \multicolumn{1}{c|}{\textit{\textbf{Fixed}}} & \textit{\textbf{Reopened}} & \multicolumn{1}{c|}{\textit{\textbf{Fixed}}} & \textit{\textbf{Reopened}} & \multicolumn{1}{c|}{\textit{\textbf{Fixed}}} & \textit{\textbf{Reopened}} \\ \hline
+            \textit{\textbf{1}} & T1, T2, T3 & T3, T1, T2 & N/A\textsuperscript{\dagger} & N/A\textsuperscript{\dagger} & N/A\textsuperscript{\dagger} & N/A\textsuperscript{\dagger} & N/A\textsuperscript{\dagger} & N/A\textsuperscript{\dagger} & N/A\textsuperscript{\dagger} & N/A\textsuperscript{\dagger} \\ \hline
+        \end{tabular}
+    \end{adjustbox}
+    {\footnotesize\textsuperscript{\dagger}N/A (fallback): non-SK results detected (method != sk\_esd\_docker) for Critical/Fixed, Critical/Reopened, Major/Fixed, Major/Reopened, Minor/Fixed, Minor/Reopened, Trivial/Fixed, Trivial/Reopened.}
+\end{table*}

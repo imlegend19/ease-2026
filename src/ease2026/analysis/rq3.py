@@ -302,7 +302,9 @@ class Rq3Analyzer:
             )
 
             for severity in SEVERITY_ORDER:
-                severity_records = [record for record in assignee_records if record.severity == severity]
+                severity_records = [
+                    record for record in assignee_records if record.severity == severity
+                ]
                 for outcome_metric in ("reopen_rate", "fix_rate"):
                     values_by_type: dict[str, list[float]] = {}
                     projects_by_type: dict[str, set[str]] = {}
@@ -311,7 +313,11 @@ class Rq3Analyzer:
                         projects_by_type[hero_type] = set()
 
                     for record in severity_records:
-                        value = record.reopen_rate if outcome_metric == "reopen_rate" else record.fix_rate
+                        value = (
+                            record.reopen_rate
+                            if outcome_metric == "reopen_rate"
+                            else record.fix_rate
+                        )
                         if record.n_assigned == 0 or _is_nan(value):
                             continue
                         values_by_type[record.hero_type].append(value)
@@ -334,7 +340,9 @@ class Rq3Analyzer:
                         hero_type
                         for hero_type in AGGREGATED_HERO_TYPE_ORDER
                         if hero_type in medians_by_type
-                        and math.isclose(medians_by_type[hero_type], best_value, rel_tol=1e-12, abs_tol=1e-12)
+                        and math.isclose(
+                            medians_by_type[hero_type], best_value, rel_tol=1e-12, abs_tol=1e-12
+                        )
                     ]
                     winner_hero_type = tied_types[0]
                     writer.writerow(
@@ -442,7 +450,11 @@ class Rq3Analyzer:
     ) -> list[float]:
         values_by_project: dict[str, list[float]] = {}
         for record in records:
-            if record.fixer != fixer or record.severity != severity or record.hero_type != hero_type:
+            if (
+                record.fixer != fixer
+                or record.severity != severity
+                or record.hero_type != hero_type
+            ):
                 continue
             if record.n_assigned <= 0 or _is_nan(record.reopen_rate):
                 continue

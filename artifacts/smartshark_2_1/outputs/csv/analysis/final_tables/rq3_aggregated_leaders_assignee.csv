@@ -1,0 +1,11 @@
+severity,outcome_metric,winner_hero_type,winner_median,winner_n_projects_with_data,tied_hero_types
+blocker,reopen_rate,technical,2.857142857142857,63,"technical,technosocial"
+blocker,fix_rate,sociotechnical,93.33333333333333,60,sociotechnical
+critical,reopen_rate,technical,3.200204813108039,68,technical
+critical,fix_rate,technical,84.61538461538461,69,"technical,technosocial"
+major,reopen_rate,technical,5.0,76,technical
+major,fix_rate,sociotechnical,85.86956521739131,71,sociotechnical
+minor,reopen_rate,sociotechnical,4.807692307692308,69,sociotechnical
+minor,fix_rate,technical,83.33333333333334,74,"technical,sociotechnical,technosocial,super"
+trivial,reopen_rate,technical,0.0,56,"technical,social,sociotechnical,technosocial,super"
+trivial,fix_rate,sociotechnical,95.55555555555556,55,sociotechnical

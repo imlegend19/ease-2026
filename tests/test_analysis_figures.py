@@ -114,9 +114,7 @@ def test_resolve_run_dir_prefers_experiment_root_relative_paths(
     )
 
     generator = FinalFigureGenerator()
-    resolved = generator._resolve_run_dir(
-        f"artifacts/{dataset_name}/runs/top0.20_cov0.80_q0.50"
-    )
+    resolved = generator._resolve_run_dir(f"artifacts/{dataset_name}/runs/top0.20_cov0.80_q0.50")
 
     assert resolved == target_run_dir
 

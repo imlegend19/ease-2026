@@ -154,8 +154,12 @@ def test_rq3_analyzer_writes_aggregated_assignee_leaders_with_ties(
         rows = list(csv.DictReader(file))
 
     assert len(rows) == 2
-    major_reopen = next(row for row in rows if row["severity"] == "major" and row["outcome_metric"] == "reopen_rate")
-    major_fix = next(row for row in rows if row["severity"] == "major" and row["outcome_metric"] == "fix_rate")
+    major_reopen = next(
+        row for row in rows if row["severity"] == "major" and row["outcome_metric"] == "reopen_rate"
+    )
+    major_fix = next(
+        row for row in rows if row["severity"] == "major" and row["outcome_metric"] == "fix_rate"
+    )
 
     assert major_reopen["winner_hero_type"] == "sociotechnical"
     assert major_reopen["tied_hero_types"] == "sociotechnical,technosocial"

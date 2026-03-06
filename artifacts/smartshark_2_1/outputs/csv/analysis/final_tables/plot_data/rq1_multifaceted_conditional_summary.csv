@@ -1,4 +1,4 @@
 condition_id,condition_label,condition_description,n_projects,non_zero_projects,median_pct,q1_pct,q3_pct,mean_pct,max_pct
-st_over_s,ST*/S*,% of social heroes that are sociotechnical,71,71,24.242424242424242,13.661462300076163,41.33976116205061,29.301182310644467,100.0
-ts_over_t,TS*/T*,% of technical heroes that are technosocial,76,76,71.42857142857143,52.863777089783284,88.9294403892944,68.45004601417072,100.0
-sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,77,70,11.11111111111111,4.444444444444445,18.181818181818183,13.787652153601936,66.66666666666666
+st_over_s,ST*/S*,% of social heroes that are sociotechnical,72,72,12.965038099506947,5.802772808586762,21.64636779822061,16.53482260797894,66.66666666666666
+ts_over_t,TS*/T*,% of technical heroes that are technosocial,77,77,62.5,44.44444444444444,78.94736842105263,61.41119576517144,100.0
+sh_over_s_union_t,SH*/(S∪T),% of heroes (social/technical union) that are superheroes,77,72,10.317460317460316,5.238095238095238,18.181818181818183,13.353300711177937,48.148148148148145

@@ -1,6 +1,6 @@
 hero_type,code_count,project_count_total,project_count_hero_any_metric,project_prevalence_pct,hero_member_rows_total,unique_hero_authors,unique_project_author_pairs
-technical,3,98,98,100.0,7738,2860,3380
-social,2,98,98,100.0,23228,11357,14458
+technical,3,98,98,100.0,7601,2847,3363
+social,2,98,91,92.85714285714286,20046,10619,13004
 sociotechnical,6,98,4,4.081632653061225,642,136,137
 technosocial,6,98,5,5.1020408163265305,725,157,158
-super,6,98,5,5.1020408163265305,726,157,158
+super,6,98,5,5.1020408163265305,725,157,158

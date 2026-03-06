@@ -97,11 +97,7 @@ def test_write_q_sensitivity_match_summary_writes_global_totals(
                     ("blocker", "technical", "fix_rate"): "T1",
                     ("critical", "social", "reopen_rate"): "S1",
                 }
-                if (
-                    top_fraction == 0.30
-                    and coverage_fraction == 0.85
-                    and hybrid_quantile == 0.75
-                ):
+                if top_fraction == 0.30 and coverage_fraction == 0.85 and hybrid_quantile == 0.75:
                     prevalence["social"] = 81.0
                     references[("critical", "social", "reopen_rate")] = "S2"
 

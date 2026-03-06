@@ -166,9 +166,7 @@ def test_rq2_run_writes_new_per_project_outputs(
         summary_rows = list(csv.DictReader(file))
 
     t1_s1_summary = next(
-        row
-        for row in summary_rows
-        if row["technical_code"] == "T1" and row["social_code"] == "S1"
+        row for row in summary_rows if row["technical_code"] == "T1" and row["social_code"] == "S1"
     )
     assert int(t1_s1_summary["n_projects_total"]) == 2
     assert int(t1_s1_summary["n_projects_with_defined_rho"]) == 2
