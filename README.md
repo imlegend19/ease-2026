@@ -1,4 +1,4 @@
-# EASE 2026 Replication Package
+﻿# EASE 2026 Replication Package
 
 This repository contains the experiment code and generated outputs for the EASE 2026 study.
 
@@ -13,7 +13,7 @@ This repository contains the experiment code and generated outputs for the EASE 
 
 - Python `>=3.12,<3.13`
 - `uv` for environment management
-- Access to a SmartSHARK MongoDB dataset (default DB: `smartshark_2_2`)
+- Access to a SmartSHARK MongoDB dataset (camera-ready paper default: `smartshark_2_1`)
 - Docker (optional, required only for Scott-Knott ESD generation in RQ3 inferential analysis)
 
 ## Setup
@@ -48,18 +48,19 @@ uv run python -m ease2026.cli.generate_base_heroes --top-fraction 0.20 --coverag
 uv run python -m ease2026.cli.generate_hybrid_heroes --top-fraction 0.20 --coverage-fraction 0.80 --hybrid-quantile 0.50
 ```
 
-3. Compute RQ3 outcomes for both fixer policies:
+3. Compute RQ3 outcomes for the paper's primary and robustness attribution modes:
 
 ```powershell
 uv run python -m ease2026.cli.compute_rq3_outcomes --fixer assignee
-uv run python -m ease2026.cli.compute_rq3_outcomes --fixer commit_author
+uv run python -m ease2026.cli.compute_rq3_outcomes --fixer assignee_at_fix_time
+uv run python -m ease2026.cli.compute_rq3_outcomes --fixer combined
 ```
 
 4. Generate final analysis tables (RQ1/RQ2/RQ3) and inferential RQ3 outputs:
 
 ```powershell
 uv run python -m ease2026.cli.run_all_analysis --inferential-fixer both
-```
+```  `assignee` is the primary attribution used in the manuscript. `assignee_at_fix_time` and `combined` are the robustness variants discussed in the paper. The dataset reference in the camera-ready manuscript is SmartSHARK 2.1; pointing `.env` at a different Mongo database can change regenerated outputs.
 
 5. Run threshold robustness sweep:
 
